@@ -13,4 +13,9 @@
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\VulkanError.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>
