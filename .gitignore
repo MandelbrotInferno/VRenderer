@@ -3,6 +3,11 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+
+# Place folders/files that you do not want to be included in github under here
+vcpkg_installed/
+
+
 # User-specific files
 *.rsuser
 *.suo
