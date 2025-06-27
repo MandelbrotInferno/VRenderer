@@ -11,7 +11,7 @@ namespace VRenderer
 	{
 	public:
 
-		~VulkanFoundationalElements();
+		void CleanUp();
 
 	public:
 		VkInstance m_instance{};

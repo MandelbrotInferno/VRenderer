@@ -7,7 +7,7 @@
 
 namespace VRenderer
 {
-	VulkanFoundationalElements::~VulkanFoundationalElements()
+	void VulkanFoundationalElements::CleanUp()
 	{
 		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 		vkDestroyInstance(m_instance, nullptr);
