@@ -17,5 +17,6 @@ namespace VRenderer
 		VkInstance m_instance{};
 		VkPhysicalDevice m_physicalDevice{};
 		VkSurfaceKHR m_surface{};
+		VkDebugUtilsMessengerEXT m_debugMsger{};
 	};
 }
