@@ -7,6 +7,12 @@
     <Filter Include="include">
       <UniqueIdentifier>{826d71b1-5771-43e6-8a01-63b82accd37d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\VulkanUtils">
+      <UniqueIdentifier>{96038c12-4347-4460-94c4-7ca6b4cfbfbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\VulkanUtils">
+      <UniqueIdentifier>{808d7076-4aab-47e3-904e-6caf5f0418dc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -23,6 +29,12 @@
     </ClCompile>
     <ClCompile Include="src\VulkanCommandbufferReset.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VulkanSwapchainAndPresentSync.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="include\VulkanUtils\VulkanUtils.cpp">
+      <Filter>src\VulkanUtils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -46,6 +58,12 @@
     </ClInclude>
     <ClInclude Include="include\Renderer.hpp">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanSwapchainAndPresentSync.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanUtils\VulkanUtils.hpp">
+      <Filter>include\VulkanUtils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
