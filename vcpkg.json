@@ -1,13 +1,18 @@
 {
   "dependencies": [
+    "fastgltf",
     "fmt",
     "glm",
     "imgui",
-    "sdl3",
     "stb",
     "vk-bootstrap",
+    "volk",
     "vulkan-memory-allocator",
-    "fastgltf",
-    "volk" 
+    {
+      "name": "sdl3",
+      "features": [
+        "vulkan"
+      ]
+    }
   ]
 }

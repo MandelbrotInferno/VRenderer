@@ -12,9 +12,39 @@
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\VulkanFoundationalElements.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VulkanSwapchain.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Renderer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VulkanCommandbufferReset.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\VulkanError.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanFoundationalElements.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanSwapchain.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanCommandbufferReset.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanQueueGraphics.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanQueueFamilyIndex.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Renderer.hpp">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
