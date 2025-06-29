@@ -65,8 +65,15 @@ namespace VRenderer
 
 		lv_cmdBuffer.EndRecording();
 
+		VkCommandBufferSubmitInfo lv_cmdBufferSubmitInfo = GenerateVkCommandBufferSubmitInfo(lv_cmdBuffer.m_buffer);
+		
 
 
+		VkSubmitInfo2 lv_submitInfo2{};
+		lv_submitInfo2.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
+		lv_submitInfo2.commandBufferInfoCount = 1;
+		lv_submitInfo2.pCommandBufferInfos = &lv_cmdBufferSubmitInfo;
+		lv_submitInfo2.;
 	}
 
 
