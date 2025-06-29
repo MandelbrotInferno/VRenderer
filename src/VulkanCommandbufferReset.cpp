@@ -26,4 +26,9 @@ namespace VRenderer
 
 		VULKAN_CHECK(vkBeginCommandBuffer(m_buffer, &lv_cmdBufferBeginInfo));
 	}
+
+	void VulkanCommandbufferReset::EndRecording()
+	{
+		VULKAN_CHECK(vkEndCommandBuffer(m_buffer));
+	}
 }

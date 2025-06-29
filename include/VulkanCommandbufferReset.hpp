@@ -19,6 +19,7 @@ namespace VRenderer
 		void ResetBuffer();
 
 		void BeginRecording();
+		void EndRecording();
 
 	public:
 		VkCommandPool m_pool{};
