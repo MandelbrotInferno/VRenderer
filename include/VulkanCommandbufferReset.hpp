@@ -16,6 +16,10 @@ namespace VRenderer
 
 		void CleanUp(VkDevice l_device);
 
+		void ResetBuffer();
+
+		void BeginRecording();
+
 	public:
 		VkCommandPool m_pool{};
 		VkCommandBuffer m_buffer{};
