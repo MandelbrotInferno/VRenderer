@@ -1,9 +1,9 @@
 
 
-
+#include "include/Renderer.hpp"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_video.h>
-#include "include/Renderer.hpp"
+#include <memory>
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -76,9 +76,9 @@ int main()
 			return -1;
 		}
 
-		VRenderer::Renderer lv_renderer{};
+		std::unique_ptr<VRenderer::Renderer> lv_renderer = std::make_unique<VRenderer::Renderer>();
 
-		lv_renderer.Init(lv_window);
+		lv_renderer->Init(lv_window);
 
 		SDL_Event lv_event{};
 		SDL_WindowFlags lv_windowFlags{};
@@ -116,10 +116,12 @@ int main()
 				std::this_thread::sleep_for(std::chrono::milliseconds(150));
 				continue;
 			}
+			
+			lv_renderer->Draw();
 		}
 
 
-		lv_renderer.CleanUp();
+		lv_renderer->CleanUp();
 
 		SDL_DestroyWindow(lv_window);
 	}
