@@ -37,6 +37,10 @@ namespace VRenderer
 		auto& lv_cmdBuffer = GetCurrentFrameGraphicsCmdBuffer();
 		auto& lv_syncPrimitives = GetCurrentFrameSwapchainPresentSyncPrimitives();
 
+		VULKAN_CHECK(vkWaitForFences(m_device, 1, &lv_syncPrimitives.m_fence, VK_TRUE,std::numeric_limits<uint64_t>::max()));
+		vkResetFences(m_device, 1, &lv_syncPrimitives.m_fence);
+		lv_cmdBuffer.ResetBuffer();
+
 		uint32_t lv_swapchainImageIndex{};
 		VULKAN_CHECK(vkAcquireNextImageKHR(m_device, m_vulkanSwapchain.m_vkSwapchain
 			, std::numeric_limits<uint64_t>::max(), lv_syncPrimitives.m_acquireImageSemaphore
@@ -45,35 +49,53 @@ namespace VRenderer
 		lv_cmdBuffer.BeginRecording();
 
 		ImageLayoutTransitionCmd(lv_cmdBuffer.m_buffer, VK_IMAGE_ASPECT_COLOR_BIT
-			, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-			, m_vulkanSwapchain.m_images[lv_swapchainImageIndex], VK_ACCESS_2_SHADER_READ_BIT
-			, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT
-			, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
+			, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+			, m_vulkanSwapchain.m_images[lv_swapchainImageIndex], VK_ACCESS_2_MEMORY_WRITE_BIT
+			, VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT, VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT
+			, VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT);
 
 		VkClearColorValue lv_clearValue;
 		float lv_flash = std::abs(std::sin((float)m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex / 120.f));
 		lv_clearValue = { { 0.0f, 0.0f, lv_flash, 1.0f } };
 
 		VkImageSubresourceRange lv_subRange = GenerateVkImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
-		vkCmdClearColorImage(lv_cmdBuffer.m_buffer, m_vulkanSwapchain.m_images[lv_swapchainImageIndex], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, &lv_clearValue, 1, &lv_subRange);
+		vkCmdClearColorImage(lv_cmdBuffer.m_buffer, m_vulkanSwapchain.m_images[lv_swapchainImageIndex], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &lv_clearValue, 1, &lv_subRange);
 
 		ImageLayoutTransitionCmd(lv_cmdBuffer.m_buffer, VK_IMAGE_ASPECT_COLOR_BIT
-			, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-			, m_vulkanSwapchain.m_images[lv_swapchainImageIndex], VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT
-			, VK_ACCESS_2_SHADER_READ_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT
-			, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
+			, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+			, m_vulkanSwapchain.m_images[lv_swapchainImageIndex], VK_ACCESS_2_MEMORY_WRITE_BIT
+			, VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT, VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT
+			, VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT);
 
 		lv_cmdBuffer.EndRecording();
 
 		VkCommandBufferSubmitInfo lv_cmdBufferSubmitInfo = GenerateVkCommandBufferSubmitInfo(lv_cmdBuffer.m_buffer);
 		
+		VkSemaphoreSubmitInfo lv_waitSemaphoreSubmitInfo = GenerateVkSemaphoreSubmitInfo(lv_syncPrimitives.m_acquireImageSemaphore, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
+		VkSemaphoreSubmitInfo lv_signalSemaphoreSubmitInfo = GenerateVkSemaphoreSubmitInfo(lv_syncPrimitives.m_presentSemaphore, VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT);
 
-
-		/*VkSubmitInfo2 lv_submitInfo2{};
+		VkSubmitInfo2 lv_submitInfo2{};
 		lv_submitInfo2.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
 		lv_submitInfo2.commandBufferInfoCount = 1;
 		lv_submitInfo2.pCommandBufferInfos = &lv_cmdBufferSubmitInfo;
-		lv_submitInfo2.;*/
+		lv_submitInfo2.pSignalSemaphoreInfos = &lv_signalSemaphoreSubmitInfo;
+		lv_submitInfo2.pWaitSemaphoreInfos = &lv_waitSemaphoreSubmitInfo;
+		lv_submitInfo2.signalSemaphoreInfoCount = 1;
+		lv_submitInfo2.waitSemaphoreInfoCount = 1;
+
+		VULKAN_CHECK(vkQueueSubmit2(m_vulkanQueue.m_queue, 1, &lv_submitInfo2, lv_syncPrimitives.m_fence));
+
+		VkPresentInfoKHR lv_presentInfo{};
+		lv_presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		lv_presentInfo.waitSemaphoreCount = 1;
+		lv_presentInfo.pWaitSemaphores = &lv_syncPrimitives.m_presentSemaphore;
+		lv_presentInfo.pSwapchains = &m_vulkanSwapchain.m_vkSwapchain;
+		lv_presentInfo.swapchainCount = 1;
+		lv_presentInfo.pImageIndices = &lv_swapchainImageIndex;
+
+		VULKAN_CHECK(vkQueuePresentKHR(m_vulkanQueue.m_queue, &lv_presentInfo));
+
+		++m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex;
 	}
 
 
@@ -102,6 +124,8 @@ namespace VRenderer
 
 	void Renderer::CleanUp()
 	{
+		std::array<VkFence, m_maxCommandBuffers> lv_tempFence{m_swapchainPresentSyncPrimitives[0].m_fence, m_swapchainPresentSyncPrimitives[1].m_fence};
+		VULKAN_CHECK(vkWaitForFences(m_device, m_maxCommandBuffers, lv_tempFence.data(), VK_TRUE, std::numeric_limits<uint64_t>::max()));
 		for (auto& l_syncPrimitve : m_swapchainPresentSyncPrimitives) {
 			l_syncPrimitve.CleanUp(m_device);
 		}
@@ -180,7 +204,7 @@ namespace VRenderer
 			.set_desired_format(VkSurfaceFormatKHR{ .format = m_vulkanSwapchain.m_format, .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR })
 			.set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
 			.set_desired_extent(lv_width, lv_height)
-			.add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT)
+			.add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)
 			.build()
 			.value();
 

@@ -41,7 +41,7 @@ namespace VRenderer
 
 	private:
 		static constexpr uint32_t m_maxCommandBuffers{ 2U };
-		uint32_t m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex{};
+		uint64_t m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex{};
 		std::array<VulkanCommandbufferReset, m_maxCommandBuffers> m_vulkanGraphicsCmdBuffers{};
 		std::array<VulkanSwapchainAndPresentSync, m_maxCommandBuffers> m_swapchainPresentSyncPrimitives{};
 	};
