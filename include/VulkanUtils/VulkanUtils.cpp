@@ -21,8 +21,8 @@ namespace VRenderer
 		VkImageMemoryBarrier2 lv_imageBarrier{};
 		lv_imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
 		lv_imageBarrier.pNext = nullptr;
-		lv_imageBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		lv_imageBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		lv_imageBarrier.oldLayout = l_oldLayout;
+		lv_imageBarrier.newLayout = l_newLayout;
 		lv_imageBarrier.image = l_image;
 		lv_imageBarrier.srcAccessMask = l_srcAccess;
 		lv_imageBarrier.srcStageMask = l_srcStage;
@@ -40,7 +40,7 @@ namespace VRenderer
 
 	VkImageSubresourceRange GenerateVkImageSubresourceRange(const VkImageAspectFlags l_aspectMask
 		, const uint32_t l_baseMipLevel, const uint32_t l_baseArrayLayer
-		, const uint32_t l_layerCount, const uint32_t l_levelCount)
+		, const uint32_t l_layerCount, const uint32_t l_levelCount) noexcept
 	{
 		VkImageSubresourceRange lv_subresourceRange{};
 		lv_subresourceRange.aspectMask = l_aspectMask;
@@ -53,12 +53,25 @@ namespace VRenderer
 	}
 
 
-	VkCommandBufferSubmitInfo GenerateVkCommandBufferSubmitInfo(VkCommandBuffer l_cmdBuffer)
+	VkCommandBufferSubmitInfo GenerateVkCommandBufferSubmitInfo(VkCommandBuffer l_cmdBuffer) noexcept
 	{
 		VkCommandBufferSubmitInfo lv_cmdBufferSubmitInfo{};
 		lv_cmdBufferSubmitInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
 		lv_cmdBufferSubmitInfo.commandBuffer = l_cmdBuffer;
 
 		return lv_cmdBufferSubmitInfo;
+	}
+
+
+	VkSemaphoreSubmitInfo GenerateVkSemaphoreSubmitInfo(VkSemaphore l_semaphore, VkPipelineStageFlags2 l_stage, const uint64_t l_value)
+	{
+		VkSemaphoreSubmitInfo lv_submitInfo{};
+		lv_submitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+		lv_submitInfo.semaphore = l_semaphore;
+		lv_submitInfo.stageMask = l_stage;
+		lv_submitInfo.value = l_value;
+		lv_submitInfo.deviceIndex = 0;
+		
+		return lv_submitInfo;
 	}
 }
