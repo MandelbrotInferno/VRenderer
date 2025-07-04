@@ -34,6 +34,8 @@ namespace VRenderer
 
 	void Renderer::Draw()
 	{
+		using namespace VulkanUtils;
+
 		auto& lv_cmdBuffer = GetCurrentFrameGraphicsCmdBuffer();
 		auto& lv_syncPrimitives = GetCurrentFrameSwapchainPresentSyncPrimitives();
 
