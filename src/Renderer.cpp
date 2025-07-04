@@ -3,6 +3,8 @@
 #include "include/Renderer.hpp"
 #include "include/VulkanError.hpp"
 #include "include/VulkanUtils/VulkanUtils.hpp"
+#define VMA_IMPLEMENTATION
+#include <vma/vk_mem_alloc.h>
 #include <cmath>
 #include <limits>
 #include <VkBootstrap.h>
@@ -28,6 +30,7 @@ namespace VRenderer
 		InitializeVulkanSwapchain(l_window);
 		InitializeVulkanGraphicsCommandbuffers();
 		InitializeVulkanSwapchainAndPresentSyncPrimitives();
+		InitializeVmaAllocator();
 		TransitionImageLayoutSwapchainImagesToPresentUponCreation();
 	}
 
@@ -128,6 +131,7 @@ namespace VRenderer
 	{
 		std::array<VkFence, m_maxCommandBuffers> lv_tempFence{m_swapchainPresentSyncPrimitives[0].m_fence, m_swapchainPresentSyncPrimitives[1].m_fence};
 		VULKAN_CHECK(vkWaitForFences(m_device, m_maxCommandBuffers, lv_tempFence.data(), VK_TRUE, std::numeric_limits<uint64_t>::max()));
+		vmaDestroyAllocator(m_allocator);
 		for (auto& l_syncPrimitve : m_swapchainPresentSyncPrimitives) {
 			l_syncPrimitve.CleanUp(m_device);
 		}
@@ -233,6 +237,18 @@ namespace VRenderer
 			VULKAN_CHECK(vkCreateSemaphore(m_device, &lv_semaphoreCreateInfo, nullptr, &l_synPrimitives.m_acquireImageSemaphore));
 			VULKAN_CHECK(vkCreateSemaphore(m_device, &lv_semaphoreCreateInfo, nullptr, &l_synPrimitives.m_presentSemaphore));
 		}
+	}
+
+	void Renderer::InitializeVmaAllocator()
+	{
+		VmaAllocatorCreateInfo lv_vmaCreateInfo{};
+		lv_vmaCreateInfo.device = m_device;
+		lv_vmaCreateInfo.physicalDevice = m_vulkanFoundational.m_physicalDevice;
+		lv_vmaCreateInfo.vulkanApiVersion = VK_API_VERSION_1_3;
+		lv_vmaCreateInfo.instance = m_vulkanFoundational.m_instance;
+		lv_vmaCreateInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+
+		VULKAN_CHECK(vmaCreateAllocator(&lv_vmaCreateInfo, &m_allocator));
 	}
 
 	void Renderer::TransitionImageLayoutSwapchainImagesToPresentUponCreation()

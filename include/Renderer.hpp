@@ -5,6 +5,7 @@
 #include "include/VulkanQueueGraphics.hpp"
 #include "include/VulkanCommandbufferReset.hpp"
 #include "include/VulkanSwapchainAndPresentSync.hpp"
+#include <vma/vk_mem_alloc.h>
 #include <array>
 
 struct SDL_Window;
@@ -30,6 +31,7 @@ namespace VRenderer
 		void InitializeVulkanGraphicsCommandbuffers();
 		void InitializeVulkanSwapchainAndPresentSyncPrimitives();
 		void TransitionImageLayoutSwapchainImagesToPresentUponCreation();
+		void InitializeVmaAllocator();
 
 	public:
 		
@@ -37,7 +39,7 @@ namespace VRenderer
 		VulkanSwapchain m_vulkanSwapchain{};
 		VulkanQueueGraphics m_vulkanQueue{};
 		VkDevice m_device{};
-
+		VmaAllocator m_allocator;
 
 	private:
 		static constexpr uint32_t m_maxCommandBuffers{ 2U };

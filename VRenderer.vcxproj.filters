@@ -36,6 +36,9 @@
     <ClCompile Include="include\VulkanUtils\VulkanUtils.cpp">
       <Filter>src\VulkanUtils</Filter>
     </ClCompile>
+    <ClCompile Include="src\VmaImplementation.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\VulkanError.hpp">
