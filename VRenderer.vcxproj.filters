@@ -39,6 +39,9 @@
     <ClCompile Include="src\VulkanResourceManager.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SDL_WindowWrapper.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\VulkanError.hpp">
@@ -72,6 +75,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\VulkanResourceManager.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SDL_WindowWrapper.hpp">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

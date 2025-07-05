@@ -33,7 +33,13 @@ namespace VRenderer
 		InitializeVmaAllocator();
 		TransitionImageLayoutSwapchainImagesToPresentUponCreation();
 	}
-
+	void Renderer::InitCleanUp()
+	{
+		if (VK_NULL_HANDLE != m_swapchainPresentSyncPrimitives[0].m_fence && VK_NULL_HANDLE != m_swapchainPresentSyncPrimitives[1].m_fence) {
+			std::array<VkFence, m_maxCommandBuffers> lv_tempFence{ m_swapchainPresentSyncPrimitives[0].m_fence, m_swapchainPresentSyncPrimitives[1].m_fence };
+			VULKAN_CHECK(vkWaitForFences(m_device, m_maxCommandBuffers, lv_tempFence.data(), VK_TRUE, std::numeric_limits<uint64_t>::max()));
+		}
+	}
 
 	void Renderer::Draw()
 	{
@@ -133,11 +139,11 @@ namespace VRenderer
 		CleanUp();
 	}
 
-	void Renderer::CleanUp()
+	void Renderer::CleanUp() noexcept
 	{
-		std::array<VkFence, m_maxCommandBuffers> lv_tempFence{m_swapchainPresentSyncPrimitives[0].m_fence, m_swapchainPresentSyncPrimitives[1].m_fence};
-		VULKAN_CHECK(vkWaitForFences(m_device, m_maxCommandBuffers, lv_tempFence.data(), VK_TRUE, std::numeric_limits<uint64_t>::max()));
-		vmaDestroyAllocator(m_allocator);
+		if (nullptr != m_allocator) {
+			vmaDestroyAllocator(m_allocator);
+		}
 		for (auto& l_syncPrimitve : m_swapchainPresentSyncPrimitives) {
 			l_syncPrimitve.CleanUp(m_device);
 		}
@@ -146,7 +152,9 @@ namespace VRenderer
 			l_cmdBuffer.CleanUp(m_device);
 		}
 		m_vulkanSwapchain.CleanUp(m_device);
-		vkDestroyDevice(m_device, nullptr);
+		if (VK_NULL_HANDLE != m_device) {
+			vkDestroyDevice(m_device, nullptr);
+		}
 		m_vulkanFoundational.CleanUp();
 	}
 

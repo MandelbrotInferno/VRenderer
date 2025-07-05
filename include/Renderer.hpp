@@ -20,12 +20,13 @@ namespace VRenderer
 		VulkanSwapchainAndPresentSync& GetCurrentFrameSwapchainPresentSyncPrimitives();
 
 		void Init(SDL_Window* l_window);
+		void InitCleanUp();
 
 		void Draw();
 
 		~Renderer();
 	private:
-		void CleanUp();
+		void CleanUp() noexcept;
 
 		void InitializeVulkanFoundationalElementsAndGraphicsQueue(SDL_Window* l_window);
 		void InitializeVulkanSwapchain(SDL_Window* l_window);

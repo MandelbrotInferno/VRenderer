@@ -1,5 +1,6 @@
 
 #include "include/Renderer.hpp"
+#include "include/SDL_WindowWrapper.hpp"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_video.h>
 #include <memory>
@@ -59,25 +60,22 @@ SDL_Window* InitializeVulkanFullScreenBorderlessWindow()
 
 int main()
 {
+	VRenderer::SDL_WindowWrapper lv_window{};
+	std::unique_ptr<VRenderer::Renderer> lv_renderer = std::make_unique<VRenderer::Renderer>();;
+	
 	try {
-		VkDevice lv_vulkanDevice{};
-		SDL_Window* lv_window{};
-
-
 
 		const int lv_result = InitializeSDL();
 		if (-1 == lv_result) {
 			return -1;
 		}
 
-		lv_window = InitializeVulkanFullScreenBorderlessWindow();
-		if (nullptr == lv_window) {
+		lv_window.m_window = InitializeVulkanFullScreenBorderlessWindow();
+		if (nullptr == lv_window.m_window) {
 			return -1;
 		}
 
-		std::unique_ptr<VRenderer::Renderer> lv_renderer = std::make_unique<VRenderer::Renderer>();
-
-		lv_renderer->Init(lv_window);
+		lv_renderer->Init(lv_window.m_window);
 
 		SDL_Event lv_event{};
 		SDL_WindowFlags lv_windowFlags{};
@@ -102,7 +100,7 @@ int main()
 
 			}
 
-			lv_windowFlags = SDL_GetWindowFlags(lv_window);
+			lv_windowFlags = SDL_GetWindowFlags(lv_window.m_window);
 
 			if (0 != (SDL_WINDOW_MINIMIZED & lv_windowFlags)) {
 				lv_windowMinimized = true;
@@ -119,13 +117,17 @@ int main()
 			lv_renderer->Draw();
 		}
 
-
-		SDL_DestroyWindow(lv_window);
 	}
 	catch (const char* l_error) {
 		std::cerr << l_error << std::endl;
 	}
 
+	try {
+		lv_renderer->InitCleanUp();
+	}
+	catch (const char* l_error) {
+		std::cerr << l_error << std::endl;
+	}
 
 	return 0;
 }
