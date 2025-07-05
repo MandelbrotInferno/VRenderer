@@ -23,8 +23,9 @@ namespace VRenderer
 
 		void Draw();
 
-		void CleanUp();
+		~Renderer();
 	private:
+		void CleanUp();
 
 		void InitializeVulkanFoundationalElementsAndGraphicsQueue(SDL_Window* l_window);
 		void InitializeVulkanSwapchain(SDL_Window* l_window);

@@ -127,6 +127,12 @@ namespace VRenderer
 		}
 	}
 
+
+	Renderer::~Renderer()
+	{
+		CleanUp();
+	}
+
 	void Renderer::CleanUp()
 	{
 		std::array<VkFence, m_maxCommandBuffers> lv_tempFence{m_swapchainPresentSyncPrimitives[0].m_fence, m_swapchainPresentSyncPrimitives[1].m_fence};

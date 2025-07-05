@@ -120,8 +120,6 @@ int main()
 		}
 
 
-		lv_renderer->CleanUp();
-
 		SDL_DestroyWindow(lv_window);
 	}
 	catch (const char* l_error) {
