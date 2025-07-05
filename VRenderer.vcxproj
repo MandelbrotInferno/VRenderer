@@ -182,6 +182,7 @@
     <ClInclude Include="include\VulkanQueueGraphics.hpp" />
     <ClInclude Include="include\VulkanSwapchain.hpp" />
     <ClInclude Include="include\VulkanSwapchainAndPresentSync.hpp" />
+    <ClInclude Include="include\VulkanTexture.hpp" />
     <ClInclude Include="include\VulkanUtils\VulkanUtils.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

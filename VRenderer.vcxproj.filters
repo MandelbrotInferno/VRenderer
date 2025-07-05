@@ -68,5 +68,8 @@
     <ClInclude Include="include\VulkanUtils\VulkanUtils.hpp">
       <Filter>include\VulkanUtils</Filter>
     </ClInclude>
+    <ClInclude Include="include\VulkanTexture.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

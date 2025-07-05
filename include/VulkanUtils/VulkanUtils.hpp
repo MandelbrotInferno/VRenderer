@@ -2,9 +2,8 @@
 
 
 
-
+#include "include/VulkanTexture.hpp"
 #include <vulkan/vulkan.h>
-
 
 
 namespace VRenderer
@@ -25,5 +24,7 @@ namespace VRenderer
 		VkCommandBufferSubmitInfo GenerateVkCommandBufferSubmitInfo(VkCommandBuffer l_cmdBuffer) noexcept;
 
 		VkSemaphoreSubmitInfo GenerateVkSemaphoreSubmitInfo(VkSemaphore l_semaphore, VkPipelineStageFlags2 l_stage, const uint64_t l_value = 0U);
+
+		VulkanTexture GenerateVulkanTexture(VmaAllocator l_allocator, const VkFormat l_format, const VkExtent3D l_extent, const VkImageUsageFlags l_usageFlags, const VkImageLayout l_initialLayout, const VkImageType l_type = VK_IMAGE_TYPE_2D,const uint32_t l_mipLevels = 1U, const uint32_t l_layerCount = 1U);
 	}
 }

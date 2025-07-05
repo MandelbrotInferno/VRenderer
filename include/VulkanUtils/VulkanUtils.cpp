@@ -3,7 +3,7 @@
 
 
 #include "include/VulkanUtils/VulkanUtils.hpp"
-
+#include "include/VulkanError.hpp"
 
 namespace VRenderer
 {
@@ -75,6 +75,37 @@ namespace VRenderer
 			lv_submitInfo.deviceIndex = 0;
 
 			return lv_submitInfo;
+		}
+
+		VulkanTexture GenerateVulkanTexture(VmaAllocator l_allocator, const VkFormat l_format, const VkExtent3D l_extent, const VkImageUsageFlags l_usageFlags, const VkImageLayout l_initialLayout, const VkImageType l_type, const uint32_t l_mipLevels, const uint32_t l_layerCount)
+		{
+			VkImageCreateInfo lv_imageCreateInfo{};
+			lv_imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+			lv_imageCreateInfo.arrayLayers = l_layerCount;
+			lv_imageCreateInfo.extent = l_extent;
+			lv_imageCreateInfo.format = l_format;
+			lv_imageCreateInfo.imageType = l_type;
+			lv_imageCreateInfo.initialLayout = l_initialLayout;
+			lv_imageCreateInfo.mipLevels = l_mipLevels;
+			lv_imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+			lv_imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+			lv_imageCreateInfo.usage = l_usageFlags;
+
+			VmaAllocationCreateInfo lv_vmaAllocCreateInfo{};
+			lv_vmaAllocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
+			lv_vmaAllocCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+
+			VulkanTexture lv_texture{};
+
+			VULKAN_CHECK(vmaCreateImage(l_allocator, &lv_imageCreateInfo, &lv_vmaAllocCreateInfo, &lv_texture.m_image, &lv_texture.m_vmaAllocation, nullptr));
+
+			lv_texture.m_extent = l_extent;
+			lv_texture.m_format = l_format;
+			lv_texture.m_layerCount = l_layerCount;
+			lv_texture.m_mipLevels = l_mipLevels;
+			lv_texture.m_type = l_type;
+
+			return lv_texture;
 		}
 	}
 }
