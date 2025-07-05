@@ -12,7 +12,7 @@ namespace VRenderer
 	{
 	public:
 
-		void CleanUp(VkDevice l_device);
+		void CleanUp(VkDevice l_device) noexcept;
 
 	public:
 		std::vector<VkImage> m_images{};

@@ -23,6 +23,8 @@ namespace VRenderer
 		VulkanTexture& RetrieveVulkanTexture(std::string_view l_name);
 		VkImageView RetrieveVulkanImageView(std::string_view l_name);
 
+		void CleanUp(VkDevice l_device, VmaAllocator l_allocator) noexcept;
+
 	private:
 		std::vector<VulkanTexture> m_vulkanTextures{};
 		std::vector<VkImageView> m_vulkanImageViews{};

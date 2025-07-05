@@ -141,6 +141,9 @@ namespace VRenderer
 
 	void Renderer::CleanUp() noexcept
 	{
+		if (nullptr != m_allocator && VK_NULL_HANDLE != m_device) {
+			m_vulkanResManager.CleanUp(m_device, m_allocator);
+		}
 		if (nullptr != m_allocator) {
 			vmaDestroyAllocator(m_allocator);
 		}

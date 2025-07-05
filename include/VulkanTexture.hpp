@@ -10,6 +10,12 @@ namespace VRenderer
 {
 	struct VulkanTexture final
 	{
+	public:
+
+		void CleanUp(VmaAllocator l_allocator) noexcept;
+
+	public:
+
 		VkImage m_image{};
 		VmaAllocation m_vmaAllocation{};
 		VkExtent3D m_extent{};

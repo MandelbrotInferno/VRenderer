@@ -6,7 +6,7 @@
 
 namespace VRenderer
 {
-	void VulkanSwapchainAndPresentSync::CleanUp(VkDevice l_device)
+	void VulkanSwapchainAndPresentSync::CleanUp(VkDevice l_device) noexcept
 	{
 		if (VK_NULL_HANDLE != l_device) {
 			if (VK_NULL_HANDLE != m_fence) {

@@ -14,7 +14,7 @@ namespace VRenderer
 	{
 	public:
 
-		void CleanUp(VkDevice l_device);
+		void CleanUp(VkDevice l_device) noexcept;
 
 		void ResetBuffer();
 

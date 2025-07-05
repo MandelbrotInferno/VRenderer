@@ -8,6 +8,7 @@
 
 namespace VRenderer
 {
+
 	void VulkanResourceManager::AddVulkanTexture(std::string&& l_name, VulkanTexture&& l_vulkanTexture)
 	{
 		m_vulkanTextures.emplace_back(std::move(l_vulkanTexture));
@@ -45,4 +46,17 @@ namespace VRenderer
 
 		throw "Requested VkImageView was not found in the vulkan resource manager.\n";
 	}
+
+	void VulkanResourceManager::CleanUp(VkDevice l_device, VmaAllocator l_allocator) noexcept
+	{
+		if (VK_NULL_HANDLE != l_device && nullptr != l_allocator) {
+			for (auto l_vulkanImageView : m_vulkanImageViews) {
+				vkDestroyImageView(l_device, l_vulkanImageView, nullptr);
+			}
+			for (auto& l_vulkanTexture : m_vulkanTextures) {
+				l_vulkanTexture.CleanUp(l_allocator);
+			}
+		}
+	}
+
 }

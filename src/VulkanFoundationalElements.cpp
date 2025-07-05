@@ -7,7 +7,7 @@
 
 namespace VRenderer
 {
-	void VulkanFoundationalElements::CleanUp()
+	void VulkanFoundationalElements::CleanUp() noexcept
 	{
 		if (VK_NULL_HANDLE != m_instance) {
 			if (VK_NULL_HANDLE != m_surface) {

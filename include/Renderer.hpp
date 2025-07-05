@@ -5,6 +5,7 @@
 #include "include/VulkanQueueGraphics.hpp"
 #include "include/VulkanCommandbufferReset.hpp"
 #include "include/VulkanSwapchainAndPresentSync.hpp"
+#include "include/VulkanResourceManager.hpp"
 #include <vma/vk_mem_alloc.h>
 #include <array>
 
@@ -41,7 +42,8 @@ namespace VRenderer
 		VulkanSwapchain m_vulkanSwapchain{};
 		VulkanQueueGraphics m_vulkanQueue{};
 		VkDevice m_device{};
-		VmaAllocator m_allocator;
+		VmaAllocator m_allocator{};
+		VulkanResourceManager m_vulkanResManager{};
 
 	private:
 		static constexpr uint32_t m_maxCommandBuffers{ 2U };

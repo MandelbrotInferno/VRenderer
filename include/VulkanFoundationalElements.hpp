@@ -11,7 +11,7 @@ namespace VRenderer
 	{
 	public:
 
-		void CleanUp();
+		void CleanUp() noexcept;
 
 	public:
 		VkInstance m_instance{};
