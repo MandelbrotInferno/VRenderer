@@ -107,5 +107,28 @@ namespace VRenderer
 
 			return lv_texture;
 		}
+
+		VkImageView GenerateVkImageView(VkDevice l_device, VulkanTexture& l_vulkanTexture, const VkImageAspectFlags l_aspect, const uint32_t l_baseMipLevel, const uint32_t l_baseArrayLayer, const uint32_t l_layerCount, const uint32_t l_levelCount)
+		{
+			VkImageViewCreateInfo lv_viewCreateInfo{};
+			lv_viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+			lv_viewCreateInfo.format = l_vulkanTexture.m_format;
+			lv_viewCreateInfo.image = l_vulkanTexture.m_image;
+			lv_viewCreateInfo.viewType = (VK_IMAGE_TYPE_1D == l_vulkanTexture.m_type) ? VK_IMAGE_VIEW_TYPE_1D : (VK_IMAGE_TYPE_2D == l_vulkanTexture.m_type) ? VK_IMAGE_VIEW_TYPE_2D : VK_IMAGE_VIEW_TYPE_3D;
+			lv_viewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+			lv_viewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+			lv_viewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+			lv_viewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+			lv_viewCreateInfo.subresourceRange.aspectMask = l_aspect;
+			lv_viewCreateInfo.subresourceRange.baseArrayLayer = l_baseArrayLayer;
+			lv_viewCreateInfo.subresourceRange.baseMipLevel = l_baseMipLevel;
+			lv_viewCreateInfo.subresourceRange.layerCount = l_layerCount;
+			lv_viewCreateInfo.subresourceRange.levelCount = l_levelCount;
+			
+			VkImageView lv_view{};
+			VULKAN_CHECK(vkCreateImageView(l_device, &lv_viewCreateInfo, nullptr, &lv_view));
+
+			return lv_view;
+		}
 	}
 }
