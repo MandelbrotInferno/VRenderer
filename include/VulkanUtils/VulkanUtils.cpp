@@ -130,5 +130,35 @@ namespace VRenderer
 
 			return lv_view;
 		}
+
+		void BlitsCopySrcToDestImage(VkCommandBuffer l_cmd, VkImage l_srcImage, VkImage l_dstImage, const VkImageAspectFlags l_srcAspectMasks, const std::span<VkOffset3D, 2> l_srcRegion, const std::span<VkOffset3D, 2> l_dstRegion, const uint32_t l_srcMipLevel, const uint32_t l_dstMipLevel, const uint32_t l_srcBaseLayer, const uint32_t l_dstBaseLayer, const uint32_t l_srcLayerCount)
+		{
+			VkImageBlit2 lv_imageBlit2{};
+			lv_imageBlit2.sType = VK_STRUCTURE_TYPE_IMAGE_BLIT_2;
+			lv_imageBlit2.srcOffsets[0] = l_srcRegion.data()[0];
+			lv_imageBlit2.srcOffsets[1] = l_srcRegion.data()[1];
+			lv_imageBlit2.dstOffsets[0] = l_dstRegion.data()[0];
+			lv_imageBlit2.dstOffsets[1] = l_dstRegion.data()[1];
+			lv_imageBlit2.srcSubresource.aspectMask = l_srcAspectMasks;
+			lv_imageBlit2.srcSubresource.baseArrayLayer = l_srcBaseLayer;
+			lv_imageBlit2.srcSubresource.layerCount = l_srcLayerCount;
+			lv_imageBlit2.srcSubresource.mipLevel = l_srcMipLevel;
+			lv_imageBlit2.dstSubresource.aspectMask = l_srcAspectMasks;
+			lv_imageBlit2.dstSubresource.baseArrayLayer = l_dstBaseLayer;
+			lv_imageBlit2.dstSubresource.layerCount = l_srcLayerCount;
+			lv_imageBlit2.dstSubresource.mipLevel = l_dstMipLevel;
+			
+			VkBlitImageInfo2 lv_blitImageInfo{};
+			lv_blitImageInfo.sType = VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2;
+			lv_blitImageInfo.srcImage = l_srcImage;
+			lv_blitImageInfo.dstImage = l_dstImage;
+			lv_blitImageInfo.regionCount = 1;
+			lv_blitImageInfo.pRegions = &lv_imageBlit2;
+			lv_blitImageInfo.filter = VK_FILTER_LINEAR;
+			lv_blitImageInfo.srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+			lv_blitImageInfo.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+			
+			vkCmdBlitImage2(l_cmd, &lv_blitImageInfo);
+		}
 	}
 }
