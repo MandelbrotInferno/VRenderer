@@ -9,17 +9,19 @@
 namespace VRenderer
 {
 
-	void VulkanResourceManager::AddVulkanTexture(std::string&& l_name, VulkanTexture&& l_vulkanTexture)
+	VulkanTexture& VulkanResourceManager::AddVulkanTexture(std::string&& l_name, VulkanTexture&& l_vulkanTexture)
 	{
-		m_vulkanTextures.emplace_back(std::move(l_vulkanTexture));
-		const size_t lv_index = m_vulkanTextures.size();
+		VulkanTexture& lv_returnTexture = m_vulkanTextures.emplace_back(std::move(l_vulkanTexture));
+		const size_t lv_index = m_vulkanTextures.size()-1U;
 		m_mapVulkanTextureNamesToIndex.emplace(std::move(l_name), lv_index);
+
+		return lv_returnTexture;
 	}
 
 	void VulkanResourceManager::AddVulkanImageView(std::string&& l_name, VkImageView l_vulkanImageView)
 	{
 		m_vulkanImageViews.push_back(l_vulkanImageView);
-		const size_t lv_index = m_vulkanImageViews.size();
+		const size_t lv_index = m_vulkanImageViews.size()-1U;
 		m_mapVulkanImageViewsNamesToIndex.emplace(std::move(l_name), lv_index);
 	}
 

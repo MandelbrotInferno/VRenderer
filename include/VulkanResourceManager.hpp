@@ -15,7 +15,7 @@ namespace VRenderer
 	public:
 
 		//Make sure every name you provide is unique
-		void AddVulkanTexture(std::string&& l_name, VulkanTexture&& l_vulkanTexture);
+		VulkanTexture& AddVulkanTexture(std::string&& l_name, VulkanTexture&& l_vulkanTexture);
 
 		//Make sure every name you provide is unique
 		void AddVulkanImageView(std::string&& l_name, VkImageView l_vulkanImageView);
