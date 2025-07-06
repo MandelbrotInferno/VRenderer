@@ -77,7 +77,7 @@ namespace VRenderer
 			return lv_submitInfo;
 		}
 
-		VulkanTexture GenerateVulkanTexture(VmaAllocator l_allocator, const VkFormat l_format, const VkExtent3D l_extent, const VkImageUsageFlags l_usageFlags, const VkImageLayout l_initialLayout, const VkImageType l_type, const uint32_t l_mipLevels, const uint32_t l_layerCount)
+		VulkanTexture GenerateVulkanTexture(VmaAllocator l_allocator, const VkFormat l_format, const VkExtent3D l_extent, const VkImageUsageFlags l_usageFlags, const VkImageType l_type, const uint32_t l_mipLevels, const uint32_t l_layerCount)
 		{
 			VkImageCreateInfo lv_imageCreateInfo{};
 			lv_imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -85,7 +85,7 @@ namespace VRenderer
 			lv_imageCreateInfo.extent = l_extent;
 			lv_imageCreateInfo.format = l_format;
 			lv_imageCreateInfo.imageType = l_type;
-			lv_imageCreateInfo.initialLayout = l_initialLayout;
+			lv_imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 			lv_imageCreateInfo.mipLevels = l_mipLevels;
 			lv_imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 			lv_imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
@@ -106,10 +106,10 @@ namespace VRenderer
 			lv_texture.m_type = l_type;
 
 			for (auto& l_mipImageLayout : lv_texture.m_mipMapImageLayouts) {
-				l_mipImageLayout = l_initialLayout;
+				l_mipImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 			}
 			for (auto& l_layerImageLayout : lv_texture.m_layerImageLayouts) {
-				l_layerImageLayout = l_initialLayout;
+				l_layerImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 			}
 
 			return lv_texture;
