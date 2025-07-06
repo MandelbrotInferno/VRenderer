@@ -105,6 +105,13 @@ namespace VRenderer
 			lv_texture.m_mipLevels = l_mipLevels;
 			lv_texture.m_type = l_type;
 
+			for (auto& l_mipImageLayout : lv_texture.m_mipMapImageLayouts) {
+				l_mipImageLayout = l_initialLayout;
+			}
+			for (auto& l_layerImageLayout : lv_texture.m_layerImageLayouts) {
+				l_layerImageLayout = l_initialLayout;
+			}
+
 			return lv_texture;
 		}
 

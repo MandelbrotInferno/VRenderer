@@ -4,7 +4,7 @@
 
 #include <vulkan/vulkan.h>
 #include <vma/vk_mem_alloc.h>
-
+#include <array>
 
 namespace VRenderer
 {
@@ -15,7 +15,8 @@ namespace VRenderer
 		void CleanUp(VmaAllocator l_allocator) noexcept;
 
 	public:
-
+		std::array<VkImageLayout, 6> m_mipMapImageLayouts{};
+		std::array<VkImageLayout, 6> m_layerImageLayouts{};
 		VkImage m_image{};
 		VmaAllocation m_vmaAllocation{};
 		VkExtent3D m_extent{};
