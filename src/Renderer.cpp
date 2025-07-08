@@ -86,7 +86,7 @@ namespace VRenderer
 
 		lv_cmdBuffer.BeginRecording();
 
-		IssueDrawCommands(lv_cmdBuffer.m_buffer, lv_swapchainImageIndex);
+		RecordCommands(lv_cmdBuffer.m_buffer, lv_swapchainImageIndex);
 
 		lv_cmdBuffer.EndRecording();
 
@@ -119,7 +119,7 @@ namespace VRenderer
 		++m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex;
 	}
 
-	void Renderer::IssueDrawCommands(VkCommandBuffer l_cmd, const uint32_t l_swapchainIndex)
+	void Renderer::RecordCommands(VkCommandBuffer l_cmd, const uint32_t l_swapchainIndex)
 	{
 		using namespace VulkanUtils;
 
@@ -130,7 +130,7 @@ namespace VRenderer
 			, m_vulkanSwapchain.m_images[l_swapchainIndex], VK_ACCESS_2_MEMORY_READ_BIT
 			, VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT
 			, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
-
+		
 		VkClearColorValue lv_clearValue;
 		float lv_flash = std::abs(std::sin((float)m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex / 120.f));
 		lv_clearValue = { { 0.0f, 0.0f, lv_flash, 1.0f } };

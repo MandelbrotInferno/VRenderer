@@ -29,7 +29,7 @@ namespace VRenderer
 	private:
 		void CleanUp() noexcept;
 
-		void IssueDrawCommands(VkCommandBuffer l_cmd, const uint32_t l_swapchainIndex);
+		void RecordCommands(VkCommandBuffer l_cmd, const uint32_t l_swapchainIndex);
 
 		void InitializeVulkanFoundationalElementsAndGraphicsQueue(SDL_Window* l_window);
 		void InitializeVulkanSwapchain(SDL_Window* l_window);
