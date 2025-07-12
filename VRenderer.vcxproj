@@ -173,6 +173,7 @@
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\SDL_WindowWrapper.cpp" />
     <ClCompile Include="src\VulkanCommandbufferReset.cpp" />
+    <ClCompile Include="src\VulkanDescriptorSetAllocator.cpp" />
     <ClCompile Include="src\VulkanDescriptorSetLayoutFactory.cpp" />
     <ClCompile Include="src\VulkanFoundationalElements.cpp" />
     <ClCompile Include="src\VulkanResourceManager.cpp" />
@@ -184,6 +185,7 @@
     <ClInclude Include="include\Renderer.hpp" />
     <ClInclude Include="include\SDL_WindowWrapper.hpp" />
     <ClInclude Include="include\VulkanCommandbufferReset.hpp" />
+    <ClInclude Include="include\VulkanDescriptorSetAllocator.hpp" />
     <ClInclude Include="include\VulkanDescriptorSetLayoutFactory.hpp" />
     <ClInclude Include="include\VulkanError.hpp" />
     <ClInclude Include="include\VulkanFoundationalElements.hpp" />

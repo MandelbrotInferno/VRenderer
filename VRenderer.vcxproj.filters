@@ -48,6 +48,9 @@
     <ClCompile Include="src\VulkanDescriptorSetLayoutFactory.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\VulkanDescriptorSetAllocator.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\VulkanError.hpp">
@@ -87,6 +90,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\VulkanDescriptorSetLayoutFactory.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanDescriptorSetAllocator.hpp">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
