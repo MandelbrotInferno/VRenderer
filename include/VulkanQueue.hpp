@@ -7,9 +7,10 @@
 
 namespace VRenderer
 {
-	struct VulkanQueueGraphics final
+	struct VulkanQueue final
 	{
 	public:
+
 
 
 	public:
