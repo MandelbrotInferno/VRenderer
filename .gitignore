@@ -6,6 +6,9 @@
 
 # Place folders/files that you do not want to be included in github under here
 vcpkg_installed/
+vcpkg/
+*.vcxproj
+*.vcxproj.filters
 
 
 # User-specific files
