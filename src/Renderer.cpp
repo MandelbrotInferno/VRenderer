@@ -3,6 +3,7 @@
 #include "include/Renderer.hpp"
 #include "include/VulkanError.hpp"
 #include "include/VulkanUtils/VulkanUtils.hpp"
+#include "include/VulkanDescriptorSetLayoutFactory.hpp"
 #define VMA_IMPLEMENTATION
 #include <vma/vk_mem_alloc.h>
 #include <cmath>
@@ -24,6 +25,11 @@ namespace VRenderer
 		return m_swapchainPresentSyncPrimitives[m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex % m_maxCommandBuffers];
 	}
 
+	uint32_t Renderer::GetCurrentFrameInflightIndex() const
+	{
+		return static_cast<uint32_t>(m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex % m_maxCommandBuffers);
+	}
+
 	void Renderer::Init(SDL_Window* l_window)
 	{
 		InitializeVulkanFoundationalElementsAndGraphicsQueue(l_window);
@@ -32,19 +38,35 @@ namespace VRenderer
 		InitializeVulkanSwapchainAndPresentSyncPrimitives();
 		InitializeVmaAllocator();
 		TransitionImageLayoutSwapchainImagesToPresentUponCreation();
+		InitializeDescriptorSetPool();
 
 
-		//Testing with a texture henceforth
-		VulkanTexture lv_testTexture = VulkanUtils::GenerateVulkanTexture(m_allocator, VK_FORMAT_R16G16B16A16_SFLOAT, VkExtent3D{.width = 1024, .height = 1024, .depth = 1}, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
-		auto& lv_cachedTestTexture = m_vulkanResManager.AddVulkanTexture("Test-Image", std::move(lv_testTexture));
+		//Testing code
+
+		VulkanTexture lv_testTexture = VulkanUtils::GenerateVulkanTexture(m_vmaAlloc, VK_FORMAT_R16G16B16A16_SFLOAT, VkExtent3D{.width = 1024, .height = 1024, .depth = 1}, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT);
+		VulkanTexture lv_testTexture2 = VulkanUtils::GenerateVulkanTexture(m_vmaAlloc, VK_FORMAT_R16G16B16A16_SFLOAT, VkExtent3D{ .width = 1024, .height = 1024, .depth = 1 }, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT);
+
+		const uint32_t lv_cachedTestTextureHandle = m_vulkanResManager.AddVulkanTexture("Test-Image0", std::move(lv_testTexture));
+		const uint32_t lv_cachedTestTexture2Handle = m_vulkanResManager.AddVulkanTexture("Test-Image1", std::move(lv_testTexture2));
+
+		auto& lv_cachedTestTexture = m_vulkanResManager.RetrieveVulkanTexture(lv_cachedTestTextureHandle);
+		auto& lv_cachedTestTexture2 = m_vulkanResManager.RetrieveVulkanTexture(lv_cachedTestTexture2Handle);
 
 		m_vulkanGraphicsCmdBuffers[0].BeginRecording();
+
 		VulkanUtils::ImageLayoutTransitionCmd(m_vulkanGraphicsCmdBuffers[0].m_buffer, VK_IMAGE_ASPECT_COLOR_BIT
-			, lv_testTexture.m_mipMapImageLayouts[0], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-			, lv_testTexture.m_image, VK_ACCESS_2_TRANSFER_READ_BIT
+			, lv_cachedTestTexture.m_mipMapImageLayouts[0], VK_IMAGE_LAYOUT_GENERAL
+			, lv_cachedTestTexture.m_image, VK_ACCESS_2_TRANSFER_READ_BIT
 			, VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_2_TRANSFER_BIT
 			, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
-		lv_testTexture.m_mipMapImageLayouts[0] = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		lv_cachedTestTexture.m_mipMapImageLayouts[0] = VK_IMAGE_LAYOUT_GENERAL;
+
+		VulkanUtils::ImageLayoutTransitionCmd(m_vulkanGraphicsCmdBuffers[0].m_buffer, VK_IMAGE_ASPECT_COLOR_BIT
+			, lv_cachedTestTexture2.m_mipMapImageLayouts[0], VK_IMAGE_LAYOUT_GENERAL
+			, lv_cachedTestTexture2.m_image, VK_ACCESS_2_TRANSFER_READ_BIT
+			, VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_2_TRANSFER_BIT
+			, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
+		lv_cachedTestTexture2.m_mipMapImageLayouts[0] = VK_IMAGE_LAYOUT_GENERAL;
 		m_vulkanGraphicsCmdBuffers[0].EndRecording();
 
 		VkCommandBufferSubmitInfo lv_cmdSubmitInfo{};
@@ -59,6 +81,57 @@ namespace VRenderer
 		VULKAN_CHECK(vkQueueSubmit2(m_vulkanQueue.m_queue, 1, &lv_submitInfo, VK_NULL_HANDLE));
 
 		VULKAN_CHECK(vkQueueWaitIdle(m_vulkanQueue.m_queue));
+
+		VulkanDescriptorSetLayoutFactory lv_setLayoutFactory{};
+		lv_setLayoutFactory.AddBinding(0U, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1U, VK_SHADER_STAGE_COMPUTE_BIT);
+		VkDescriptorSetLayout lv_computeSetLayout = lv_setLayoutFactory.GenerateSetLayout(m_device);
+		m_vulkanResManager.AddVulkanSetLayout("ComputeSetLayout", lv_computeSetLayout);
+
+		std::array<VkDescriptorSetLayout, 1> lv_ptComputeSetLayout{ lv_computeSetLayout };
+		m_testComputeSets[0] = m_mainDescriptorSetAlloc.Allocate(m_device, lv_ptComputeSetLayout);
+		m_testComputeSets[1] = m_mainDescriptorSetAlloc.Allocate(m_device, lv_ptComputeSetLayout);
+
+		VkImageView lv_cachedTextureView = VulkanUtils::GenerateVkImageView(m_device, lv_cachedTestTexture);
+		VkImageView lv_cachedTexture2View = VulkanUtils::GenerateVkImageView(m_device, lv_cachedTestTexture2);
+
+		m_vulkanResManager.AddVulkanImageView("ComputeImageView0", lv_cachedTextureView);
+		m_vulkanResManager.AddVulkanImageView("ComputeImageView1", lv_cachedTexture2View);
+		
+		VkDescriptorImageInfo lv_imageInfo{};
+		lv_imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+		lv_imageInfo.imageView = lv_cachedTextureView;
+		
+		VkDescriptorImageInfo lv_imageInfo2{};
+		lv_imageInfo2.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+		lv_imageInfo2.imageView = lv_cachedTexture2View;
+
+		std::array<VkWriteDescriptorSet, 2U> lv_writes{};
+
+		lv_writes[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		lv_writes[0].descriptorCount = 1U;
+		lv_writes[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		lv_writes[0].dstBinding = 0U;
+		lv_writes[0].dstSet = m_testComputeSets[0];
+		lv_writes[0].pImageInfo = &lv_imageInfo;
+
+		lv_writes[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		lv_writes[1].descriptorCount = 1U;
+		lv_writes[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+		lv_writes[1].dstBinding = 0U;
+		lv_writes[1].dstSet = m_testComputeSets[1];
+		lv_writes[1].pImageInfo = &lv_imageInfo2;
+		
+		vkUpdateDescriptorSets(m_device, (uint32_t)lv_writes.size(), lv_writes.data(), 0, nullptr);
+
+		VkPipelineLayout lv_computePipelineLayout = VulkanUtils::GenerateVkPipelineLayout(m_device, (uint32_t)lv_ptComputeSetLayout.size(), lv_ptComputeSetLayout);
+		VkShaderModule lv_shaderModule = VulkanUtils::GenerateVkShaderModule("shaders/SPIRV-CompiledShaders/Gradient.spv", m_device);
+		VkPipeline lv_computePipeline = VulkanUtils::GenerateComputeVkPipeline(m_device, lv_computePipelineLayout, lv_shaderModule, "main");
+		
+		m_vulkanResManager.AddVulkanPipeline("ComputePipeline", lv_computePipeline);
+		m_vulkanResManager.AddVulkanPipelineLayout("ComputePipelineLayout", lv_computePipelineLayout);
+
+		vkDestroyShaderModule(m_device, lv_shaderModule, nullptr);
+
 	}
 	void Renderer::InitCleanUp()
 	{
@@ -84,9 +157,11 @@ namespace VRenderer
 			, std::numeric_limits<uint64_t>::max(), lv_syncPrimitives.m_acquireImageSemaphore
 			, VK_NULL_HANDLE, &lv_swapchainImageIndex));
 
+		const uint32_t lv_currentFrameInflightIndex = GetCurrentFrameInflightIndex();
+
 		lv_cmdBuffer.BeginRecording();
 
-		RecordCommands(lv_cmdBuffer.m_buffer, lv_swapchainImageIndex);
+		RecordCommands(lv_cmdBuffer.m_buffer, lv_swapchainImageIndex, lv_currentFrameInflightIndex);
 
 		lv_cmdBuffer.EndRecording();
 
@@ -119,11 +194,13 @@ namespace VRenderer
 		++m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex;
 	}
 
-	void Renderer::RecordCommands(VkCommandBuffer l_cmd, const uint32_t l_swapchainIndex)
+	void Renderer::RecordCommands(VkCommandBuffer l_cmd, const uint32_t l_swapchainIndex, const uint32_t l_frameInflightIndex)
 	{
 		using namespace VulkanUtils;
-
-		VulkanTexture& lv_testTexture = m_vulkanResManager.RetrieveVulkanTexture("Test-Image");
+		
+		VulkanTexture& lv_testTexture = m_vulkanResManager.RetrieveVulkanTexture(fmt::format("Test-Image{}", l_frameInflightIndex));
+		VkPipeline lv_computePipeline = m_vulkanResManager.RetrieveVulkanPipeline("ComputePipeline");
+		VkPipelineLayout lv_computePipelineLayout = m_vulkanResManager.RetrieveVulkanPipelineLayout("ComputePipelineLayout");
 
 		ImageLayoutTransitionCmd(l_cmd, VK_IMAGE_ASPECT_COLOR_BIT
 			, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
@@ -131,17 +208,15 @@ namespace VRenderer
 			, VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT
 			, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
 		
-		VkClearColorValue lv_clearValue;
-		float lv_flash = std::abs(std::sin((float)m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex / 120.f));
-		lv_clearValue = { { 0.0f, 0.0f, lv_flash, 1.0f } };
+		vkCmdBindPipeline(l_cmd, VK_PIPELINE_BIND_POINT_COMPUTE, lv_computePipeline);
+		vkCmdBindDescriptorSets(l_cmd, VK_PIPELINE_BIND_POINT_COMPUTE, lv_computePipelineLayout, 0, 1, &m_testComputeSets[l_frameInflightIndex], 0U, nullptr);
+		vkCmdDispatch(l_cmd, (uint32_t)std::ceilf(lv_testTexture.m_extent.width/16.f), (uint32_t)std::ceilf(lv_testTexture.m_extent.height/16.f), 1U);
 
-		VkImageSubresourceRange lv_subRange = GenerateVkImageSubresourceRange(VK_IMAGE_ASPECT_COLOR_BIT);
-		vkCmdClearColorImage(l_cmd, lv_testTexture.m_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &lv_clearValue, 1, &lv_subRange);
 
 		ImageLayoutTransitionCmd(l_cmd, VK_IMAGE_ASPECT_COLOR_BIT
 			, lv_testTexture.m_mipMapImageLayouts[0], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
-			, lv_testTexture.m_image, VK_ACCESS_2_TRANSFER_WRITE_BIT
-			, VK_ACCESS_2_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_2_TRANSFER_BIT
+			, lv_testTexture.m_image, VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT
+			, VK_ACCESS_2_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT
 			, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
 		lv_testTexture.m_mipMapImageLayouts[0] = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 
@@ -152,11 +227,11 @@ namespace VRenderer
 
 
 		ImageLayoutTransitionCmd(l_cmd, VK_IMAGE_ASPECT_COLOR_BIT
-			, lv_testTexture.m_mipMapImageLayouts[0], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+			, lv_testTexture.m_mipMapImageLayouts[0], VK_IMAGE_LAYOUT_GENERAL
 			, lv_testTexture.m_image, VK_ACCESS_2_TRANSFER_READ_BIT
 			, VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_2_TRANSFER_BIT
 			, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
-		lv_testTexture.m_mipMapImageLayouts[0] = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		lv_testTexture.m_mipMapImageLayouts[0] = VK_IMAGE_LAYOUT_GENERAL;
 
 
 		ImageLayoutTransitionCmd(l_cmd, VK_IMAGE_ASPECT_COLOR_BIT
@@ -198,11 +273,13 @@ namespace VRenderer
 
 	void Renderer::CleanUp() noexcept
 	{
-		if (nullptr != m_allocator && VK_NULL_HANDLE != m_device) {
-			m_vulkanResManager.CleanUp(m_device, m_allocator);
+		m_mainDescriptorSetAlloc.CleanUp(m_device);
+
+		if (nullptr != m_vmaAlloc && VK_NULL_HANDLE != m_device) {
+			m_vulkanResManager.CleanUp(m_device, m_vmaAlloc);
 		}
-		if (nullptr != m_allocator) {
-			vmaDestroyAllocator(m_allocator);
+		if (nullptr != m_vmaAlloc) {
+			vmaDestroyAllocator(m_vmaAlloc);
 		}
 		for (auto& l_syncPrimitve : m_swapchainPresentSyncPrimitives) {
 			l_syncPrimitve.CleanUp(m_device);
@@ -322,7 +399,20 @@ namespace VRenderer
 		lv_vmaCreateInfo.instance = m_vulkanFoundational.m_instance;
 		lv_vmaCreateInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
 
-		VULKAN_CHECK(vmaCreateAllocator(&lv_vmaCreateInfo, &m_allocator));
+		VULKAN_CHECK(vmaCreateAllocator(&lv_vmaCreateInfo, &m_vmaAlloc));
+	}
+
+
+	void Renderer::InitializeDescriptorSetPool()
+	{
+		constexpr uint32_t lv_maxPossibleSets = 128U;
+
+		std::vector<VkDescriptorPoolSize> lv_poolSizes{};
+		lv_poolSizes.resize(1);
+		lv_poolSizes[0].descriptorCount = 64U * m_maxCommandBuffers;
+		lv_poolSizes[0].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+
+		m_mainDescriptorSetAlloc.InitPool(m_device, lv_poolSizes, lv_maxPossibleSets);
 	}
 
 	void Renderer::TransitionImageLayoutSwapchainImagesToPresentUponCreation()

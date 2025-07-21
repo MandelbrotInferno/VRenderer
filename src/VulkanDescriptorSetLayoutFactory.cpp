@@ -26,13 +26,13 @@ namespace VRenderer
 
 		VkDescriptorSetLayoutBindingFlagsCreateInfo lv_layoutBindingFlagsCreateInfo{};
 		lv_layoutBindingFlagsCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
-		lv_layoutBindingFlagsCreateInfo.bindingCount = lv_bindingFlags.size();
+		lv_layoutBindingFlagsCreateInfo.bindingCount = static_cast<uint32_t>(lv_bindingFlags.size());
 		lv_layoutBindingFlagsCreateInfo.pBindingFlags = lv_bindingFlags.data();
 
 		VkDescriptorSetLayoutCreateInfo lv_layoutCreateInfo{};
 		lv_layoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		lv_layoutCreateInfo.pBindings = m_bindings.data();
-		lv_layoutCreateInfo.bindingCount = m_bindings.size();
+		lv_layoutCreateInfo.bindingCount = static_cast<uint32_t>(m_bindings.size());
 		lv_layoutCreateInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT_EXT;
 
 		VkDescriptorSetLayout lv_setLayout{};

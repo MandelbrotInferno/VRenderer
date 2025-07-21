@@ -4,6 +4,8 @@
 
 #include "include/VulkanUtils/VulkanUtils.hpp"
 #include "include/VulkanError.hpp"
+#include <fstream>
+#include <vector>
 
 namespace VRenderer
 {
@@ -137,6 +139,82 @@ namespace VRenderer
 
 			return lv_view;
 		}
+
+
+		VkShaderModule GenerateVkShaderModule(std::string_view l_compiledShaderPath, VkDevice l_device)
+		{
+			std::ifstream lv_compiledShaderFile(l_compiledShaderPath.data(), std::ios::ate | std::ios::binary);
+
+			if (false == lv_compiledShaderFile.is_open()) {
+				throw "Compiled shader file could not open in GenerateVkShaderModule()";
+			}
+
+			// find what the size of the file is by looking up the location of the cursor
+			// because the cursor is at the end, it gives the size directly in bytes
+			const size_t lv_fileSize = (size_t)lv_compiledShaderFile.tellg();
+
+			// spirv expects the buffer to be on uint32, so make sure to reserve a int
+			// vector big enough for the entire file
+			std::vector<uint32_t> lv_buffer(lv_fileSize / sizeof(uint32_t));
+
+			lv_compiledShaderFile.seekg(0);
+
+			std::vector<char> lv_bufferChar{};
+			lv_bufferChar.resize(lv_fileSize);
+
+			lv_compiledShaderFile.read((char*)lv_bufferChar.data(), lv_fileSize);
+			lv_compiledShaderFile.close();
+			
+			memcpy(lv_buffer.data(), lv_bufferChar.data(), lv_buffer.size()*sizeof(uint32_t));
+
+			VkShaderModuleCreateInfo lv_createInfo{};
+			lv_createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+			lv_createInfo.codeSize = lv_buffer.size() * sizeof(uint32_t);
+			lv_createInfo.pCode = lv_buffer.data();
+
+			VkShaderModule lv_shaderModule{};
+			VULKAN_CHECK(vkCreateShaderModule(l_device, &lv_createInfo, nullptr, &lv_shaderModule));
+
+			return lv_shaderModule;
+			
+		}
+
+
+		VkPipelineLayout GenerateVkPipelineLayout(VkDevice l_device, const uint32_t l_setLayoutCounts, const std::span<VkDescriptorSetLayout> l_setLayouts, const uint32_t l_pushConstRangeCount, const std::span<VkPushConstantRange> l_pushConstRanges)
+		{
+			VkPipelineLayoutCreateInfo lv_createInfo{};
+			lv_createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+			lv_createInfo.pSetLayouts = l_setLayouts.data();
+			lv_createInfo.setLayoutCount = l_setLayoutCounts;
+			lv_createInfo.pPushConstantRanges = l_pushConstRanges.data();
+			lv_createInfo.pushConstantRangeCount = l_pushConstRangeCount;
+			
+			VkPipelineLayout lv_pipelineLayout{};
+			VULKAN_CHECK(vkCreatePipelineLayout(l_device, &lv_createInfo, nullptr, &lv_pipelineLayout));
+
+			return lv_pipelineLayout;
+		}
+
+
+		VkPipeline GenerateComputeVkPipeline(VkDevice l_device, VkPipelineLayout l_pipelineLayout, VkShaderModule l_shaderModule, std::string_view l_entryFunctionShader)
+		{
+			VkPipelineShaderStageCreateInfo lv_stageCreateInfo{};
+			lv_stageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			lv_stageCreateInfo.module = l_shaderModule;
+			lv_stageCreateInfo.pName = l_entryFunctionShader.data();
+			lv_stageCreateInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+
+			VkComputePipelineCreateInfo lv_pipelineCreateInfo{};
+			lv_pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+			lv_pipelineCreateInfo.layout = l_pipelineLayout;
+			lv_pipelineCreateInfo.stage = lv_stageCreateInfo;
+
+			VkPipeline lv_pipeline{};
+			VULKAN_CHECK(vkCreateComputePipelines(l_device, VK_NULL_HANDLE, 1, &lv_pipelineCreateInfo, nullptr, &lv_pipeline));
+
+			return lv_pipeline;
+		}
+
 
 		void BlitsCopySrcToDestImage(VkCommandBuffer l_cmd, VkImage l_srcImage, VkImage l_dstImage, const VkImageAspectFlags l_srcAspectMasks, const std::span<VkOffset3D, 2> l_srcRegion, const std::span<VkOffset3D, 2> l_dstRegion, const uint32_t l_srcMipLevel, const uint32_t l_dstMipLevel, const uint32_t l_srcBaseLayer, const uint32_t l_dstBaseLayer, const uint32_t l_srcLayerCount)
 		{
