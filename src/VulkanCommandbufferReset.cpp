@@ -6,11 +6,9 @@
 
 namespace VRenderer
 {
-	void VulkanCommandbufferReset::CleanUp(VkDevice l_device) noexcept
+	void VulkanCommandbufferReset::FreeBuffer(VkDevice l_device, VkCommandPool l_pool) noexcept
 	{
-		if (VK_NULL_HANDLE != l_device && VK_NULL_HANDLE != m_pool) {
-			vkDestroyCommandPool(l_device, m_pool, nullptr);
-		}
+		vkFreeCommandBuffers(l_device, l_pool, 1, &m_buffer);
 	}
 
 	void VulkanCommandbufferReset::ResetBuffer()
