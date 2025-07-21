@@ -339,7 +339,9 @@ namespace VRenderer
 		if (VK_NULL_HANDLE != m_mainThreadComputeCmdPool) {
 			vkDestroyCommandPool(m_device, m_mainThreadComputeCmdPool, nullptr);
 		}
-		
+		if (VK_NULL_HANDLE != m_timelineComputeGraphicsSemaphore) {
+			vkDestroySemaphore(m_device, m_timelineComputeGraphicsSemaphore, nullptr);
+		}
 		m_vulkanSwapchain.CleanUp(m_device);
 		if (VK_NULL_HANDLE != m_device) {
 			vkDestroyDevice(m_device, nullptr);
@@ -375,6 +377,7 @@ namespace VRenderer
 		VkPhysicalDeviceVulkan12Features lv_features12{ .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES };
 		lv_features12.bufferDeviceAddress = true;
 		lv_features12.descriptorIndexing = true;
+		lv_features12.timelineSemaphore = true;
 
 		vkb::PhysicalDeviceSelector lv_selector{ lv_vkbInstance };
 		vkb::PhysicalDevice lv_physicalDevice = lv_selector
@@ -420,6 +423,7 @@ namespace VRenderer
 		VkSemaphoreTypeCreateInfo lv_typeCreateInfo{};
 		lv_typeCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
 		lv_typeCreateInfo.initialValue = 0U;
+		lv_typeCreateInfo.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
 		lv_typeCreateInfo.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
 
 		VkSemaphoreCreateInfo lv_createInfo{};
