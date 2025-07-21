@@ -7,7 +7,6 @@
 #include "include/VulkanSwapchainAndPresentSync.hpp"
 #include "include/VulkanResourceManager.hpp"
 #include "include/VulkanDescriptorSetAllocator.hpp"
-#include "include/VulkanQueueFamiliesEnum.hpp"
 #include <vma/vk_mem_alloc.h>
 #include <array>
 
