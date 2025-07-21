@@ -43,7 +43,7 @@ namespace VRenderer
 		InitializeVulkanFoundationalElementsAndGraphicsQueue(l_window);
 		InitializeVulkanSwapchain(l_window);
 		InitializeVulkanGraphicsCommandPoolAndBuffers();
-
+		InitializeSemaphores();
 		if (VK_NULL_HANDLE != m_computeQueue.m_queue) {
 			InitializeVulkanComputeCommandPoolAndBuffers();
 		}
