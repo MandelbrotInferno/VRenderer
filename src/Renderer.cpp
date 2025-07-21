@@ -6,6 +6,7 @@
 #include "include/VulkanDescriptorSetLayoutFactory.hpp"
 #define VMA_IMPLEMENTATION
 #include <vma/vk_mem_alloc.h>
+#include <iostream>
 #include <cmath>
 #include <limits>
 #include <VkBootstrap.h>
@@ -25,16 +26,27 @@ namespace VRenderer
 		return m_swapchainPresentSyncPrimitives[m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex % m_maxCommandBuffers];
 	}
 
+	VulkanCommandbufferReset& Renderer::GetCurrentFrameComputeCmdBuffer()
+	{
+		return m_vulkanComputeCmdBuffers[m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex % m_maxCommandBuffers];
+	}
+
 	uint32_t Renderer::GetCurrentFrameInflightIndex() const
 	{
 		return static_cast<uint32_t>(m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex % m_maxCommandBuffers);
 	}
+
+
 
 	void Renderer::Init(SDL_Window* l_window)
 	{
 		InitializeVulkanFoundationalElementsAndGraphicsQueue(l_window);
 		InitializeVulkanSwapchain(l_window);
 		InitializeVulkanGraphicsCommandPoolAndBuffers();
+
+		if (VK_NULL_HANDLE != m_computeQueue.m_queue) {
+			InitializeVulkanComputeCommandPoolAndBuffers();
+		}
 		InitializeVulkanSwapchainAndPresentSyncPrimitives();
 		InitializeVmaAllocator();
 		TransitionImageLayoutSwapchainImagesToPresentUponCreation();
@@ -78,9 +90,9 @@ namespace VRenderer
 		lv_submitInfo.commandBufferInfoCount = 1;
 		lv_submitInfo.pCommandBufferInfos = &lv_cmdSubmitInfo;
 
-		VULKAN_CHECK(vkQueueSubmit2(m_vulkanQueue.m_queue, 1, &lv_submitInfo, VK_NULL_HANDLE));
+		VULKAN_CHECK(vkQueueSubmit2(m_graphicsQueue.m_queue, 1, &lv_submitInfo, VK_NULL_HANDLE));
 
-		VULKAN_CHECK(vkQueueWaitIdle(m_vulkanQueue.m_queue));
+		VULKAN_CHECK(vkQueueWaitIdle(m_graphicsQueue.m_queue));
 
 		VulkanDescriptorSetLayoutFactory lv_setLayoutFactory{};
 		lv_setLayoutFactory.AddBinding(0U, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1U, VK_SHADER_STAGE_COMPUTE_BIT);
@@ -145,7 +157,18 @@ namespace VRenderer
 	{
 		using namespace VulkanUtils;
 
-		auto& lv_cmdBuffer = GetCurrentFrameGraphicsCmdBuffer();
+		VulkanCommandbufferReset lv_cmdBuffer{};
+		VkQueue lv_queue{};
+
+		if (VK_NULL_HANDLE != m_computeQueue.m_queue) {
+			lv_cmdBuffer = GetCurrentFrameComputeCmdBuffer();
+			lv_queue = m_computeQueue.m_queue;
+		}
+		else {
+			lv_cmdBuffer = GetCurrentFrameGraphicsCmdBuffer();
+			lv_queue = m_graphicsQueue.m_queue;
+		}
+
 		auto& lv_syncPrimitives = GetCurrentFrameSwapchainPresentSyncPrimitives();
 
 		VULKAN_CHECK(vkWaitForFences(m_device, 1, &lv_syncPrimitives.m_fence, VK_TRUE,std::numeric_limits<uint64_t>::max()));
@@ -179,7 +202,7 @@ namespace VRenderer
 		lv_submitInfo2.signalSemaphoreInfoCount = 1;
 		lv_submitInfo2.waitSemaphoreInfoCount = 1;
 
-		VULKAN_CHECK(vkQueueSubmit2(m_vulkanQueue.m_queue, 1, &lv_submitInfo2, lv_syncPrimitives.m_fence));
+		VULKAN_CHECK(vkQueueSubmit2(lv_queue, 1, &lv_submitInfo2, lv_syncPrimitives.m_fence));
 
 		VkPresentInfoKHR lv_presentInfo{};
 		lv_presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -189,7 +212,7 @@ namespace VRenderer
 		lv_presentInfo.swapchainCount = 1;
 		lv_presentInfo.pImageIndices = &lv_swapchainImageIndex;
 
-		VULKAN_CHECK(vkQueuePresentKHR(m_vulkanQueue.m_queue, &lv_presentInfo));
+		VULKAN_CHECK(vkQueuePresentKHR(lv_queue, &lv_presentInfo));
 
 		++m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex;
 	}
@@ -247,7 +270,7 @@ namespace VRenderer
 		VkCommandPoolCreateInfo lv_cmdPoolCreateInfo{};
 		lv_cmdPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		lv_cmdPoolCreateInfo.pNext = nullptr;
-		lv_cmdPoolCreateInfo.queueFamilyIndex = m_vulkanQueue.m_familyIndex.m_familyIndex;
+		lv_cmdPoolCreateInfo.queueFamilyIndex = m_graphicsQueue.m_familyIndex.m_familyIndex;
 		lv_cmdPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
 		VULKAN_CHECK(vkCreateCommandPool(m_device, &lv_cmdPoolCreateInfo, nullptr, &m_mainThreadGraphicsCmdPool));
@@ -262,6 +285,30 @@ namespace VRenderer
 			lv_cmdBufferAllocateInfo.commandBufferCount = 1;
 
 			VULKAN_CHECK(vkAllocateCommandBuffers(m_device, &lv_cmdBufferAllocateInfo, &l_vulkanGraphicsCmdBuffer.m_buffer));
+		}
+	}
+
+
+	void Renderer::InitializeVulkanComputeCommandPoolAndBuffers()
+	{
+		VkCommandPoolCreateInfo lv_cmdPoolCreateInfo{};
+		lv_cmdPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		lv_cmdPoolCreateInfo.pNext = nullptr;
+		lv_cmdPoolCreateInfo.queueFamilyIndex = m_computeQueue.m_familyIndex.m_familyIndex;
+		lv_cmdPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+
+		VULKAN_CHECK(vkCreateCommandPool(m_device, &lv_cmdPoolCreateInfo, nullptr, &m_mainThreadComputeCmdPool));
+
+		for (auto& l_vulkanComputeBuffer : m_vulkanComputeCmdBuffers) {
+
+			VkCommandBufferAllocateInfo lv_cmdBufferAllocateInfo{};
+			lv_cmdBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+			lv_cmdBufferAllocateInfo.pNext = nullptr;
+			lv_cmdBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+			lv_cmdBufferAllocateInfo.commandPool = m_mainThreadComputeCmdPool;
+			lv_cmdBufferAllocateInfo.commandBufferCount = 1;
+
+			VULKAN_CHECK(vkAllocateCommandBuffers(m_device, &lv_cmdBufferAllocateInfo, &l_vulkanComputeBuffer.m_buffer));
 		}
 	}
 
@@ -285,7 +332,13 @@ namespace VRenderer
 			l_syncPrimitve.CleanUp(m_device);
 		}
 
-		vkDestroyCommandPool(m_device, m_mainThreadGraphicsCmdPool, nullptr);
+		if (VK_NULL_HANDLE != m_mainThreadGraphicsCmdPool) {
+			vkDestroyCommandPool(m_device, m_mainThreadGraphicsCmdPool, nullptr);
+		}
+
+		if (VK_NULL_HANDLE != m_mainThreadComputeCmdPool) {
+			vkDestroyCommandPool(m_device, m_mainThreadComputeCmdPool, nullptr);
+		}
 		
 		m_vulkanSwapchain.CleanUp(m_device);
 		if (VK_NULL_HANDLE != m_device) {
@@ -339,8 +392,27 @@ namespace VRenderer
 
 		m_device = lv_vkbDevice.device;
 
-		m_vulkanQueue.m_queue = lv_vkbDevice.get_queue(vkb::QueueType::graphics).value();
-		m_vulkanQueue.m_familyIndex.m_familyIndex = lv_vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
+		VulkanQueue lv_queue{};
+
+		auto lv_graphicsQueueRef = lv_vkbDevice.get_queue(vkb::QueueType::graphics);
+
+		if (false == lv_graphicsQueueRef.has_value()) {
+			std::cerr << lv_graphicsQueueRef.error().message() << std::endl;
+			throw "Problem with getting graphics queue";
+		}
+
+		m_graphicsQueue.m_queue = lv_graphicsQueueRef.value();
+		m_graphicsQueue.m_familyIndex.m_familyIndex = lv_vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
+
+
+		auto lv_computeQueueRef = lv_vkbDevice.get_queue(vkb::QueueType::compute);
+
+		if (false == lv_computeQueueRef.has_value()) {
+			m_computeQueue.m_queue = VK_NULL_HANDLE;
+			return;
+		}
+		m_computeQueue.m_queue = lv_vkbDevice.get_queue(vkb::QueueType::compute).value();
+		m_computeQueue.m_familyIndex.m_familyIndex = lv_vkbDevice.get_queue_index(vkb::QueueType::compute).value();
 	}
 
 	void Renderer::InitializeVulkanSwapchain(SDL_Window* l_window)
@@ -460,9 +532,9 @@ namespace VRenderer
 		lv_submitInfo.commandBufferInfoCount = 1;
 		lv_submitInfo.pCommandBufferInfos = &lv_cmdSubmitInfo;
 		
-		VULKAN_CHECK(vkQueueSubmit2(m_vulkanQueue.m_queue, 1, &lv_submitInfo, VK_NULL_HANDLE));
+		VULKAN_CHECK(vkQueueSubmit2(m_graphicsQueue.m_queue, 1, &lv_submitInfo, VK_NULL_HANDLE));
 
-		VULKAN_CHECK(vkQueueWaitIdle(m_vulkanQueue.m_queue));
+		VULKAN_CHECK(vkQueueWaitIdle(m_graphicsQueue.m_queue));
 
 	}
 }

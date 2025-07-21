@@ -2,11 +2,12 @@
 
 #include "include/VulkanFoundationalElements.hpp"
 #include "include/VulkanSwapchain.hpp"
-#include "include/VulkanQueueGraphics.hpp"
+#include "include/VulkanQueue.hpp"
 #include "include/VulkanCommandbufferReset.hpp"
 #include "include/VulkanSwapchainAndPresentSync.hpp"
 #include "include/VulkanResourceManager.hpp"
 #include "include/VulkanDescriptorSetAllocator.hpp"
+#include "include/VulkanQueueFamiliesEnum.hpp"
 #include <vma/vk_mem_alloc.h>
 #include <array>
 
@@ -19,6 +20,7 @@ namespace VRenderer
 	public:
 		
 		VulkanCommandbufferReset& GetCurrentFrameGraphicsCmdBuffer();
+		VulkanCommandbufferReset& GetCurrentFrameComputeCmdBuffer();
 		VulkanSwapchainAndPresentSync& GetCurrentFrameSwapchainPresentSyncPrimitives();
 		uint32_t GetCurrentFrameInflightIndex() const;
 
@@ -36,6 +38,7 @@ namespace VRenderer
 		void InitializeVulkanFoundationalElementsAndGraphicsQueue(SDL_Window* l_window);
 		void InitializeVulkanSwapchain(SDL_Window* l_window);
 		void InitializeVulkanGraphicsCommandPoolAndBuffers();
+		void InitializeVulkanComputeCommandPoolAndBuffers();
 		void InitializeVulkanSwapchainAndPresentSyncPrimitives();
 		void TransitionImageLayoutSwapchainImagesToPresentUponCreation();
 		void InitializeVmaAllocator();
@@ -45,17 +48,20 @@ namespace VRenderer
 		
 		VulkanFoundationalElements m_vulkanFoundational{};
 		VulkanSwapchain m_vulkanSwapchain{};
-		VulkanQueueGraphics m_vulkanQueue{};
 		VkDevice m_device{};
 		VmaAllocator m_vmaAlloc{};
 		VulkanResourceManager m_vulkanResManager{};
 		VulkanDescriptorSetAllocator m_mainDescriptorSetAlloc{};
+		VulkanQueue m_graphicsQueue{};
+		VulkanQueue m_computeQueue{};
 		VkCommandPool m_mainThreadGraphicsCmdPool{};
+		VkCommandPool m_mainThreadComputeCmdPool{};
 
 	private:
 		static constexpr uint32_t m_maxCommandBuffers{ 2U };
 		uint64_t m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex{};
 		std::array<VulkanCommandbufferReset, m_maxCommandBuffers> m_vulkanGraphicsCmdBuffers{};
+		std::array<VulkanCommandbufferReset, m_maxCommandBuffers> m_vulkanComputeCmdBuffers{};
 		std::array<VulkanSwapchainAndPresentSync, m_maxCommandBuffers> m_swapchainPresentSyncPrimitives{};
 
 		//Test code
