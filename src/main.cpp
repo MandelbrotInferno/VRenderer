@@ -121,6 +121,9 @@ int main()
 	catch (const char* l_error) {
 		std::cerr << l_error << std::endl;
 	}
+	catch (const std::out_of_range& l_error) {
+		std::cerr << l_error.what() << std::endl;
+	}
 
 	try {
 		lv_renderer->InitCleanUp();
