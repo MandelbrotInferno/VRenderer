@@ -415,6 +415,22 @@ namespace VRenderer
 		m_computeQueue.m_familyIndex.m_familyIndex = lv_vkbDevice.get_queue_index(vkb::QueueType::compute).value();
 	}
 
+	void Renderer::InitializeSemaphores()
+	{
+		VkSemaphoreTypeCreateInfo lv_typeCreateInfo{};
+		lv_typeCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
+		lv_typeCreateInfo.initialValue = 0U;
+		lv_typeCreateInfo.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
+
+		VkSemaphoreCreateInfo lv_createInfo{};
+		lv_createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+		lv_createInfo.pNext = &lv_typeCreateInfo;
+
+		VULKAN_CHECK(vkCreateSemaphore(m_device, &lv_createInfo, nullptr, &m_timelineComputeGraphicsSemaphore));
+
+	}
+
+
 	void Renderer::InitializeVulkanSwapchain(SDL_Window* l_window)
 	{
 		int lv_height{};

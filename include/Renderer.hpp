@@ -39,6 +39,7 @@ namespace VRenderer
 		void InitializeVulkanGraphicsCommandPoolAndBuffers();
 		void InitializeVulkanComputeCommandPoolAndBuffers();
 		void InitializeVulkanSwapchainAndPresentSyncPrimitives();
+		void InitializeSemaphores();
 		void TransitionImageLayoutSwapchainImagesToPresentUponCreation();
 		void InitializeVmaAllocator();
 		void InitializeDescriptorSetPool();
@@ -55,6 +56,7 @@ namespace VRenderer
 		VulkanQueue m_computeQueue{};
 		VkCommandPool m_mainThreadGraphicsCmdPool{};
 		VkCommandPool m_mainThreadComputeCmdPool{};
+		VkSemaphore m_timelineComputeGraphicsSemaphore{};
 
 	private:
 		static constexpr uint32_t m_maxCommandBuffers{ 2U };
