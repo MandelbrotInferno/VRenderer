@@ -7,8 +7,11 @@
 #include "include/VulkanSwapchainAndPresentSync.hpp"
 #include "include/VulkanResourceManager.hpp"
 #include "include/VulkanDescriptorSetAllocator.hpp"
+#include "include/VulkanCommandRecorders/IVulkanCommandRecorder.hpp"
 #include <vma/vk_mem_alloc.h>
 #include <array>
+#include <memory>
+
 
 struct SDL_Window;
 
@@ -30,9 +33,10 @@ namespace VRenderer
 
 		~Renderer();
 	private:
+
 		void CleanUp() noexcept;
 
-		void RecordCommands(VkCommandBuffer l_cmd, const uint32_t l_swapchainIndex, const uint32_t l_frameInflightIndex);
+		void RecordCommands(VkCommandBuffer l_computeCmdBuffer ,VkCommandBuffer l_graphicsCmdBuffer, const uint32_t l_swapchainIndex, const uint32_t l_frameInflightIndex);
 
 		void InitializeVulkanFoundationalElementsAndGraphicsQueue(SDL_Window* l_window);
 		void InitializeVulkanSwapchain(SDL_Window* l_window);
@@ -64,6 +68,9 @@ namespace VRenderer
 		std::array<VulkanCommandbufferReset, m_maxCommandBuffers> m_vulkanGraphicsCmdBuffers{};
 		std::array<VulkanCommandbufferReset, m_maxCommandBuffers> m_vulkanComputeCmdBuffers{};
 		std::array<VulkanSwapchainAndPresentSync, m_maxCommandBuffers> m_swapchainPresentSyncPrimitives{};
+
+		std::unique_ptr<IVulkanCommandRecorder> m_computeCommandRecorder{};
+		std::unique_ptr<IVulkanCommandRecorder> m_graphicsCommandRecorder{};
 
 		//Test code
 		std::array<VkDescriptorSet, m_maxCommandBuffers> m_testComputeSets{};

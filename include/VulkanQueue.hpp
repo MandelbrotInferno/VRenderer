@@ -9,12 +9,11 @@ namespace VRenderer
 {
 	struct VulkanQueue final
 	{
-	public:
-
-
-
+	
 	public:
 		VulkanQueueFamilyIndex m_familyIndex{};
 		VkQueue m_queue{};
+		uint64_t m_waitValueTimelineSemaphore{};
+		uint64_t m_signalValueTimelineSemaphore{};
 	};
 }

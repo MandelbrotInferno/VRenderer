@@ -4,6 +4,10 @@
 #include "include/VulkanError.hpp"
 #include "include/VulkanUtils/VulkanUtils.hpp"
 #include "include/VulkanDescriptorSetLayoutFactory.hpp"
+#include "include/VulkanCommandRecorders/VulkanAllGraphicsRecorder.hpp"
+#include "include/VulkanCommandRecorders/VulkanComputeRecorder.hpp"
+#include "include/VulkanCommandRecorders/VulkanGraphicsRecorder.hpp"
+#include "include/VulkanCommandRecorders/VulkanEmptyComputeRecorder.hpp"
 #define VMA_IMPLEMENTATION
 #include <vma/vk_mem_alloc.h>
 #include <iostream>
@@ -47,6 +51,16 @@ namespace VRenderer
 		if (VK_NULL_HANDLE != m_computeQueue.m_queue) {
 			InitializeVulkanComputeCommandPoolAndBuffers();
 		}
+
+		if (VK_NULL_HANDLE != m_computeQueue.m_queue && m_graphicsQueue.m_familyIndex.m_familyIndex != m_computeQueue.m_familyIndex.m_familyIndex) {
+			m_computeCommandRecorder = std::make_unique<VulkanComputeRecorder>();
+			m_graphicsCommandRecorder = std::make_unique<VulkanGraphicsRecorder>();
+		}
+		else {
+			m_computeCommandRecorder = std::make_unique<VulkanEmptyComputeRecorder>();
+			m_graphicsCommandRecorder = std::make_unique<VulkanAllGraphicsRecorder>();
+		}
+
 		InitializeVulkanSwapchainAndPresentSyncPrimitives();
 		InitializeVmaAllocator();
 		TransitionImageLayoutSwapchainImagesToPresentUponCreation();
@@ -157,23 +171,24 @@ namespace VRenderer
 	{
 		using namespace VulkanUtils;
 
-		VulkanCommandbufferReset lv_cmdBuffer{};
-		VkQueue lv_queue{};
+		VulkanCommandbufferReset lv_graphicsCmdBuffer{};		
+		VulkanCommandbufferReset lv_computeCmdBuffer{};
 
-		if (VK_NULL_HANDLE != m_computeQueue.m_queue) {
-			lv_cmdBuffer = GetCurrentFrameComputeCmdBuffer();
-			lv_queue = m_computeQueue.m_queue;
+
+		lv_graphicsCmdBuffer = GetCurrentFrameGraphicsCmdBuffer();
+
+		if (VK_NULL_HANDLE != m_computeQueue.m_queue && m_graphicsQueue.m_familyIndex.m_familyIndex != m_computeQueue.m_familyIndex.m_familyIndex) {
+			lv_computeCmdBuffer = GetCurrentFrameComputeCmdBuffer();
 		}
-		else {
-			lv_cmdBuffer = GetCurrentFrameGraphicsCmdBuffer();
-			lv_queue = m_graphicsQueue.m_queue;
-		}
+		
 
 		auto& lv_syncPrimitives = GetCurrentFrameSwapchainPresentSyncPrimitives();
 
 		VULKAN_CHECK(vkWaitForFences(m_device, 1, &lv_syncPrimitives.m_fence, VK_TRUE,std::numeric_limits<uint64_t>::max()));
 		vkResetFences(m_device, 1, &lv_syncPrimitives.m_fence);
-		lv_cmdBuffer.ResetBuffer();
+		
+		lv_graphicsCmdBuffer.ResetBuffer();
+		lv_computeCmdBuffer.ResetBuffer();
 
 		uint32_t lv_swapchainImageIndex{};
 		VULKAN_CHECK(vkAcquireNextImageKHR(m_device, m_vulkanSwapchain.m_vkSwapchain
@@ -182,11 +197,16 @@ namespace VRenderer
 
 		const uint32_t lv_currentFrameInflightIndex = GetCurrentFrameInflightIndex();
 
-		lv_cmdBuffer.BeginRecording();
 
-		RecordCommands(lv_cmdBuffer.m_buffer, lv_swapchainImageIndex, lv_currentFrameInflightIndex);
+		lv_computeCmdBuffer.BeginRecording();
+		m_computeCommandRecorder->RecordCommands(lv_computeCmdBuffer.m_buffer, *this, lv_swapchainImageIndex, lv_currentFrameInflightIndex);
+		lv_computeCmdBuffer.EndRecording();
 
-		lv_cmdBuffer.EndRecording();
+
+		lv_graphicsCmdBuffer.BeginRecording();
+		m_graphicsCommandRecorder->RecordCommands(lv_graphicsCmdBuffer.m_buffer, *this, lv_swapchainImageIndex, lv_currentFrameInflightIndex);
+		lv_graphicsCmdBuffer.EndRecording();
+
 
 		VkCommandBufferSubmitInfo lv_cmdBufferSubmitInfo = GenerateVkCommandBufferSubmitInfo(lv_cmdBuffer.m_buffer);
 		
@@ -204,6 +224,9 @@ namespace VRenderer
 
 		VULKAN_CHECK(vkQueueSubmit2(lv_queue, 1, &lv_submitInfo2, lv_syncPrimitives.m_fence));
 
+		m_computeCommandRecorder->SubmitCommandsToQueue(m_computeQueue, lv_computeCmdBuffer.m_buffer, lv_syncPrimitives, m_timelineComputeGraphicsSemaphore);
+		m_graphicsCommandRecorder->SubmitCommandsToQueue(m_graphicsQueue, lv_graphicsCmdBuffer.m_buffer, lv_syncPrimitives, m_timelineComputeGraphicsSemaphore);
+
 		VkPresentInfoKHR lv_presentInfo{};
 		lv_presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 		lv_presentInfo.waitSemaphoreCount = 1;
@@ -212,12 +235,12 @@ namespace VRenderer
 		lv_presentInfo.swapchainCount = 1;
 		lv_presentInfo.pImageIndices = &lv_swapchainImageIndex;
 
-		VULKAN_CHECK(vkQueuePresentKHR(lv_queue, &lv_presentInfo));
+		VULKAN_CHECK(vkQueuePresentKHR(m_graphicsQueue.m_queue, &lv_presentInfo));
 
 		++m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex;
 	}
 
-	void Renderer::RecordCommands(VkCommandBuffer l_cmd, const uint32_t l_swapchainIndex, const uint32_t l_frameInflightIndex)
+	void Renderer::RecordCommands(VkCommandBuffer l_computeCmdBuffer, VkCommandBuffer l_graphicsCmdBuffer, const uint32_t l_swapchainIndex, const uint32_t l_frameInflightIndex)
 	{
 		using namespace VulkanUtils;
 		
@@ -225,23 +248,28 @@ namespace VRenderer
 		VkPipeline lv_computePipeline = m_vulkanResManager.RetrieveVulkanPipeline("ComputePipeline");
 		VkPipelineLayout lv_computePipelineLayout = m_vulkanResManager.RetrieveVulkanPipelineLayout("ComputePipelineLayout");
 
-		ImageLayoutTransitionCmd(l_cmd, VK_IMAGE_ASPECT_COLOR_BIT
-			, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-			, m_vulkanSwapchain.m_images[l_swapchainIndex], VK_ACCESS_2_MEMORY_READ_BIT
-			, VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT
-			, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
-		
-		vkCmdBindPipeline(l_cmd, VK_PIPELINE_BIND_POINT_COMPUTE, lv_computePipeline);
-		vkCmdBindDescriptorSets(l_cmd, VK_PIPELINE_BIND_POINT_COMPUTE, lv_computePipelineLayout, 0, 1, &m_testComputeSets[l_frameInflightIndex], 0U, nullptr);
-		vkCmdDispatch(l_cmd, (uint32_t)std::ceilf(lv_testTexture.m_extent.width/16.f), (uint32_t)std::ceilf(lv_testTexture.m_extent.height/16.f), 1U);
+		if (VK_NULL_HANDLE != l_computeCmdBuffer) {
+			ImageLayoutTransitionCmd(l_cmd, VK_IMAGE_ASPECT_COLOR_BIT
+				, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+				, m_vulkanSwapchain.m_images[l_swapchainIndex], VK_ACCESS_2_MEMORY_READ_BIT
+				, VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT
+				, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
+
+			vkCmdBindPipeline(l_cmd, VK_PIPELINE_BIND_POINT_COMPUTE, lv_computePipeline);
+			vkCmdBindDescriptorSets(l_cmd, VK_PIPELINE_BIND_POINT_COMPUTE, lv_computePipelineLayout, 0, 1, &m_testComputeSets[l_frameInflightIndex], 0U, nullptr);
+			vkCmdDispatch(l_cmd, (uint32_t)std::ceilf(lv_testTexture.m_extent.width / 16.f), (uint32_t)std::ceilf(lv_testTexture.m_extent.height / 16.f), 1U);
 
 
-		ImageLayoutTransitionCmd(l_cmd, VK_IMAGE_ASPECT_COLOR_BIT
-			, lv_testTexture.m_mipMapImageLayouts[0], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
-			, lv_testTexture.m_image, VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT
-			, VK_ACCESS_2_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT
-			, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
-		lv_testTexture.m_mipMapImageLayouts[0] = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+			ImageLayoutTransitionCmd(l_cmd, VK_IMAGE_ASPECT_COLOR_BIT
+				, lv_testTexture.m_mipMapImageLayouts[0], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
+				, lv_testTexture.m_image, VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT
+				, VK_ACCESS_2_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT
+				, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
+			lv_testTexture.m_mipMapImageLayouts[0] = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		}
+		else {
+
+		}
 
 		auto& lv_swapchainExtent = m_vulkanSwapchain.m_extent;
 		std::array<VkOffset3D, 2> lv_srcRegion{ VkOffset3D{}, VkOffset3D{.x	= (int)lv_testTexture.m_extent.width, .y = (int)lv_testTexture.m_extent.height, .z = 1}};
