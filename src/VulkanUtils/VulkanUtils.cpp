@@ -1,7 +1,7 @@
 
 
 
-
+#define VOLK_IMPLEMENTATION 
 #include "include/VulkanUtils/VulkanUtils.hpp"
 #include "include/VulkanError.hpp"
 #include <fstream>
@@ -244,6 +244,59 @@ namespace VRenderer
 			lv_blitImageInfo.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 			
 			vkCmdBlitImage2(l_cmd, &lv_blitImageInfo);
+		}
+
+		void ExecuteImmediateGPUCommands(VkDevice l_device, VkQueue l_graphicsQueue, VulkanCommandbufferReset& l_cmd, VkFence l_fence, std::function<void()>&& l_callback)
+		{
+			l_cmd.ResetBuffer();
+
+			VULKAN_CHECK(vkResetFences(l_device, 1, &l_fence));
+
+			l_cmd.BeginRecording();
+			l_callback();
+			l_cmd.EndRecording();
+
+			auto lv_cmdBufferSubmitInfo = GenerateVkCommandBufferSubmitInfo(l_cmd.m_buffer);
+
+			VkSubmitInfo2 lv_queueSubmitInfo{};
+			lv_queueSubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2_KHR;
+			lv_queueSubmitInfo.commandBufferInfoCount = 1;
+			lv_queueSubmitInfo.pCommandBufferInfos = &lv_cmdBufferSubmitInfo;
+			lv_queueSubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2_KHR;
+
+			VULKAN_CHECK(vkQueueSubmit2(l_graphicsQueue, 1, &lv_queueSubmitInfo, l_fence));
+
+			VULKAN_CHECK(vkWaitForFences(l_device, 1, &l_fence, VK_TRUE, std::numeric_limits<uint64_t>::max()));
+		}
+
+		VkRenderingAttachmentInfo GenerateRenderAttachmentInfo(VkImageView l_view, const VkImageLayout l_layout, const VkAttachmentLoadOp l_loadOp, const VkAttachmentStoreOp l_storeOp, const VkClearValue* l_clearValue)
+		{
+			VkRenderingAttachmentInfo lv_attachmentInfo{};
+			lv_attachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+			lv_attachmentInfo.imageLayout = l_layout;
+			lv_attachmentInfo.imageView = l_view;
+			lv_attachmentInfo.loadOp = l_loadOp;
+			lv_attachmentInfo.storeOp = l_storeOp;
+			lv_attachmentInfo.imageView = l_view;
+			
+			if (nullptr != l_clearValue) {
+				lv_attachmentInfo.clearValue = *l_clearValue;
+			}
+
+			return lv_attachmentInfo;
+		}
+
+		VkRenderingInfo GenerateRenderingInfo(const VkRect2D& l_area, const std::span<VkRenderingAttachmentInfo> l_colorAttachments, const uint32_t l_totalNumLayers,const VkRenderingAttachmentInfo* l_depthAttachment, const VkRenderingAttachmentInfo* l_stencilAttachment)
+		{
+			VkRenderingInfo lv_renderingInfo{};
+			lv_renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+			lv_renderingInfo.renderArea = l_area;
+			lv_renderingInfo.colorAttachmentCount = static_cast<uint32_t>(l_colorAttachments.size());
+			lv_renderingInfo.pColorAttachments = l_colorAttachments.data();
+			lv_renderingInfo.pDepthAttachment = l_depthAttachment;
+			lv_renderingInfo.pStencilAttachment = l_stencilAttachment;
+			lv_renderingInfo.layerCount = l_totalNumLayers;
+			return lv_renderingInfo;
 		}
 	}
 }

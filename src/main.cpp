@@ -3,6 +3,9 @@
 #include "include/SDL_WindowWrapper.hpp"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_video.h>
+
+#include <imgui_impl_sdl3.h>
+#include <imgui_impl_vulkan.h>
 #include <memory>
 #include <iostream>
 #include <chrono>
@@ -98,6 +101,8 @@ int main()
 					lv_quit = true;
 				}
 
+				ImGui_ImplSDL3_ProcessEvent(&lv_event);
+
 			}
 
 			lv_windowFlags = SDL_GetWindowFlags(lv_window.m_window);
@@ -114,6 +119,17 @@ int main()
 				continue;
 			}
 			
+
+			ImGui_ImplVulkan_NewFrame();
+			ImGui_ImplSDL3_NewFrame();
+			ImGui::NewFrame();
+
+			//Some imgui UI to test
+			ImGui::ShowDemoWindow();
+
+			//Make imgui calculate internal draw structures. It does not draw.
+			ImGui::Render();
+
 			lv_renderer->Draw();
 		}
 
