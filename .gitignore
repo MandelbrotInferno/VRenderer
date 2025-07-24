@@ -413,6 +413,7 @@ vcpkg_installed/
 vcpkg/
 *.vcxproj
 *.vcxproj.filters
+imgui.ini
 
 
 
