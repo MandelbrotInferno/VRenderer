@@ -4,6 +4,7 @@
 
 #include "include/VulkanTexture.hpp"
 #include "include/VulkanCommandbufferReset.hpp"
+#include "include/VulkanSubmissionSync.hpp"
 #include <volk.h>
 #include <span>
 #include <string_view>
@@ -11,6 +12,10 @@
 
 namespace VRenderer
 {
+	struct VulkanTimelineSemaphore;
+	struct VulkanSwapchainAndPresentSync;
+	struct VulkanQueue;
+
 	namespace VulkanUtils
 	{
 		//Should be used with single images that have no mip maps or layers
@@ -45,5 +50,7 @@ namespace VRenderer
 		VkRenderingAttachmentInfo GenerateRenderAttachmentInfo(VkImageView l_view, const VkImageLayout l_layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, const VkAttachmentLoadOp l_loadOp = VK_ATTACHMENT_LOAD_OP_LOAD, const VkAttachmentStoreOp l_storeOp = VK_ATTACHMENT_STORE_OP_STORE, const VkClearValue* l_clearValue = nullptr);
 
 		VkRenderingInfo GenerateRenderingInfo(const VkRect2D& l_area, const std::span<VkRenderingAttachmentInfo> l_colorAttachments, const uint32_t l_totalNumLayers = 1U, const VkRenderingAttachmentInfo* l_depthAttachment = nullptr, const VkRenderingAttachmentInfo* l_stencilAttachment = nullptr);
+
+		void SubmitCommandsToQueue(VulkanQueue& l_queue, const VulkanSubmissionSync l_sync, const VkPipelineStageFlagBits2 l_semaphoreStage, VkCommandBuffer l_cmdBuffer, VulkanSwapchainAndPresentSync& l_swapchainPresentSyncPrimitives, VulkanTimelineSemaphore& l_timelineSemaphore);
 	}
 }

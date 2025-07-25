@@ -8,7 +8,6 @@
 #include "include/VulkanResourceManager.hpp"
 #include "include/VulkanDescriptorSetAllocator.hpp"
 #include "include/VulkanTimelineSemaphore.hpp"
-#include "include/VulkanCommandRecorders/IVulkanCommandRecorder.hpp"
 #include <vma/vk_mem_alloc.h>
 #include <array>
 #include <memory>
@@ -70,7 +69,8 @@ namespace VRenderer
 		VulkanTimelineSemaphore m_timelineComputeGraphicsSemaphore{};
 		VulkanCommandbufferReset m_immediateCmdBuffer{};
 		VkFence m_immediateGPUCmdsFence{};
-		
+		bool m_physicalDeviceHasDedicatedCompute{ false };
+
 	private:
 
 		static constexpr uint32_t m_maxCommandBuffers{ 2U };
@@ -85,9 +85,6 @@ namespace VRenderer
 		std::array<VulkanCommandbufferReset, m_maxCommandBuffers> m_vulkanGraphicsCmdBuffers{};
 		std::array<VulkanCommandbufferReset, m_maxCommandBuffers> m_vulkanComputeCmdBuffers{};
 		std::array<VulkanSwapchainAndPresentSync, m_maxCommandBuffers> m_swapchainPresentSyncPrimitives{};
-
-		std::unique_ptr<IVulkanCommandRecorder> m_computeCommandRecorder{};
-		std::unique_ptr<IVulkanCommandRecorder> m_graphicsCommandRecorder{};
 
 	};
 }

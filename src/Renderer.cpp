@@ -3,10 +3,6 @@
 #include "include/VulkanError.hpp"
 #include "include/VulkanUtils/VulkanUtils.hpp"
 #include "include/VulkanDescriptorSetLayoutFactory.hpp"
-#include "include/VulkanCommandRecorders/VulkanAllGraphicsRecorder.hpp"
-#include "include/VulkanCommandRecorders/VulkanComputeRecorder.hpp"
-#include "include/VulkanCommandRecorders/VulkanGraphicsRecorder.hpp"
-#include "include/VulkanCommandRecorders/VulkanEmptyComputeRecorder.hpp"
 
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
@@ -60,12 +56,7 @@ namespace VRenderer
 		}
 
 		if (VK_NULL_HANDLE != m_computeQueue.m_queue && m_graphicsQueue.m_familyIndex.m_familyIndex != m_computeQueue.m_familyIndex.m_familyIndex) {
-			m_computeCommandRecorder = std::make_unique<VulkanComputeRecorder>();
-			m_graphicsCommandRecorder = std::make_unique<VulkanGraphicsRecorder>();
-		}
-		else {
-			m_computeCommandRecorder = std::make_unique<VulkanEmptyComputeRecorder>();
-			m_graphicsCommandRecorder = std::make_unique<VulkanAllGraphicsRecorder>();
+			m_physicalDeviceHasDedicatedCompute = true;
 		}
 
 		InitializeSyncPrimitives();
@@ -178,18 +169,17 @@ namespace VRenderer
 	{
 		using namespace VulkanUtils;
 
+		auto& lv_syncPrimitives = GetCurrentFrameSwapchainPresentSyncPrimitives();
+
 		VulkanCommandbufferReset lv_graphicsCmdBuffer{};		
 		VulkanCommandbufferReset lv_computeCmdBuffer{};
 
-
 		lv_graphicsCmdBuffer = GetCurrentFrameGraphicsCmdBuffer();
-
-		if (VK_NULL_HANDLE != m_computeQueue.m_queue && m_graphicsQueue.m_familyIndex.m_familyIndex != m_computeQueue.m_familyIndex.m_familyIndex) {
+		if (true == m_physicalDeviceHasDedicatedCompute) {
 			lv_computeCmdBuffer = GetCurrentFrameComputeCmdBuffer();
 		}
 		
 
-		auto& lv_syncPrimitives = GetCurrentFrameSwapchainPresentSyncPrimitives();
 
 		VULKAN_CHECK(vkWaitForFences(m_device, 1, &lv_syncPrimitives.m_fence, VK_TRUE,std::numeric_limits<uint64_t>::max()));
 		VULKAN_CHECK(vkResetFences(m_device, 1, &lv_syncPrimitives.m_fence));
@@ -274,18 +264,30 @@ namespace VRenderer
 					, VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT);
 			};
 
-		lv_computeCmdBuffer.BeginRecording();
-		m_computeCommandRecorder->RecordCommands(lv_computeCmdBuffer.m_buffer, VulkanCmdsRecordFirst::COMPUTE,lv_computeCmds, lv_graphicsCmds);
-		lv_computeCmdBuffer.EndRecording();
+		if (true == m_physicalDeviceHasDedicatedCompute) {
+
+			lv_computeCmdBuffer.BeginRecording();
+			lv_computeCmds(lv_computeCmdBuffer.m_buffer);
+			lv_computeCmdBuffer.EndRecording();
+
+			lv_graphicsCmdBuffer.BeginRecording();
+			lv_graphicsCmds(lv_graphicsCmdBuffer.m_buffer);
+			lv_graphicsCmdBuffer.EndRecording();
+
+			SubmitCommandsToQueue(m_computeQueue, VulkanSubmissionSync::SIGNAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, lv_computeCmdBuffer.m_buffer, lv_syncPrimitives, m_timelineComputeGraphicsSemaphore);
+			SubmitCommandsToQueue(m_graphicsQueue, VulkanSubmissionSync::WAIT_PREP_FOR_PRESENTATION, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, lv_graphicsCmdBuffer.m_buffer, lv_syncPrimitives, m_timelineComputeGraphicsSemaphore);
 
 
-		lv_graphicsCmdBuffer.BeginRecording();
-		m_graphicsCommandRecorder->RecordCommands(lv_graphicsCmdBuffer.m_buffer, VulkanCmdsRecordFirst::COMPUTE,lv_computeCmds, lv_graphicsCmds);
-		lv_graphicsCmdBuffer.EndRecording();
+		}
+		else {
+			lv_graphicsCmdBuffer.BeginRecording();
+			lv_computeCmds(lv_graphicsCmdBuffer.m_buffer);
+			lv_graphicsCmds(lv_graphicsCmdBuffer.m_buffer);
+			lv_graphicsCmdBuffer.EndRecording();
 
+			SubmitCommandsToQueue(m_graphicsQueue, VulkanSubmissionSync::PREP_FOR_PRESENTATION, 0, lv_graphicsCmdBuffer.m_buffer, lv_syncPrimitives, m_timelineComputeGraphicsSemaphore);
+		}
 
-		m_computeCommandRecorder->SubmitCommandsToQueue(m_computeQueue, VulkanSubmissionSync::SIGNAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,lv_computeCmdBuffer.m_buffer, lv_syncPrimitives, m_timelineComputeGraphicsSemaphore);
-		m_graphicsCommandRecorder->SubmitCommandsToQueue(m_graphicsQueue, VulkanSubmissionSync::WAIT_PREP_FOR_PRESENTATION, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,lv_graphicsCmdBuffer.m_buffer, lv_syncPrimitives, m_timelineComputeGraphicsSemaphore);
 
 		VkPresentInfoKHR lv_presentInfo{};
 		lv_presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

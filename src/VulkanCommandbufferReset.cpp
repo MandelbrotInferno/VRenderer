@@ -22,22 +22,17 @@ namespace VRenderer
 
 	void VulkanCommandbufferReset::BeginRecording()
 	{
-		if (VK_NULL_HANDLE != m_buffer) {
-			VkCommandBufferBeginInfo lv_cmdBufferBeginInfo{};
-			lv_cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-			lv_cmdBufferBeginInfo.pNext = nullptr;
-			lv_cmdBufferBeginInfo.pInheritanceInfo = nullptr;
-			lv_cmdBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+		VkCommandBufferBeginInfo lv_cmdBufferBeginInfo{};
+		lv_cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		lv_cmdBufferBeginInfo.pNext = nullptr;
+		lv_cmdBufferBeginInfo.pInheritanceInfo = nullptr;
+		lv_cmdBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-			VULKAN_CHECK(vkBeginCommandBuffer(m_buffer, &lv_cmdBufferBeginInfo));
-		}
+		VULKAN_CHECK(vkBeginCommandBuffer(m_buffer, &lv_cmdBufferBeginInfo));
 	}
 
 	void VulkanCommandbufferReset::EndRecording()
 	{
-		if (VK_NULL_HANDLE != m_buffer) {
-			VULKAN_CHECK(vkEndCommandBuffer(m_buffer));
-		}
-
+		VULKAN_CHECK(vkEndCommandBuffer(m_buffer));
 	}
 }

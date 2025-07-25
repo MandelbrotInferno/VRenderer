@@ -179,10 +179,6 @@
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\SDL_WindowWrapper.cpp" />
     <ClCompile Include="src\VulkanCommandbufferReset.cpp" />
-    <ClCompile Include="src\VulkanCommandRecorders\VulkanAllGraphicsRecorder.cpp" />
-    <ClCompile Include="src\VulkanCommandRecorders\VulkanComputeRecorder.cpp" />
-    <ClCompile Include="src\VulkanCommandRecorders\VulkanEmptyComputeRecorder.cpp" />
-    <ClCompile Include="src\VulkanCommandRecorders\VulkanGraphicsRecorder.cpp" />
     <ClCompile Include="src\VulkanDescriptorSetAllocator.cpp" />
     <ClCompile Include="src\VulkanDescriptorSetLayoutFactory.cpp" />
     <ClCompile Include="src\VulkanError.cpp" />
@@ -199,11 +195,6 @@
     <ClInclude Include="include\SDL_WindowWrapper.hpp" />
     <ClInclude Include="include\VulkanCmdsRecordFirst.hpp" />
     <ClInclude Include="include\VulkanCommandbufferReset.hpp" />
-    <ClInclude Include="include\VulkanCommandRecorders\IVulkanCommandRecorder.hpp" />
-    <ClInclude Include="include\VulkanCommandRecorders\VulkanAllGraphicsRecorder.hpp" />
-    <ClInclude Include="include\VulkanCommandRecorders\VulkanComputeRecorder.hpp" />
-    <ClInclude Include="include\VulkanCommandRecorders\VulkanEmptyComputeRecorder.hpp" />
-    <ClInclude Include="include\VulkanCommandRecorders\VulkanGraphicsRecorder.hpp" />
     <ClInclude Include="include\VulkanDescriptorSetAllocator.hpp" />
     <ClInclude Include="include\VulkanDescriptorSetLayoutFactory.hpp" />
     <ClInclude Include="include\VulkanError.hpp" />

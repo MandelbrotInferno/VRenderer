@@ -13,12 +13,6 @@
     <Filter Include="src\VulkanUtils">
       <UniqueIdentifier>{808d7076-4aab-47e3-904e-6caf5f0418dc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\VulkanCommandRecorders">
-      <UniqueIdentifier>{407343c1-a611-4937-b0e7-5aaf1be2341e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\VulkanCommandRecorders">
-      <UniqueIdentifier>{96fd8283-10fa-4f0b-9e77-5c131a96d3e1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="manual-dependencies">
       <UniqueIdentifier>{5288c0e9-3395-42bc-891b-423096df54a4}</UniqueIdentifier>
     </Filter>
@@ -62,18 +56,6 @@
     </ClCompile>
     <ClCompile Include="src\VulkanUtils\VulkanUtils.cpp">
       <Filter>src\VulkanUtils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VulkanCommandRecorders\VulkanComputeRecorder.cpp">
-      <Filter>src\VulkanCommandRecorders</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VulkanCommandRecorders\VulkanGraphicsRecorder.cpp">
-      <Filter>src\VulkanCommandRecorders</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VulkanCommandRecorders\VulkanAllGraphicsRecorder.cpp">
-      <Filter>src\VulkanCommandRecorders</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VulkanCommandRecorders\VulkanEmptyComputeRecorder.cpp">
-      <Filter>src\VulkanCommandRecorders</Filter>
     </ClCompile>
     <ClCompile Include="src\VulkanTimelineSemaphore.cpp">
       <Filter>src</Filter>
@@ -145,21 +127,6 @@
     </ClInclude>
     <ClInclude Include="include\VulkanDescriptorSetAllocator.hpp">
       <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VulkanCommandRecorders\IVulkanCommandRecorder.hpp">
-      <Filter>include\VulkanCommandRecorders</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VulkanCommandRecorders\VulkanComputeRecorder.hpp">
-      <Filter>include\VulkanCommandRecorders</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VulkanCommandRecorders\VulkanGraphicsRecorder.hpp">
-      <Filter>include\VulkanCommandRecorders</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VulkanCommandRecorders\VulkanAllGraphicsRecorder.hpp">
-      <Filter>include\VulkanCommandRecorders</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VulkanCommandRecorders\VulkanEmptyComputeRecorder.hpp">
-      <Filter>include\VulkanCommandRecorders</Filter>
     </ClInclude>
     <ClInclude Include="include\VulkanTimelineSemaphore.hpp">
       <Filter>include</Filter>
