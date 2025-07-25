@@ -4,8 +4,7 @@
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
 
-# Place folders/files that you do not want to be included in github under here
-vcpkg_installed/
+
 
 
 # User-specific files
@@ -36,6 +35,11 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+
+
+
+
+
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -401,3 +405,14 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+
+
+# Place folders/files that you do not want to be included in github under here
+vcpkg_installed/
+vcpkg/
+imgui.ini
+
+
+
+

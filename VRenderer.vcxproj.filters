@@ -1,0 +1,165 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{6a4562eb-4cf2-4608-b0fa-12a13220f3f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{826d71b1-5771-43e6-8a01-63b82accd37d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\VulkanUtils">
+      <UniqueIdentifier>{96038c12-4347-4460-94c4-7ca6b4cfbfbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\VulkanUtils">
+      <UniqueIdentifier>{808d7076-4aab-47e3-904e-6caf5f0418dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="manual-dependencies">
+      <UniqueIdentifier>{5288c0e9-3395-42bc-891b-423096df54a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="manual-dependencies\backends">
+      <UniqueIdentifier>{9642e32b-a2ce-4e8a-9f59-7ba898dc61e0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VulkanFoundationalElements.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VulkanSwapchain.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Renderer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VulkanCommandbufferReset.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VulkanSwapchainAndPresentSync.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VulkanResourceManager.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SDL_WindowWrapper.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VulkanTexture.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VulkanDescriptorSetLayoutFactory.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VulkanDescriptorSetAllocator.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VulkanUtils\VulkanUtils.cpp">
+      <Filter>src\VulkanUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VulkanTimelineSemaphore.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VulkanError.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="manual-dependencies\imgui.cpp">
+      <Filter>manual-dependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="manual-dependencies\imgui_demo.cpp">
+      <Filter>manual-dependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="manual-dependencies\imgui_draw.cpp">
+      <Filter>manual-dependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="manual-dependencies\imgui_tables.cpp">
+      <Filter>manual-dependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="manual-dependencies\imgui_widgets.cpp">
+      <Filter>manual-dependencies</Filter>
+    </ClCompile>
+    <ClCompile Include="manual-dependencies\backends\imgui_impl_sdl3.cpp">
+      <Filter>manual-dependencies\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="manual-dependencies\backends\imgui_impl_vulkan.cpp">
+      <Filter>manual-dependencies\backends</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\VulkanError.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanFoundationalElements.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanSwapchain.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanCommandbufferReset.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanQueue.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanQueueFamilyIndex.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Renderer.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanSwapchainAndPresentSync.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanUtils\VulkanUtils.hpp">
+      <Filter>include\VulkanUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanTexture.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanResourceManager.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SDL_WindowWrapper.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanDescriptorSetLayoutFactory.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanDescriptorSetAllocator.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanTimelineSemaphore.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="manual-dependencies\imconfig.h">
+      <Filter>manual-dependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="manual-dependencies\imgui.h">
+      <Filter>manual-dependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="manual-dependencies\imgui_internal.h">
+      <Filter>manual-dependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="manual-dependencies\imstb_rectpack.h">
+      <Filter>manual-dependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="manual-dependencies\imstb_textedit.h">
+      <Filter>manual-dependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="manual-dependencies\imstb_truetype.h">
+      <Filter>manual-dependencies</Filter>
+    </ClInclude>
+    <ClInclude Include="manual-dependencies\backends\imgui_impl_sdl3.h">
+      <Filter>manual-dependencies\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="manual-dependencies\backends\imgui_impl_vulkan.h">
+      <Filter>manual-dependencies\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanCmdsRecordFirst.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanSubmissionSync.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

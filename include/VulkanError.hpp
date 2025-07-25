@@ -2,12 +2,12 @@
 
 
 #include <fmt/core.h>
-#include <vulkan/vk_enum_string_helper.h>
+#include <volk.h>
 
 
 namespace VRenderer
 {
-
+    const char* string_VkResult(VkResult input_value);
 #define VULKAN_CHECK(x)                                                     \
         {\
     VkResult err = x;                                               \
