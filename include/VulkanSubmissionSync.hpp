@@ -10,6 +10,7 @@ namespace VRenderer
 	{
 		SIGNAL,
 		WAIT,
-		NOT_REQUIRED
+		WAIT_PREP_FOR_PRESENTATION,
+		PREP_FOR_PRESENTATION
 	};
 }
