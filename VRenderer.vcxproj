@@ -197,6 +197,7 @@
   <ItemGroup>
     <ClInclude Include="include\Renderer.hpp" />
     <ClInclude Include="include\SDL_WindowWrapper.hpp" />
+    <ClInclude Include="include\VulkanCmdsRecordFirst.hpp" />
     <ClInclude Include="include\VulkanCommandbufferReset.hpp" />
     <ClInclude Include="include\VulkanCommandRecorders\IVulkanCommandRecorder.hpp" />
     <ClInclude Include="include\VulkanCommandRecorders\VulkanAllGraphicsRecorder.hpp" />
@@ -210,6 +211,7 @@
     <ClInclude Include="include\VulkanQueueFamilyIndex.hpp" />
     <ClInclude Include="include\VulkanQueue.hpp" />
     <ClInclude Include="include\VulkanResourceManager.hpp" />
+    <ClInclude Include="include\VulkanSubmissionSync.hpp" />
     <ClInclude Include="include\VulkanSwapchain.hpp" />
     <ClInclude Include="include\VulkanSwapchainAndPresentSync.hpp" />
     <ClInclude Include="include\VulkanTexture.hpp" />

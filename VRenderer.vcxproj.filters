@@ -188,5 +188,11 @@
     <ClInclude Include="manual-dependencies\backends\imgui_impl_vulkan.h">
       <Filter>manual-dependencies\backends</Filter>
     </ClInclude>
+    <ClInclude Include="include\VulkanCmdsRecordFirst.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VulkanSubmissionSync.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
