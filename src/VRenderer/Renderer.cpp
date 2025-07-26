@@ -1,13 +1,13 @@
 
 
-#include "include/VulkanError.hpp"
-#include "include/VulkanUtils/VulkanUtils.hpp"
-#include "include/VulkanDescriptorSetLayoutFactory.hpp"
+#include "VRenderer/VulkanWrappers/VulkanError.hpp"
+#include "VRenderer/VulkanUtils/VulkanUtils.hpp"
+#include "VRenderer/VulkanWrappers/VulkanDescriptorSetLayoutFactory.hpp"
 
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
 #define VMA_IMPLEMENTATION
-#include "include/Renderer.hpp"
+#include "VRenderer/Renderer.hpp"
 
 #include <iostream>
 #include <cmath>

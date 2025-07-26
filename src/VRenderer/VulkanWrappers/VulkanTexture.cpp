@@ -2,7 +2,7 @@
 
 
 
-#include "include/VulkanTexture.hpp"
+#include "VRenderer/VulkanWrappers/VulkanTexture.hpp"
 
 
 namespace VRenderer

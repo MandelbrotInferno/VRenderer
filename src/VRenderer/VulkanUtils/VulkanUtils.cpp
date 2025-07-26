@@ -2,11 +2,12 @@
 
 
 #define VOLK_IMPLEMENTATION 
-#include "include/VulkanUtils/VulkanUtils.hpp"
-#include "include/VulkanError.hpp"
-#include "include/VulkanQueue.hpp"
-#include "include/VulkanTimelineSemaphore.hpp"
-#include "include/VulkanSwapchainAndPresentSync.hpp"
+#include "VRenderer/VulkanUtils/VulkanUtils.hpp"
+#include "VRenderer/VulkanWrappers/VulkanCommandbufferReset.hpp"
+#include "VRenderer/VulkanWrappers/VulkanError.hpp"
+#include "VRenderer/VulkanWrappers/VulkanQueue.hpp"
+#include "VRenderer/VulkanWrappers/VulkanTimelineSemaphore.hpp"
+#include "VRenderer/VulkanWrappers/VulkanSwapchainAndPresentSync.hpp"
 #include <fstream>
 #include <vector>
 

@@ -3,7 +3,7 @@
 
 
 
-#include "include/VulkanResourceManager.hpp"
+#include "VRenderer/VulkanResourceManager.hpp"
 #include <cassert>
 
 namespace VRenderer

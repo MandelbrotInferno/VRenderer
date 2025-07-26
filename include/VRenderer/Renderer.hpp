@@ -1,13 +1,13 @@
 #pragma once
 
-#include "include/VulkanFoundationalElements.hpp"
-#include "include/VulkanSwapchain.hpp"
-#include "include/VulkanQueue.hpp"
-#include "include/VulkanCommandbufferReset.hpp"
-#include "include/VulkanSwapchainAndPresentSync.hpp"
-#include "include/VulkanResourceManager.hpp"
-#include "include/VulkanDescriptorSetAllocator.hpp"
-#include "include/VulkanTimelineSemaphore.hpp"
+#include "VRenderer/VulkanWrappers/VulkanFoundationalElements.hpp"
+#include "VRenderer/VulkanWrappers/VulkanSwapchain.hpp"
+#include "VRenderer/VulkanWrappers/VulkanQueue.hpp"
+#include "VRenderer/VulkanWrappers/VulkanCommandbufferReset.hpp"
+#include "VRenderer/VulkanWrappers/VulkanSwapchainAndPresentSync.hpp"
+#include "VRenderer/VulkanResourceManager.hpp"
+#include "VRenderer/VulkanWrappers/VulkanDescriptorSetAllocator.hpp"
+#include "VRenderer/VulkanWrappers/VulkanTimelineSemaphore.hpp"
 #include <vma/vk_mem_alloc.h>
 #include <array>
 #include <memory>

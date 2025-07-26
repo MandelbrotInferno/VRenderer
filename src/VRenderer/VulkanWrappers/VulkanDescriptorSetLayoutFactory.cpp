@@ -1,8 +1,8 @@
 
 
 
-#include "include/VulkanDescriptorSetLayoutFactory.hpp"
-#include "include/VulkanError.hpp"
+#include "VRenderer/VulkanWrappers/VulkanDescriptorSetLayoutFactory.hpp"
+#include "VRenderer/VulkanWrappers/VulkanError.hpp"
 
 
 namespace VRenderer

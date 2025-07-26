@@ -2,9 +2,8 @@
 
 
 
-#include "include/VulkanTexture.hpp"
-#include "include/VulkanCommandbufferReset.hpp"
-#include "include/VulkanSubmissionSync.hpp"
+#include "VRenderer/VulkanWrappers/VulkanTexture.hpp"
+#include "VRenderer/VulkanWrappers/VulkanSubmissionSync.hpp"
 #include <volk.h>
 #include <span>
 #include <string_view>
@@ -15,6 +14,7 @@ namespace VRenderer
 	struct VulkanTimelineSemaphore;
 	struct VulkanSwapchainAndPresentSync;
 	struct VulkanQueue;
+	struct VulkanCommandbufferReset;
 
 	namespace VulkanUtils
 	{

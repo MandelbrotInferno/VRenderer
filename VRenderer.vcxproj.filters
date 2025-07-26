@@ -7,62 +7,32 @@
     <Filter Include="include">
       <UniqueIdentifier>{826d71b1-5771-43e6-8a01-63b82accd37d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\VulkanUtils">
-      <UniqueIdentifier>{96038c12-4347-4460-94c4-7ca6b4cfbfbf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\VulkanUtils">
-      <UniqueIdentifier>{808d7076-4aab-47e3-904e-6caf5f0418dc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="manual-dependencies">
       <UniqueIdentifier>{5288c0e9-3395-42bc-891b-423096df54a4}</UniqueIdentifier>
     </Filter>
     <Filter Include="manual-dependencies\backends">
       <UniqueIdentifier>{9642e32b-a2ce-4e8a-9f59-7ba898dc61e0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\VRenderer">
+      <UniqueIdentifier>{9f7f8946-b15f-4232-a88d-d675f5a6074b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\VRenderer">
+      <UniqueIdentifier>{42f88326-a311-421e-a06e-7666d6c10342}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\VRenderer\VulkanUtils">
+      <UniqueIdentifier>{46325164-a5e0-45d4-bfb0-b25669a1990a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\VRenderer\VulkanWrappers">
+      <UniqueIdentifier>{dd68b035-c071-459a-83dc-3808099957bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\VRenderer\VulkanUtils">
+      <UniqueIdentifier>{c70badd6-1c35-4c1f-a7d6-26d2d61636c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\VRenderer\VulkanWrappers">
+      <UniqueIdentifier>{8d917480-6d8d-4d0d-9fac-c2e5a2070a61}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VulkanFoundationalElements.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VulkanSwapchain.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Renderer.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VulkanCommandbufferReset.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VulkanSwapchainAndPresentSync.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VulkanResourceManager.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SDL_WindowWrapper.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VulkanTexture.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VulkanDescriptorSetLayoutFactory.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VulkanDescriptorSetAllocator.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VulkanUtils\VulkanUtils.cpp">
-      <Filter>src\VulkanUtils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VulkanTimelineSemaphore.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VulkanError.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="manual-dependencies\imgui.cpp">
       <Filter>manual-dependencies</Filter>
     </ClCompile>
@@ -84,53 +54,50 @@
     <ClCompile Include="manual-dependencies\backends\imgui_impl_vulkan.cpp">
       <Filter>manual-dependencies\backends</Filter>
     </ClCompile>
+    <ClCompile Include="src\VRenderer\main.cpp">
+      <Filter>src\VRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VRenderer\Renderer.cpp">
+      <Filter>src\VRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VRenderer\SDL_WindowWrapper.cpp">
+      <Filter>src\VRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanCommandbufferReset.cpp">
+      <Filter>src\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanDescriptorSetAllocator.cpp">
+      <Filter>src\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanDescriptorSetLayoutFactory.cpp">
+      <Filter>src\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanError.cpp">
+      <Filter>src\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanFoundationalElements.cpp">
+      <Filter>src\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanResourceManager.cpp">
+      <Filter>src\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanSwapchain.cpp">
+      <Filter>src\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanSwapchainAndPresentSync.cpp">
+      <Filter>src\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanTexture.cpp">
+      <Filter>src\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanTimelineSemaphore.cpp">
+      <Filter>src\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VRenderer\VulkanUtils\VulkanUtils.cpp">
+      <Filter>src\VRenderer\VulkanUtils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\VulkanError.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VulkanFoundationalElements.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VulkanSwapchain.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VulkanCommandbufferReset.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VulkanQueue.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VulkanQueueFamilyIndex.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Renderer.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VulkanSwapchainAndPresentSync.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VulkanUtils\VulkanUtils.hpp">
-      <Filter>include\VulkanUtils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VulkanTexture.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VulkanResourceManager.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\SDL_WindowWrapper.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VulkanDescriptorSetLayoutFactory.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VulkanDescriptorSetAllocator.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VulkanTimelineSemaphore.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="manual-dependencies\imconfig.h">
       <Filter>manual-dependencies</Filter>
     </ClInclude>
@@ -155,11 +122,53 @@
     <ClInclude Include="manual-dependencies\backends\imgui_impl_vulkan.h">
       <Filter>manual-dependencies\backends</Filter>
     </ClInclude>
-    <ClInclude Include="include\VulkanCmdsRecordFirst.hpp">
-      <Filter>include</Filter>
+    <ClInclude Include="include\VRenderer\Renderer.hpp">
+      <Filter>include\VRenderer</Filter>
     </ClInclude>
-    <ClInclude Include="include\VulkanSubmissionSync.hpp">
-      <Filter>include</Filter>
+    <ClInclude Include="include\VRenderer\SDL_WindowWrapper.hpp">
+      <Filter>include\VRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRenderer\VulkanResourceManager.hpp">
+      <Filter>include\VRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanCommandbufferReset.hpp">
+      <Filter>include\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSetAllocator.hpp">
+      <Filter>include\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSetLayoutFactory.hpp">
+      <Filter>include\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanError.hpp">
+      <Filter>include\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanFoundationalElements.hpp">
+      <Filter>include\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanQueue.hpp">
+      <Filter>include\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanQueueFamilyIndex.hpp">
+      <Filter>include\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanSubmissionSync.hpp">
+      <Filter>include\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanSwapchain.hpp">
+      <Filter>include\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanSwapchainAndPresentSync.hpp">
+      <Filter>include\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanTexture.hpp">
+      <Filter>include\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanTimelineSemaphore.hpp">
+      <Filter>include\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRenderer\VulkanUtils\VulkanUtils.hpp">
+      <Filter>include\VRenderer\VulkanUtils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

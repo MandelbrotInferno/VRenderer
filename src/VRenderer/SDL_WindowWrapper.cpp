@@ -1,7 +1,7 @@
 
 
 
-#include "include/SDL_WindowWrapper.hpp"
+#include "VRenderer/SDL_WindowWrapper.hpp"
 #include <SDL3/SDL.h>
 
 namespace VRenderer
