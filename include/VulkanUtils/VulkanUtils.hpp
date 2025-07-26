@@ -39,13 +39,13 @@ namespace VRenderer
 
 		VkShaderModule GenerateVkShaderModule(std::string_view l_shaderPath, VkDevice l_device);
 
-		VkPipelineLayout GenerateVkPipelineLayout(VkDevice l_device, const uint32_t l_setLayoutCounts, const std::span<VkDescriptorSetLayout> l_setLayouts, const uint32_t l_pushConstRangeCount = 0U, const std::span<VkPushConstantRange> l_pushConstRanges = {});
+		VkPipelineLayout GenerateVkPipelineLayout(VkDevice l_device, const uint32_t l_setLayoutCounts, const std::span<VkDescriptorSetLayout> l_setLayouts, const std::span<VkPushConstantRange> l_pushConstRanges = {});
 
 		VkPipeline GenerateComputeVkPipeline(VkDevice l_device, VkPipelineLayout l_pipelineLayout, VkShaderModule l_shaderModule, std::string_view l_entryFunctionShader);
 
 		void BlitsCopySrcToDestImage(VkCommandBuffer l_cmd, VkImage l_srcImage, VkImage l_dstImage ,const VkImageAspectFlags l_srcAspectMasks, const std::span<VkOffset3D, 2> l_srcRegion, const std::span<VkOffset3D, 2> l_dstRegion ,const uint32_t l_srcMipLevel = 0U, const uint32_t l_dstMipLevel = 0U, const uint32_t l_srcBaseLayer = 0U, const uint32_t l_dstBaseLayer = 0U, const uint32_t l_srcLayerCount = 1U);
 
-		void ExecuteImmediateGPUCommands(VkDevice l_device, VkQueue l_graphicsQueue, VulkanCommandbufferReset& l_cmd, VkFence l_fence, std::function<void()>&& l_callback);
+		void ExecuteImmediateGPUCommands(VkDevice l_device, VkQueue l_graphicsQueue, VulkanCommandbufferReset& l_cmd, VkFence l_fence, std::function<void(VkCommandBuffer)>&& l_callback);
 
 		VkRenderingAttachmentInfo GenerateRenderAttachmentInfo(VkImageView l_view, const VkImageLayout l_layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, const VkAttachmentLoadOp l_loadOp = VK_ATTACHMENT_LOAD_OP_LOAD, const VkAttachmentStoreOp l_storeOp = VK_ATTACHMENT_STORE_OP_STORE, const VkClearValue* l_clearValue = nullptr);
 

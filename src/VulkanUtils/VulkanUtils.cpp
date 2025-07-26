@@ -183,14 +183,14 @@ namespace VRenderer
 		}
 
 
-		VkPipelineLayout GenerateVkPipelineLayout(VkDevice l_device, const uint32_t l_setLayoutCounts, const std::span<VkDescriptorSetLayout> l_setLayouts, const uint32_t l_pushConstRangeCount, const std::span<VkPushConstantRange> l_pushConstRanges)
+		VkPipelineLayout GenerateVkPipelineLayout(VkDevice l_device, const uint32_t l_setLayoutCounts, const std::span<VkDescriptorSetLayout> l_setLayouts, const std::span<VkPushConstantRange> l_pushConstRanges)
 		{
 			VkPipelineLayoutCreateInfo lv_createInfo{};
 			lv_createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 			lv_createInfo.pSetLayouts = l_setLayouts.data();
 			lv_createInfo.setLayoutCount = l_setLayoutCounts;
 			lv_createInfo.pPushConstantRanges = l_pushConstRanges.data();
-			lv_createInfo.pushConstantRangeCount = l_pushConstRangeCount;
+			lv_createInfo.pushConstantRangeCount = static_cast<uint32_t>(l_pushConstRanges.size());
 			
 			VkPipelineLayout lv_pipelineLayout{};
 			VULKAN_CHECK(vkCreatePipelineLayout(l_device, &lv_createInfo, nullptr, &lv_pipelineLayout));
@@ -249,14 +249,14 @@ namespace VRenderer
 			vkCmdBlitImage2(l_cmd, &lv_blitImageInfo);
 		}
 
-		void ExecuteImmediateGPUCommands(VkDevice l_device, VkQueue l_graphicsQueue, VulkanCommandbufferReset& l_cmd, VkFence l_fence, std::function<void()>&& l_callback)
+		void ExecuteImmediateGPUCommands(VkDevice l_device, VkQueue l_graphicsQueue, VulkanCommandbufferReset& l_cmd, VkFence l_fence, std::function<void(VkCommandBuffer)>&& l_callback)
 		{
 			l_cmd.ResetBuffer();
 
 			VULKAN_CHECK(vkResetFences(l_device, 1, &l_fence));
 
 			l_cmd.BeginRecording();
-			l_callback();
+			l_callback(l_cmd.m_buffer);
 			l_cmd.EndRecording();
 
 			auto lv_cmdBufferSubmitInfo = GenerateVkCommandBufferSubmitInfo(l_cmd.m_buffer);
