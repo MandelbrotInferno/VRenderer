@@ -8,6 +8,7 @@
 #include "VRenderer/VulkanResourceManager.hpp"
 #include "VRenderer/VulkanWrappers/VulkanDescriptorSetAllocator.hpp"
 #include "VRenderer/VulkanWrappers/VulkanTimelineSemaphore.hpp"
+#include "VRenderer/Passes/ComputePasses/ComputePass.hpp"
 #include <vma/vk_mem_alloc.h>
 #include <array>
 #include <memory>
@@ -71,6 +72,10 @@ namespace VRenderer
 		VkFence m_immediateGPUCmdsFence{};
 		bool m_physicalDeviceHasDedicatedCompute{ false };
 
+
+		//Test code
+		ComputePassPushConstant m_pushConstDataImGui{};
+
 	private:
 
 		static constexpr uint32_t m_maxCommandBuffers{ 2U };
@@ -86,5 +91,8 @@ namespace VRenderer
 		std::array<VulkanCommandbufferReset, m_maxCommandBuffers> m_vulkanComputeCmdBuffers{};
 		std::array<VulkanSwapchainAndPresentSync, m_maxCommandBuffers> m_swapchainPresentSyncPrimitives{};
 
+		//Test code
+		std::array<ComputePass, 2> m_computePasses{};
+		uint32_t m_currentComputePassIndex{1U};
 	};
 }

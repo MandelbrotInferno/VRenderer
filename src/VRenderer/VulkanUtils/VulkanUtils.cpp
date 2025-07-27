@@ -373,5 +373,20 @@ namespace VRenderer
 				VULKAN_CHECK(vkQueueSubmit2(l_queue.m_queue, 1, &lv_submitInfo2, l_swapchainPresentSyncPrimitives.m_fence));
 			}
 		}
+
+
+
+		VkPushConstantsInfo GenerateVkPushConstantsInfo(VkPipelineLayout l_pipelineLayout, VkShaderStageFlags l_stage, const void* l_newData, const uint32_t l_size, const uint32_t l_offset)
+		{
+			VkPushConstantsInfo lv_pushInfo{};
+			lv_pushInfo.sType = VK_STRUCTURE_TYPE_PUSH_CONSTANTS_INFO;
+			lv_pushInfo.offset = l_offset;
+			lv_pushInfo.size = l_size;
+			lv_pushInfo.pValues = l_newData;
+			lv_pushInfo.stageFlags = l_stage;
+			lv_pushInfo.layout = l_pipelineLayout;
+
+			return lv_pushInfo;
+		}
 	}
 }

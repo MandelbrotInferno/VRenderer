@@ -52,5 +52,7 @@ namespace VRenderer
 		VkRenderingInfo GenerateRenderingInfo(const VkRect2D& l_area, const std::span<VkRenderingAttachmentInfo> l_colorAttachments, const uint32_t l_totalNumLayers = 1U, const VkRenderingAttachmentInfo* l_depthAttachment = nullptr, const VkRenderingAttachmentInfo* l_stencilAttachment = nullptr);
 
 		void SubmitCommandsToQueue(VulkanQueue& l_queue, const VulkanSubmissionSync l_sync, const VkPipelineStageFlagBits2 l_semaphoreStage, VkCommandBuffer l_cmdBuffer, VulkanSwapchainAndPresentSync& l_swapchainPresentSyncPrimitives, VulkanTimelineSemaphore& l_timelineSemaphore);
+
+		VkPushConstantsInfo GenerateVkPushConstantsInfo(VkPipelineLayout l_pipelineLayout, VkShaderStageFlags l_stage, const void* l_newData, const uint32_t l_size, const uint32_t l_offset = 0U);
 	}
 }

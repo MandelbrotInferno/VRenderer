@@ -120,16 +120,6 @@ int main()
 				std::this_thread::sleep_for(std::chrono::milliseconds(150));
 				continue;
 			}
-			
-
-			ImGui_ImplVulkan_NewFrame();
-			ImGui_ImplSDL3_NewFrame();
-			ImGui::NewFrame();
-
-			ImGui::ShowDemoWindow();
-
-			//Make imgui calculate internal draw structures. It does not draw.
-			ImGui::Render();
 
 			lv_renderer->Draw();
 		}

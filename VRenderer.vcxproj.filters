@@ -31,6 +31,12 @@
     <Filter Include="src\VRenderer\VulkanWrappers">
       <UniqueIdentifier>{8d917480-6d8d-4d0d-9fac-c2e5a2070a61}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\VRenderer\Passes">
+      <UniqueIdentifier>{5ab1935a-08b1-4406-8c45-96c9862091ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\VRenderer\Passes\ComputePasses">
+      <UniqueIdentifier>{d73a67a4-dfb7-4cd8-8c77-f87daed491f7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="manual-dependencies\imgui.cpp">
@@ -169,6 +175,12 @@
     </ClInclude>
     <ClInclude Include="include\VRenderer\VulkanUtils\VulkanUtils.hpp">
       <Filter>include\VRenderer\VulkanUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRenderer\Passes\ComputePasses\ComputePass.hpp">
+      <Filter>include\VRenderer\Passes\ComputePasses</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRenderer\Passes\ComputePasses\ComputePassPushConstant.hpp">
+      <Filter>include\VRenderer\Passes\ComputePasses</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

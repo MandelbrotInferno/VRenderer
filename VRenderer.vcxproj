@@ -191,6 +191,8 @@
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanTimelineSemaphore.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\VRenderer\Passes\ComputePasses\ComputePass.hpp" />
+    <ClInclude Include="include\VRenderer\Passes\ComputePasses\ComputePassPushConstant.hpp" />
     <ClInclude Include="include\VRenderer\Renderer.hpp" />
     <ClInclude Include="include\VRenderer\SDL_WindowWrapper.hpp" />
     <ClInclude Include="include\VRenderer\VulkanResourceManager.hpp" />

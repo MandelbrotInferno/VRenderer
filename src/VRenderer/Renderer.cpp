@@ -148,14 +148,27 @@ namespace VRenderer
 		
 		vkUpdateDescriptorSets(m_device, (uint32_t)lv_writes.size(), lv_writes.data(), 0, nullptr);
 
-		VkPipelineLayout lv_computePipelineLayout = VulkanUtils::GenerateVkPipelineLayout(m_device, (uint32_t)lv_ptComputeSetLayout.size(), lv_ptComputeSetLayout);
-		VkShaderModule lv_shaderModule = VulkanUtils::GenerateVkShaderModule("shaders/SPIRV-CompiledShaders/Gradient.spv", m_device);
-		VkPipeline lv_computePipeline = VulkanUtils::GenerateComputeVkPipeline(m_device, lv_computePipelineLayout, lv_shaderModule, "main");
+		std::array<VkPushConstantRange,1> lv_pushConsRange{};
+		lv_pushConsRange[0].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+		lv_pushConsRange[0].offset = 0U;
+		lv_pushConsRange[0].size = sizeof(ComputePassPushConstant);
+
+		VkPipelineLayout lv_computePipelineLayout = VulkanUtils::GenerateVkPipelineLayout(m_device, (uint32_t)lv_ptComputeSetLayout.size(), lv_ptComputeSetLayout, lv_pushConsRange);
+		VkShaderModule lv_gradientColorShaderModule = VulkanUtils::GenerateVkShaderModule("shaders/SPIRV-CompiledShaders/GradientColor.spv", m_device);
+		VkShaderModule lv_skyShaderModule = VulkanUtils::GenerateVkShaderModule("shaders/SPIRV-CompiledShaders/Sky.spv", m_device);
+		VkPipeline lv_GradientColorPipeline = VulkanUtils::GenerateComputeVkPipeline(m_device, lv_computePipelineLayout, lv_gradientColorShaderModule, "main");
+		VkPipeline lv_skyPipeline = VulkanUtils::GenerateComputeVkPipeline(m_device, lv_computePipelineLayout, lv_skyShaderModule, "main");
 		
-		m_vulkanResManager.AddVulkanPipeline("ComputePipeline", lv_computePipeline);
+		m_computePasses[0] = {.m_pipeline = lv_GradientColorPipeline, .m_passName = "GradientColor"};
+		m_computePasses[1] = {.m_pipeline = lv_skyPipeline, .m_passName = "Sky"};
+
+		m_vulkanResManager.AddVulkanPipeline("GradientColorPipeline", lv_GradientColorPipeline);
+		m_vulkanResManager.AddVulkanPipeline("SkyPipeline", lv_skyPipeline);
+
 		m_vulkanResManager.AddVulkanPipelineLayout("ComputePipelineLayout", lv_computePipelineLayout);
 
-		vkDestroyShaderModule(m_device, lv_shaderModule, nullptr);
+		vkDestroyShaderModule(m_device, lv_gradientColorShaderModule, nullptr);
+		vkDestroyShaderModule(m_device, lv_skyShaderModule, nullptr);
 
 	}
 	void Renderer::InitCleanUp()
@@ -200,7 +213,8 @@ namespace VRenderer
 			using namespace VulkanUtils;
 
 			VulkanTexture& lv_testTexture = m_vulkanResManager.RetrieveVulkanTexture(fmt::format("Test-Image{}", lv_currentFrameInflightIndex));
-			VkPipeline lv_computePipeline = m_vulkanResManager.RetrieveVulkanPipeline("ComputePipeline");
+			VkPipeline lv_computePipeline = m_computePasses[m_currentComputePassIndex].m_pipeline;
+			auto& lv_pushData = m_computePasses[m_currentComputePassIndex].m_pushConstData;
 			VkPipelineLayout lv_computePipelineLayout = m_vulkanResManager.RetrieveVulkanPipelineLayout("ComputePipelineLayout");
 
 
@@ -211,11 +225,14 @@ namespace VRenderer
 				, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
 			lv_testTexture.m_mipMapImageLayouts[0] = VK_IMAGE_LAYOUT_GENERAL;
 
+			
+
 			vkCmdBindPipeline(l_cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, lv_computePipeline);
 			vkCmdBindDescriptorSets(l_cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, lv_computePipelineLayout, 0, 1, &m_testComputeSets[lv_currentFrameInflightIndex], 0U, nullptr);
+			
+			vkCmdPushConstants(l_cmdBuffer,lv_computePipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(lv_pushData),&lv_pushData);
 			vkCmdDispatch(l_cmdBuffer, (uint32_t)std::ceilf(lv_testTexture.m_extent.width / 16.f), (uint32_t)std::ceilf(lv_testTexture.m_extent.height / 16.f), 1U);
-
-
+			
 			};
 		auto lv_graphicsCmds = [&, lv_swapchainImageIndex](VkCommandBuffer l_cmdBuffer)->void
 			{
@@ -263,6 +280,28 @@ namespace VRenderer
 					, VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT
 					, VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT);
 			};
+
+		ImGui_ImplVulkan_NewFrame();
+		ImGui_ImplSDL3_NewFrame();
+
+		ImGui::NewFrame();
+
+		if (ImGui::Begin("SelectEffect")) {
+
+			auto& lv_selected = m_computePasses[m_currentComputePassIndex];
+
+			ImGui::Text("Selected effect: ", lv_selected.m_passName);
+			int lv_index = (int)m_currentComputePassIndex;
+			ImGui::SliderInt("Effect Index", &lv_index, 0, m_computePasses.size() - 1);
+			m_currentComputePassIndex = lv_index;
+			ImGui::InputFloat4("data1", (float*)&lv_selected.m_pushConstData.m_data1);
+			ImGui::InputFloat4("data2", (float*)&lv_selected.m_pushConstData.m_data2);
+			ImGui::InputFloat4("data3", (float*)&lv_selected.m_pushConstData.m_data3);
+			ImGui::InputFloat4("data4", (float*)&lv_selected.m_pushConstData.m_data4);
+		}
+		ImGui::End();
+
+		ImGui::Render();
 
 		if (true == m_physicalDeviceHasDedicatedCompute) {
 
