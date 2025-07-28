@@ -196,6 +196,7 @@
     <ClInclude Include="include\VRenderer\Renderer.hpp" />
     <ClInclude Include="include\VRenderer\SDL_WindowWrapper.hpp" />
     <ClInclude Include="include\VRenderer\VulkanResourceManager.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanUtils\VulkanGraphicsCreateInfo.hpp" />
     <ClInclude Include="include\VRenderer\VulkanUtils\VulkanUtils.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanCommandbufferReset.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSetAllocator.hpp" />
