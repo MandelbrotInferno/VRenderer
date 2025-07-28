@@ -15,6 +15,7 @@ namespace VRenderer
 	struct VulkanSwapchainAndPresentSync;
 	struct VulkanQueue;
 	struct VulkanCommandbufferReset;
+	struct VulkanGraphicsCreateInfo;
 
 	namespace VulkanUtils
 	{
@@ -53,5 +54,6 @@ namespace VRenderer
 
 		void SubmitCommandsToQueue(VulkanQueue& l_queue, const VulkanSubmissionSync l_sync, const VkPipelineStageFlagBits2 l_semaphoreStage, VkCommandBuffer l_cmdBuffer, VulkanSwapchainAndPresentSync& l_swapchainPresentSyncPrimitives, VulkanTimelineSemaphore& l_timelineSemaphore);
 
+		std::vector<VkPipeline> GenerateGraphicsPipelines(const std::span<VulkanGraphicsCreateInfo> l_graphicsCreateInfoHelpers);
 	}
 }

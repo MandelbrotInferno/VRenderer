@@ -8,6 +8,7 @@
 #include "VRenderer/VulkanWrappers/VulkanQueue.hpp"
 #include "VRenderer/VulkanWrappers/VulkanTimelineSemaphore.hpp"
 #include "VRenderer/VulkanWrappers/VulkanSwapchainAndPresentSync.hpp"
+#include "VRenderer/VulkanUtils/VulkanGraphicsCreateInfo.hpp"
 #include <fstream>
 #include <vector>
 
@@ -374,5 +375,10 @@ namespace VRenderer
 			}
 		}
 
+
+		std::vector<VkPipeline> GenerateGraphicsPipelines(const std::span<VulkanGraphicsCreateInfo> l_graphicsCreateInfoHelpers)
+		{
+
+		}
 	}
 }
