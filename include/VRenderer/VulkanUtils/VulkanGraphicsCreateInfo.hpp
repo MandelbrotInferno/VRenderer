@@ -17,6 +17,7 @@ namespace VRenderer
 			VkPolygonMode m_polygonMode{};
 			VkCullModeFlags m_cullMode{};
 			VkFrontFace m_frontFace{};
+			VkCompareOp m_depthCompareOp;
 			float m_lineWidth{};
 			VkSampleCountFlagBits m_rasterizationSamples{};
 			VkBool32 m_sampleShadingEnabled{};
@@ -29,6 +30,8 @@ namespace VRenderer
 			std::array<float, 4> m_blendConstants{};
 			std::vector<VkDynamicState> m_dynamicStates{};
 			VkPipelineLayout m_pipelineLayout{};
+			std::vector<VkFormat> m_colorAttachmentFormats{};
+			VkFormat m_depthAttachmentFormat{};
 		};
 	}
 }
