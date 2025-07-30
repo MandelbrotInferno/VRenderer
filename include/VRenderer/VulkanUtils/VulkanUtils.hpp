@@ -15,10 +15,11 @@ namespace VRenderer
 	struct VulkanSwapchainAndPresentSync;
 	struct VulkanQueue;
 	struct VulkanCommandbufferReset;
-	struct VulkanGraphicsCreateInfo;
 
 	namespace VulkanUtils
 	{
+		struct VulkanGraphicsCreateInfo;
+
 		//Should be used with single images that have no mip maps or layers
 		//since it covers everything from level and layer 0 until the end.
 		void ImageLayoutTransitionCmd(VkCommandBuffer l_cmdBuffer, VkImageAspectFlags l_aspectMask
@@ -40,7 +41,7 @@ namespace VRenderer
 
 		VkShaderModule GenerateVkShaderModule(std::string_view l_shaderPath, VkDevice l_device);
 
-		VkPipelineLayout GenerateVkPipelineLayout(VkDevice l_device, const uint32_t l_setLayoutCounts, const std::span<VkDescriptorSetLayout> l_setLayouts, const std::span<VkPushConstantRange> l_pushConstRanges = {});
+		VkPipelineLayout GenerateVkPipelineLayout(VkDevice l_device, const std::span<VkDescriptorSetLayout> l_setLayouts, const std::span<VkPushConstantRange> l_pushConstRanges = {});
 
 		VkPipeline GenerateComputeVkPipeline(VkDevice l_device, VkPipelineLayout l_pipelineLayout, VkShaderModule l_shaderModule, std::string_view l_entryFunctionShader);
 
@@ -54,6 +55,6 @@ namespace VRenderer
 
 		void SubmitCommandsToQueue(VulkanQueue& l_queue, const VulkanSubmissionSync l_sync, const VkPipelineStageFlagBits2 l_semaphoreStage, VkCommandBuffer l_cmdBuffer, VulkanSwapchainAndPresentSync& l_swapchainPresentSyncPrimitives, VulkanTimelineSemaphore& l_timelineSemaphore);
 
-		std::vector<VkPipeline> GenerateGraphicsPipelines(const std::span<VulkanGraphicsCreateInfo> l_graphicsCreateInfoHelpers);
+		std::vector<VkPipeline> GenerateGraphicsPipelines(VkDevice l_device, const std::span<VulkanGraphicsCreateInfo> l_graphicsCreateInfoHelpers);
 	}
 }
