@@ -3,6 +3,7 @@
 #include "VRenderer/VulkanWrappers/VulkanError.hpp"
 #include "VRenderer/VulkanUtils/VulkanUtils.hpp"
 #include "VRenderer/VulkanWrappers/VulkanDescriptorSetLayoutFactory.hpp"
+#include "VRenderer/VulkanUtils/VulkanGraphicsCreateInfo.hpp"
 
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
@@ -153,12 +154,51 @@ namespace VRenderer
 		lv_pushConsRange[0].offset = 0U;
 		lv_pushConsRange[0].size = sizeof(ComputePassPushConstant);
 
-		VkPipelineLayout lv_computePipelineLayout = VulkanUtils::GenerateVkPipelineLayout(m_device, (uint32_t)lv_ptComputeSetLayout.size(), lv_ptComputeSetLayout, lv_pushConsRange);
+		VkPipelineLayout lv_computePipelineLayout = VulkanUtils::GenerateVkPipelineLayout(m_device, lv_ptComputeSetLayout, lv_pushConsRange);
+		VkPipelineLayout lv_graphicsPipelineLayout = VulkanUtils::GenerateVkPipelineLayout(m_device, {});
 		VkShaderModule lv_gradientColorShaderModule = VulkanUtils::GenerateVkShaderModule("shaders/SPIRV-CompiledShaders/GradientColor.spv", m_device);
 		VkShaderModule lv_skyShaderModule = VulkanUtils::GenerateVkShaderModule("shaders/SPIRV-CompiledShaders/Sky.spv", m_device);
+		VkShaderModule lv_triangleVertShaderModule = VulkanUtils::GenerateVkShaderModule("shaders/SPIRV-CompiledShaders/TriangleVert.spv", m_device);
+		VkShaderModule lv_triangleFragShaderModule = VulkanUtils::GenerateVkShaderModule("shaders/SPIRV-CompiledShaders/TriangleFrag.spv", m_device);
 		VkPipeline lv_GradientColorPipeline = VulkanUtils::GenerateComputeVkPipeline(m_device, lv_computePipelineLayout, lv_gradientColorShaderModule, "main");
 		VkPipeline lv_skyPipeline = VulkanUtils::GenerateComputeVkPipeline(m_device, lv_computePipelineLayout, lv_skyShaderModule, "main");
 		
+
+		std::vector<VkPipelineShaderStageCreateInfo> lv_shaderStageCreateInfo{};
+		lv_shaderStageCreateInfo.resize(2);
+		lv_shaderStageCreateInfo[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		lv_shaderStageCreateInfo[0].module = lv_triangleVertShaderModule;
+		lv_shaderStageCreateInfo[0].pName = "main";
+		lv_shaderStageCreateInfo[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
+
+		lv_shaderStageCreateInfo[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		lv_shaderStageCreateInfo[1].module = lv_triangleFragShaderModule;
+		lv_shaderStageCreateInfo[1].pName = "main";
+		lv_shaderStageCreateInfo[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+
+		std::array<VulkanUtils::VulkanGraphicsCreateInfo, 1> lv_graphicsCreateInfoHelper{};
+		lv_graphicsCreateInfoHelper[0].m_topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+		lv_graphicsCreateInfoHelper[0].m_sampleShadingEnabled = VK_FALSE;
+		lv_graphicsCreateInfoHelper[0].m_rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+		lv_graphicsCreateInfoHelper[0].m_polygonMode = VK_POLYGON_MODE_FILL;
+		lv_graphicsCreateInfoHelper[0].m_pipelineLayout = lv_graphicsPipelineLayout;
+		lv_graphicsCreateInfoHelper[0].m_minSampleShading = 1.f;
+		lv_graphicsCreateInfoHelper[0].m_lineWidth = 1.f;
+		lv_graphicsCreateInfoHelper[0].m_frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+		lv_graphicsCreateInfoHelper[0].m_depthWriteEnabled = VK_TRUE;
+		lv_graphicsCreateInfoHelper[0].m_depthTestEnabled = VK_TRUE;
+		lv_graphicsCreateInfoHelper[0].m_depthCompareOp = VK_COMPARE_OP_LESS;
+		lv_graphicsCreateInfoHelper[0].m_cullMode = VK_CULL_MODE_BACK_BIT;
+		lv_graphicsCreateInfoHelper[0].m_colorBlendCreateInfoLogicOpEnabled = VK_FALSE;
+		lv_graphicsCreateInfoHelper[0].m_shaderStageCreateInfos = std::move(lv_shaderStageCreateInfo);
+		lv_graphicsCreateInfoHelper[0].m_dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+
+		std::vector<VkPipeline> lv_graphicsPipelines = VulkanUtils::GenerateGraphicsPipelines(m_device, lv_graphicsCreateInfoHelper);
+
+		m_vulkanResManager.AddVulkanPipeline("GraphicsPipeline", lv_graphicsPipelines[0]);
+		
+
 		m_computePasses[0] = {.m_pipeline = lv_GradientColorPipeline, .m_passName = "GradientColor"};
 		m_computePasses[1] = {.m_pipeline = lv_skyPipeline, .m_passName = "Sky"};
 
@@ -166,9 +206,12 @@ namespace VRenderer
 		m_vulkanResManager.AddVulkanPipeline("SkyPipeline", lv_skyPipeline);
 
 		m_vulkanResManager.AddVulkanPipelineLayout("ComputePipelineLayout", lv_computePipelineLayout);
+		m_vulkanResManager.AddVulkanPipelineLayout("GraphicsPipelineLayout", lv_graphicsPipelineLayout);
 
 		vkDestroyShaderModule(m_device, lv_gradientColorShaderModule, nullptr);
 		vkDestroyShaderModule(m_device, lv_skyShaderModule, nullptr);
+		vkDestroyShaderModule(m_device, lv_triangleFragShaderModule, nullptr);
+		vkDestroyShaderModule(m_device, lv_triangleVertShaderModule, nullptr);
 
 	}
 	void Renderer::InitCleanUp()
@@ -234,16 +277,53 @@ namespace VRenderer
 			vkCmdDispatch(l_cmdBuffer, (uint32_t)std::ceilf(lv_testTexture.m_extent.width / 16.f), (uint32_t)std::ceilf(lv_testTexture.m_extent.height / 16.f), 1U);
 			
 			};
-		auto lv_graphicsCmds = [&, lv_swapchainImageIndex](VkCommandBuffer l_cmdBuffer)->void
+		auto lv_graphicsCmds = [&, lv_swapchainImageIndex, lv_currentFrameInflightIndex](VkCommandBuffer l_cmdBuffer)->void
 			{
 				using namespace VulkanUtils;
 				
 				VulkanTexture& lv_testTexture = m_vulkanResManager.RetrieveVulkanTexture(fmt::format("Test-Image{}", lv_currentFrameInflightIndex));
+				VkImageView lv_testTextureView = m_vulkanResManager.RetrieveVulkanImageView(fmt::format("ComputeImageView{}", lv_currentFrameInflightIndex));
+				VkPipeline lv_graphicsPipeline = m_vulkanResManager.RetrieveVulkanPipeline("GraphicsPipeline");
+
+				ImageLayoutTransitionCmd(l_cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT
+					, lv_testTexture.m_mipMapImageLayouts[0], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+					, lv_testTexture.m_image, VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT
+					, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT
+					, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
+				lv_testTexture.m_mipMapImageLayouts[0] = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+				auto lv_renderAttachmentInfo = GenerateRenderAttachmentInfo(lv_testTextureView);
+				std::array<VkRenderingAttachmentInfo, 1> lv_pRenderAttachmentInfo{lv_renderAttachmentInfo};
+				auto lv_renderingInfo = GenerateRenderingInfo({ .offset = {.x = 0, .y = 0}, .extent = {.width = lv_testTexture.m_extent.width, .height = lv_testTexture.m_extent.height} }, lv_pRenderAttachmentInfo);
+
+				vkCmdBeginRendering(l_cmdBuffer, &lv_renderingInfo);
+
+				vkCmdBindPipeline(l_cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, lv_graphicsPipeline);
+
+				VkViewport lv_viewPort{};
+				lv_viewPort.x = 0.f;
+				lv_viewPort.y = 0.f;
+				lv_viewPort.width = lv_testTexture.m_extent.width;
+				lv_viewPort.height = lv_testTexture.m_extent.height;
+				lv_viewPort.minDepth = 0.f;
+				lv_viewPort.maxDepth = 1.f;
+
+				vkCmdSetViewport(l_cmdBuffer, 0U , 1U, &lv_viewPort);
+
+				VkRect2D lv_scissorArea{};
+				lv_scissorArea.offset = { .x = 0, .y = 0 };
+				lv_scissorArea.extent = {.width = lv_testTexture.m_extent.width, .height = lv_testTexture.m_extent.height};
+
+				vkCmdSetScissor(l_cmdBuffer, 0U, 1U, &lv_scissorArea);
+
+				vkCmdDraw(l_cmdBuffer, 3U, 1, 0U, 0U);
+
+				vkCmdEndRendering(l_cmdBuffer);
 
 				ImageLayoutTransitionCmd(l_cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT
 					, lv_testTexture.m_mipMapImageLayouts[0], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
-					, lv_testTexture.m_image, VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT
-					, VK_ACCESS_2_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT
+					, lv_testTexture.m_image, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT
+					, VK_ACCESS_2_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT
 					, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
 				lv_testTexture.m_mipMapImageLayouts[0] = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 
@@ -268,7 +348,7 @@ namespace VRenderer
 
 				auto lv_attachmentRenderInfo = GenerateRenderAttachmentInfo(m_vulkanSwapchain.m_imageViews[lv_swapchainImageIndex]);
 				std::array<VkRenderingAttachmentInfo, 1> lv_colorAttachments{ lv_attachmentRenderInfo };
-				auto lv_renderingInfo = GenerateRenderingInfo({ .offset = {} ,.extent = m_vulkanSwapchain.m_extent }, lv_colorAttachments);
+				lv_renderingInfo = GenerateRenderingInfo({ .offset = {} ,.extent = m_vulkanSwapchain.m_extent }, lv_colorAttachments);
 
 				vkCmdBeginRendering(l_cmdBuffer, &lv_renderingInfo);
 				ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), l_cmdBuffer);
