@@ -2,11 +2,12 @@
 
 
 #define VOLK_IMPLEMENTATION 
-#include "include/VulkanUtils/VulkanUtils.hpp"
-#include "include/VulkanError.hpp"
-#include "include/VulkanQueue.hpp"
-#include "include/VulkanTimelineSemaphore.hpp"
-#include "include/VulkanSwapchainAndPresentSync.hpp"
+#include "VRenderer/VulkanUtils/VulkanUtils.hpp"
+#include "VRenderer/VulkanWrappers/VulkanError.hpp"
+#include "VRenderer/VulkanWrappers/VulkanQueue.hpp"
+#include "VRenderer/VulkanWrappers/VulkanTimelineSemaphore.hpp"
+#include "VRenderer/VulkanWrappers/VulkanSwapchainAndPresentSync.hpp"
+#include "VRenderer/VulkanUtils/VulkanGraphicsCreateInfo.hpp"
 #include <fstream>
 #include <vector>
 
@@ -183,14 +184,14 @@ namespace VRenderer
 		}
 
 
-		VkPipelineLayout GenerateVkPipelineLayout(VkDevice l_device, const uint32_t l_setLayoutCounts, const std::span<VkDescriptorSetLayout> l_setLayouts, const uint32_t l_pushConstRangeCount, const std::span<VkPushConstantRange> l_pushConstRanges)
+		VkPipelineLayout GenerateVkPipelineLayout(VkDevice l_device, const std::span<VkDescriptorSetLayout> l_setLayouts, const std::span<VkPushConstantRange> l_pushConstRanges)
 		{
 			VkPipelineLayoutCreateInfo lv_createInfo{};
 			lv_createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 			lv_createInfo.pSetLayouts = l_setLayouts.data();
-			lv_createInfo.setLayoutCount = l_setLayoutCounts;
+			lv_createInfo.setLayoutCount = static_cast<uint32_t>(l_setLayouts.size());
 			lv_createInfo.pPushConstantRanges = l_pushConstRanges.data();
-			lv_createInfo.pushConstantRangeCount = l_pushConstRangeCount;
+			lv_createInfo.pushConstantRangeCount = static_cast<uint32_t>(l_pushConstRanges.size());
 			
 			VkPipelineLayout lv_pipelineLayout{};
 			VULKAN_CHECK(vkCreatePipelineLayout(l_device, &lv_createInfo, nullptr, &lv_pipelineLayout));
@@ -249,14 +250,14 @@ namespace VRenderer
 			vkCmdBlitImage2(l_cmd, &lv_blitImageInfo);
 		}
 
-		void ExecuteImmediateGPUCommands(VkDevice l_device, VkQueue l_graphicsQueue, VulkanCommandbufferReset& l_cmd, VkFence l_fence, std::function<void()>&& l_callback)
+		void ExecuteImmediateGPUCommands(VkDevice l_device, VkQueue l_graphicsQueue, VulkanCommandbufferReset& l_cmd, VkFence l_fence, std::function<void(VkCommandBuffer)>&& l_callback)
 		{
 			l_cmd.ResetBuffer();
 
 			VULKAN_CHECK(vkResetFences(l_device, 1, &l_fence));
 
 			l_cmd.BeginRecording();
-			l_callback();
+			l_callback(l_cmd.m_buffer);
 			l_cmd.EndRecording();
 
 			auto lv_cmdBufferSubmitInfo = GenerateVkCommandBufferSubmitInfo(l_cmd.m_buffer);
@@ -371,6 +372,130 @@ namespace VRenderer
 
 				VULKAN_CHECK(vkQueueSubmit2(l_queue.m_queue, 1, &lv_submitInfo2, l_swapchainPresentSyncPrimitives.m_fence));
 			}
+		}
+
+
+		std::vector<VkPipeline> GenerateGraphicsPipelines(VkDevice l_device, const std::span<VulkanGraphicsCreateInfo> l_graphicsCreateInfoHelpers)
+		{
+			using namespace VulkanUtils;
+
+			std::vector<VkPipeline> lv_graphicsPipelines{};
+			lv_graphicsPipelines.resize(l_graphicsCreateInfoHelpers.size());
+
+			for (size_t i = 0; const auto& l_createInfoHelper : l_graphicsCreateInfoHelpers) {
+
+
+				VkPipelineInputAssemblyStateCreateInfo lv_inputAssemblyCreateInfo{};
+				lv_inputAssemblyCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+				lv_inputAssemblyCreateInfo.topology = l_createInfoHelper.m_topology;
+				
+				VkPipelineRasterizationStateCreateInfo lv_rasterStateCreateInfo{};
+				lv_rasterStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+				lv_rasterStateCreateInfo.polygonMode = l_createInfoHelper.m_polygonMode;
+				lv_rasterStateCreateInfo.cullMode = l_createInfoHelper.m_cullMode;
+				lv_rasterStateCreateInfo.frontFace = l_createInfoHelper.m_frontFace;
+				lv_rasterStateCreateInfo.lineWidth = l_createInfoHelper.m_lineWidth;
+				
+				VkPipelineMultisampleStateCreateInfo lv_multiSampleStateCreateInfo{};
+				lv_multiSampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+				lv_multiSampleStateCreateInfo.sampleShadingEnable = l_createInfoHelper.m_sampleShadingEnabled;
+				lv_multiSampleStateCreateInfo.rasterizationSamples = l_createInfoHelper.m_rasterizationSamples;
+				lv_multiSampleStateCreateInfo.minSampleShading = l_createInfoHelper.m_minSampleShading;
+
+				VkPipelineDepthStencilStateCreateInfo lv_depthStateCreateInfo{};
+				lv_depthStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+				lv_depthStateCreateInfo.minDepthBounds = 0.f;
+				lv_depthStateCreateInfo.maxDepthBounds = 1.f;
+				lv_depthStateCreateInfo.depthWriteEnable = l_createInfoHelper.m_depthWriteEnabled;
+				lv_depthStateCreateInfo.depthTestEnable = l_createInfoHelper.m_depthTestEnabled;
+				lv_depthStateCreateInfo.depthCompareOp = l_createInfoHelper.m_depthCompareOp;
+				
+				VkPipelineColorBlendStateCreateInfo lv_colorBlendStateCreateInfo{};
+				lv_colorBlendStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+				lv_colorBlendStateCreateInfo.pAttachments = l_createInfoHelper.m_blendAttachmentStates.data();
+				lv_colorBlendStateCreateInfo.attachmentCount = static_cast<uint32_t>(l_createInfoHelper.m_blendAttachmentStates.size());
+				lv_colorBlendStateCreateInfo.logicOpEnable = l_createInfoHelper.m_colorBlendCreateInfoLogicOpEnabled;
+				lv_colorBlendStateCreateInfo.logicOp = l_createInfoHelper.m_colorBlendCreateInfoLogicOp;
+				lv_colorBlendStateCreateInfo.blendConstants[0] = l_createInfoHelper.m_blendConstants[0];
+				lv_colorBlendStateCreateInfo.blendConstants[1] = l_createInfoHelper.m_blendConstants[1];
+				lv_colorBlendStateCreateInfo.blendConstants[2] = l_createInfoHelper.m_blendConstants[2];
+				lv_colorBlendStateCreateInfo.blendConstants[3] = l_createInfoHelper.m_blendConstants[3];
+
+				VkPipelineDynamicStateCreateInfo lv_dynamicStateCreateInfo{};
+				lv_dynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+				lv_dynamicStateCreateInfo.pDynamicStates = l_createInfoHelper.m_dynamicStates.data();
+				lv_dynamicStateCreateInfo.dynamicStateCount = static_cast<uint32_t>(l_createInfoHelper.m_dynamicStates.size());
+
+				VkPipelineRenderingCreateInfo lv_renderingInfo{};
+				lv_renderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+				lv_renderingInfo.pColorAttachmentFormats = l_createInfoHelper.m_colorAttachmentFormats.data();
+				lv_renderingInfo.colorAttachmentCount = static_cast<uint32_t>(l_createInfoHelper.m_colorAttachmentFormats.size());
+				lv_renderingInfo.depthAttachmentFormat = l_createInfoHelper.m_depthAttachmentFormat;
+
+
+				VkPipelineViewportStateCreateInfo lv_viewPortCreateInfo{};
+				lv_viewPortCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+				lv_viewPortCreateInfo.scissorCount = 1U;
+				lv_viewPortCreateInfo.viewportCount = 1U;
+
+				VkPipelineVertexInputStateCreateInfo lv_vertextInputCreateInfo{};
+				lv_vertextInputCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+
+				VkGraphicsPipelineCreateInfo lv_createInfo{};
+				lv_createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+				lv_createInfo.pNext = &lv_renderingInfo;
+				lv_createInfo.stageCount = static_cast<uint32_t>(l_createInfoHelper.m_shaderStageCreateInfos.size());
+				lv_createInfo.pStages = l_createInfoHelper.m_shaderStageCreateInfos.data();
+				lv_createInfo.layout = l_createInfoHelper.m_pipelineLayout;
+				lv_createInfo.pRasterizationState = &lv_rasterStateCreateInfo;
+				lv_createInfo.pMultisampleState = &lv_multiSampleStateCreateInfo;
+				lv_createInfo.pInputAssemblyState = &lv_inputAssemblyCreateInfo;
+				lv_createInfo.pDynamicState = &lv_dynamicStateCreateInfo;
+				lv_createInfo.pDepthStencilState = &lv_depthStateCreateInfo;
+				lv_createInfo.pColorBlendState = &lv_colorBlendStateCreateInfo;
+				lv_createInfo.pViewportState = &lv_viewPortCreateInfo;
+				lv_createInfo.pVertexInputState = &lv_vertextInputCreateInfo;
+				
+
+				VULKAN_CHECK(vkCreateGraphicsPipelines(l_device, VK_NULL_HANDLE, 1, &lv_createInfo, nullptr, &lv_graphicsPipelines[i]));
+				++i;
+			}
+
+			return lv_graphicsPipelines;
+		}
+
+		VulkanBuffer AllocateVulkanBuffer(VmaAllocator l_allocator, const VkDeviceSize l_bufferSize, const VkBufferUsageFlags l_usage, const VmaAllocationCreateFlags l_vmaFlags)
+		{
+			using namespace VulkanUtils;
+
+			VulkanBuffer lv_buffer{};
+
+			VkBufferCreateInfo lv_createInfo{};
+			lv_createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+			lv_createInfo.size = l_bufferSize;
+			lv_createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+			lv_createInfo.usage = l_usage;
+
+			VmaAllocationCreateInfo lv_vmaAllocCreateInfo{};
+			lv_vmaAllocCreateInfo.flags = l_vmaFlags;
+			lv_vmaAllocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
+
+			VULKAN_CHECK(vmaCreateBuffer(l_allocator, &lv_createInfo, &lv_vmaAllocCreateInfo, &lv_buffer.m_buffer, &lv_buffer.m_vmaAllocation, &lv_buffer.m_vmaAllocationInfo));
+
+			vmaGetAllocationInfo(l_allocator, lv_buffer.m_vmaAllocation, &lv_buffer.m_vmaAllocationInfo);
+
+			return lv_buffer;
+		}
+
+		VkDeviceAddress GetDeviceAddressOfVkBuffer(VkDevice l_device, VkBuffer l_vkBuffer)
+		{
+			VkBufferDeviceAddressInfo lv_deviceAddressInfo{};
+			lv_deviceAddressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+			lv_deviceAddressInfo.buffer = l_vkBuffer;
+
+			VkDeviceAddress lv_deviceAddress = vkGetBufferDeviceAddress(l_device, &lv_deviceAddressInfo);
+
+			return lv_deviceAddress;
 		}
 	}
 }

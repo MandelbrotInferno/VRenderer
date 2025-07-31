@@ -95,7 +95,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\manual-dependencies;$(ProjectDir)\manual-dependencies\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\manual-dependencies;$(ProjectDir)\manual-dependencies\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
@@ -115,7 +115,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\manual-dependencies;$(ProjectDir)\manual-dependencies\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\manual-dependencies;$(ProjectDir)\manual-dependencies\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>MaxSpeed</Optimization>
     </ClCompile>
     <Link>
@@ -135,7 +135,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\manual-dependencies;$(ProjectDir)\manual-dependencies\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\manual-dependencies;$(ProjectDir)\manual-dependencies\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
@@ -155,7 +155,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)\manual-dependencies;$(ProjectDir)\manual-dependencies\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\manual-dependencies;$(ProjectDir)\manual-dependencies\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>MaxSpeed</Optimization>
     </ClCompile>
     <Link>
@@ -175,39 +175,46 @@
     <ClCompile Include="manual-dependencies\imgui_draw.cpp" />
     <ClCompile Include="manual-dependencies\imgui_tables.cpp" />
     <ClCompile Include="manual-dependencies\imgui_widgets.cpp" />
-    <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Renderer.cpp" />
-    <ClCompile Include="src\SDL_WindowWrapper.cpp" />
-    <ClCompile Include="src\VulkanCommandbufferReset.cpp" />
-    <ClCompile Include="src\VulkanDescriptorSetAllocator.cpp" />
-    <ClCompile Include="src\VulkanDescriptorSetLayoutFactory.cpp" />
-    <ClCompile Include="src\VulkanError.cpp" />
-    <ClCompile Include="src\VulkanFoundationalElements.cpp" />
-    <ClCompile Include="src\VulkanResourceManager.cpp" />
-    <ClCompile Include="src\VulkanSwapchain.cpp" />
-    <ClCompile Include="src\VulkanSwapchainAndPresentSync.cpp" />
-    <ClCompile Include="src\VulkanTexture.cpp" />
-    <ClCompile Include="src\VulkanTimelineSemaphore.cpp" />
-    <ClCompile Include="src\VulkanUtils\VulkanUtils.cpp" />
+    <ClCompile Include="src\VRenderer\main.cpp" />
+    <ClCompile Include="src\VRenderer\Renderer.cpp" />
+    <ClCompile Include="src\VRenderer\SDL_WindowWrapper.cpp" />
+    <ClCompile Include="src\VRenderer\VulkanResourceManager.cpp" />
+    <ClCompile Include="src\VRenderer\VulkanUtils\VulkanUtils.cpp" />
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanBuffer.cpp" />
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanCommandbufferReset.cpp" />
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanDescriptorSetAllocator.cpp" />
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanDescriptorSetLayoutFactory.cpp" />
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanError.cpp" />
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanFoundationalElements.cpp" />
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanSwapchain.cpp" />
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanSwapchainAndPresentSync.cpp" />
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanTexture.cpp" />
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanTimelineSemaphore.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Renderer.hpp" />
-    <ClInclude Include="include\SDL_WindowWrapper.hpp" />
-    <ClInclude Include="include\VulkanCmdsRecordFirst.hpp" />
-    <ClInclude Include="include\VulkanCommandbufferReset.hpp" />
-    <ClInclude Include="include\VulkanDescriptorSetAllocator.hpp" />
-    <ClInclude Include="include\VulkanDescriptorSetLayoutFactory.hpp" />
-    <ClInclude Include="include\VulkanError.hpp" />
-    <ClInclude Include="include\VulkanFoundationalElements.hpp" />
-    <ClInclude Include="include\VulkanQueueFamilyIndex.hpp" />
-    <ClInclude Include="include\VulkanQueue.hpp" />
-    <ClInclude Include="include\VulkanResourceManager.hpp" />
-    <ClInclude Include="include\VulkanSubmissionSync.hpp" />
-    <ClInclude Include="include\VulkanSwapchain.hpp" />
-    <ClInclude Include="include\VulkanSwapchainAndPresentSync.hpp" />
-    <ClInclude Include="include\VulkanTexture.hpp" />
-    <ClInclude Include="include\VulkanTimelineSemaphore.hpp" />
-    <ClInclude Include="include\VulkanUtils\VulkanUtils.hpp" />
+    <ClInclude Include="include\VRenderer\Passes\ComputePasses\ComputePass.hpp" />
+    <ClInclude Include="include\VRenderer\Passes\ComputePasses\ComputePassPushConstant.hpp" />
+    <ClInclude Include="include\VRenderer\Passes\GraphicsPasses\GraphicsPassPushConstant.hpp" />
+    <ClInclude Include="include\VRenderer\Passes\GraphicsPasses\Vertex.hpp" />
+    <ClInclude Include="include\VRenderer\Renderer.hpp" />
+    <ClInclude Include="include\VRenderer\SDL_WindowWrapper.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanResourceManager.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanUtils\GPUSceneBuffers.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanUtils\VulkanGraphicsCreateInfo.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanUtils\VulkanUtils.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanBuffer.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanCommandbufferReset.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSetAllocator.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSetLayoutFactory.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanError.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanFoundationalElements.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanQueue.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanQueueFamilyIndex.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanSubmissionSync.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanSwapchain.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanSwapchainAndPresentSync.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanTexture.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanTimelineSemaphore.hpp" />
     <ClInclude Include="manual-dependencies\backends\imgui_impl_sdl3.h" />
     <ClInclude Include="manual-dependencies\backends\imgui_impl_vulkan.h" />
     <ClInclude Include="manual-dependencies\imconfig.h" />

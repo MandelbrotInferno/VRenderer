@@ -1,8 +1,8 @@
 
 
 
-#include "include/VulkanCommandbufferReset.hpp"
-#include "include/VulkanError.hpp"
+#include "VRenderer/VulkanWrappers/VulkanCommandbufferReset.hpp"
+#include "VRenderer/VulkanWrappers/VulkanError.hpp"
 
 namespace VRenderer
 {

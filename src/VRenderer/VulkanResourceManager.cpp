@@ -3,7 +3,7 @@
 
 
 
-#include "include/VulkanResourceManager.hpp"
+#include "VRenderer/VulkanResourceManager.hpp"
 #include <cassert>
 
 namespace VRenderer
@@ -152,6 +152,37 @@ namespace VRenderer
 	}
 
 
+	uint32_t VulkanResourceManager::AddVulkanBuffer(std::string&& l_name, VulkanBuffer&& l_vulkanBuffer)
+	{
+		m_vulkanBuffers.push_back(l_vulkanBuffer);
+		const size_t lv_index = m_vulkanBuffers.size() - 1U;
+		m_mapVulkanBufferNamesToIndex.emplace(std::move(l_name), lv_index);
+		return static_cast<uint32_t>(lv_index);
+	}
+
+
+	VulkanBuffer& VulkanResourceManager::RetrieveVulkanBuffer(std::string_view l_name)
+	{
+		const std::string lv_tempName{ l_name };
+		auto lv_iter = m_mapVulkanBufferNamesToIndex.find(lv_tempName);
+
+		if (m_mapVulkanBufferNamesToIndex.end() != lv_iter) {
+			return m_vulkanBuffers[lv_iter->second];
+		}
+
+		throw "Requested VulkanBuffer was not found in the vulkan resource manager.\n";
+	}
+
+
+	VulkanBuffer& VulkanResourceManager::RetrieveVulkanBuffer(const uint32_t l_bufferHandle)
+	{
+		assert(l_bufferHandle < (uint32_t)m_vulkanBuffers.size());
+
+		return m_vulkanBuffers[l_bufferHandle];
+	}
+
+
+
 	void VulkanResourceManager::CleanUp(VkDevice l_device, VmaAllocator l_allocator) noexcept
 	{
 		if (VK_NULL_HANDLE != l_device && nullptr != l_allocator) {
@@ -171,6 +202,10 @@ namespace VRenderer
 
 			for (auto l_vulkanPipelineLayout : m_vulkanPipelineLayouts) {
 				vkDestroyPipelineLayout(l_device, l_vulkanPipelineLayout, nullptr);
+			}
+
+			for (auto& l_vulkanBuffer : m_vulkanBuffers) {
+				l_vulkanBuffer.CleanUp(l_allocator);
 			}
 		}
 	}

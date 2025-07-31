@@ -1,13 +1,15 @@
 #pragma once
 
-#include "include/VulkanFoundationalElements.hpp"
-#include "include/VulkanSwapchain.hpp"
-#include "include/VulkanQueue.hpp"
-#include "include/VulkanCommandbufferReset.hpp"
-#include "include/VulkanSwapchainAndPresentSync.hpp"
-#include "include/VulkanResourceManager.hpp"
-#include "include/VulkanDescriptorSetAllocator.hpp"
-#include "include/VulkanTimelineSemaphore.hpp"
+#include "VRenderer/VulkanWrappers/VulkanFoundationalElements.hpp"
+#include "VRenderer/VulkanWrappers/VulkanSwapchain.hpp"
+#include "VRenderer/VulkanWrappers/VulkanQueue.hpp"
+#include "VRenderer/VulkanWrappers/VulkanCommandbufferReset.hpp"
+#include "VRenderer/VulkanWrappers/VulkanSwapchainAndPresentSync.hpp"
+#include "VRenderer/VulkanResourceManager.hpp"
+#include "VRenderer/VulkanWrappers/VulkanDescriptorSetAllocator.hpp"
+#include "VRenderer/VulkanWrappers/VulkanTimelineSemaphore.hpp"
+#include "VRenderer/Passes/ComputePasses/ComputePass.hpp"
+#include "VRenderer/Passes/GraphicsPasses/GraphicsPassPushConstant.hpp"
 #include <vma/vk_mem_alloc.h>
 #include <array>
 #include <memory>
@@ -71,6 +73,11 @@ namespace VRenderer
 		VkFence m_immediateGPUCmdsFence{};
 		bool m_physicalDeviceHasDedicatedCompute{ false };
 
+
+		//Test code
+		ComputePassPushConstant m_pushConstDataImGui{};
+		GraphicsPassPushConstant m_graphicsPushConstant{};
+
 	private:
 
 		static constexpr uint32_t m_maxCommandBuffers{ 2U };
@@ -86,5 +93,8 @@ namespace VRenderer
 		std::array<VulkanCommandbufferReset, m_maxCommandBuffers> m_vulkanComputeCmdBuffers{};
 		std::array<VulkanSwapchainAndPresentSync, m_maxCommandBuffers> m_swapchainPresentSyncPrimitives{};
 
+		//Test code
+		std::array<ComputePass, 2> m_computePasses{};
+		uint32_t m_currentComputePassIndex{1U};
 	};
 }
