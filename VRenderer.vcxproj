@@ -178,13 +178,14 @@
     <ClCompile Include="src\VRenderer\main.cpp" />
     <ClCompile Include="src\VRenderer\Renderer.cpp" />
     <ClCompile Include="src\VRenderer\SDL_WindowWrapper.cpp" />
+    <ClCompile Include="src\VRenderer\VulkanResourceManager.cpp" />
     <ClCompile Include="src\VRenderer\VulkanUtils\VulkanUtils.cpp" />
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanBuffer.cpp" />
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanCommandbufferReset.cpp" />
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanDescriptorSetAllocator.cpp" />
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanDescriptorSetLayoutFactory.cpp" />
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanError.cpp" />
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanFoundationalElements.cpp" />
-    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanResourceManager.cpp" />
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanSwapchain.cpp" />
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanSwapchainAndPresentSync.cpp" />
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanTexture.cpp" />
@@ -193,11 +194,15 @@
   <ItemGroup>
     <ClInclude Include="include\VRenderer\Passes\ComputePasses\ComputePass.hpp" />
     <ClInclude Include="include\VRenderer\Passes\ComputePasses\ComputePassPushConstant.hpp" />
+    <ClInclude Include="include\VRenderer\Passes\GraphicsPasses\GraphicsPassPushConstant.hpp" />
+    <ClInclude Include="include\VRenderer\Passes\GraphicsPasses\Vertex.hpp" />
     <ClInclude Include="include\VRenderer\Renderer.hpp" />
     <ClInclude Include="include\VRenderer\SDL_WindowWrapper.hpp" />
     <ClInclude Include="include\VRenderer\VulkanResourceManager.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanUtils\GPUSceneBuffers.hpp" />
     <ClInclude Include="include\VRenderer\VulkanUtils\VulkanGraphicsCreateInfo.hpp" />
     <ClInclude Include="include\VRenderer\VulkanUtils\VulkanUtils.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanBuffer.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanCommandbufferReset.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSetAllocator.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSetLayoutFactory.hpp" />

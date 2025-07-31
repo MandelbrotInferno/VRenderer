@@ -4,6 +4,8 @@
 #include "VRenderer/VulkanUtils/VulkanUtils.hpp"
 #include "VRenderer/VulkanWrappers/VulkanDescriptorSetLayoutFactory.hpp"
 #include "VRenderer/VulkanUtils/VulkanGraphicsCreateInfo.hpp"
+#include "VRenderer/Passes/GraphicsPasses/Vertex.hpp"
+#include "VRenderer/VulkanUtils/GPUSceneBuffers.hpp"
 
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
@@ -149,17 +151,55 @@ namespace VRenderer
 		
 		vkUpdateDescriptorSets(m_device, (uint32_t)lv_writes.size(), lv_writes.data(), 0, nullptr);
 
+
+		std::array<Vertex, 4> lv_rectVertices;
+
+		lv_rectVertices[0].m_position = { 0.5,-0.5, 0 };
+		lv_rectVertices[1].m_position = { 0.5,0.5, 0 };
+		lv_rectVertices[2].m_position = { -0.5,-0.5, 0 };
+		lv_rectVertices[3].m_position = { -0.5,0.5, 0 };
+
+		lv_rectVertices[0].m_color = { 0,0, 0,1 };
+		lv_rectVertices[1].m_color = { 0.5,0.5,0.5 ,1 };
+		lv_rectVertices[2].m_color = { 1,0, 0,1 };
+		lv_rectVertices[3].m_color = { 0,1, 0,1 };
+
+		std::array<uint32_t, 6> lv_rectIndices;
+
+		lv_rectIndices[0] = 3;
+		lv_rectIndices[1] = 0;
+		lv_rectIndices[2] = 2;
+
+		lv_rectIndices[3] = 0;
+		lv_rectIndices[4] = 3;
+		lv_rectIndices[5] = 1;
+
+		GPUSceneBuffers lv_sceneBuffers{};
+
+		lv_sceneBuffers.m_verticesBuffer = VulkanUtils::AllocateAndPopulateVulkanBuffer<Vertex>(m_device, m_graphicsQueue.m_queue, m_immediateCmdBuffer, m_immediateGPUCmdsFence, m_vmaAlloc, lv_rectVertices, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT);
+		lv_sceneBuffers.m_indicesBuffer = VulkanUtils::AllocateAndPopulateVulkanBuffer<uint32_t>(m_device, m_graphicsQueue.m_queue, m_immediateCmdBuffer, m_immediateGPUCmdsFence, m_vmaAlloc, lv_rectIndices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT);
+		lv_sceneBuffers.m_verticesDeviceAddr = VulkanUtils::GetDeviceAddressOfVkBuffer(m_device, lv_sceneBuffers.m_verticesBuffer.m_buffer);
+
+		m_graphicsPushConstant.m_allVerticesBufferAddress = lv_sceneBuffers.m_verticesDeviceAddr;
+		m_graphicsPushConstant.m_worldMatrix = glm::mat4{ 1.f };
+
+
 		std::array<VkPushConstantRange,1> lv_pushConsRange{};
 		lv_pushConsRange[0].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
 		lv_pushConsRange[0].offset = 0U;
 		lv_pushConsRange[0].size = sizeof(ComputePassPushConstant);
 
 		VkPipelineLayout lv_computePipelineLayout = VulkanUtils::GenerateVkPipelineLayout(m_device, lv_ptComputeSetLayout, lv_pushConsRange);
-		VkPipelineLayout lv_graphicsPipelineLayout = VulkanUtils::GenerateVkPipelineLayout(m_device, {});
+
+		lv_pushConsRange[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+		lv_pushConsRange[0].size = sizeof(GraphicsPassPushConstant);
+		VkPipelineLayout lv_graphicsPipelineLayout = VulkanUtils::GenerateVkPipelineLayout(m_device, {}, lv_pushConsRange);
+
 		VkShaderModule lv_gradientColorShaderModule = VulkanUtils::GenerateVkShaderModule("shaders/SPIRV-CompiledShaders/GradientColor.spv", m_device);
 		VkShaderModule lv_skyShaderModule = VulkanUtils::GenerateVkShaderModule("shaders/SPIRV-CompiledShaders/Sky.spv", m_device);
-		VkShaderModule lv_triangleVertShaderModule = VulkanUtils::GenerateVkShaderModule("shaders/SPIRV-CompiledShaders/TriangleVert.spv", m_device);
+		VkShaderModule lv_triangleVertShaderModule = VulkanUtils::GenerateVkShaderModule("shaders/SPIRV-CompiledShaders/RectangleTriangleVert.spv", m_device);
 		VkShaderModule lv_triangleFragShaderModule = VulkanUtils::GenerateVkShaderModule("shaders/SPIRV-CompiledShaders/TriangleFrag.spv", m_device);
+
 		VkPipeline lv_GradientColorPipeline = VulkanUtils::GenerateComputeVkPipeline(m_device, lv_computePipelineLayout, lv_gradientColorShaderModule, "main");
 		VkPipeline lv_skyPipeline = VulkanUtils::GenerateComputeVkPipeline(m_device, lv_computePipelineLayout, lv_skyShaderModule, "main");
 		
@@ -207,6 +247,10 @@ namespace VRenderer
 
 		m_vulkanResManager.AddVulkanPipelineLayout("ComputePipelineLayout", lv_computePipelineLayout);
 		m_vulkanResManager.AddVulkanPipelineLayout("GraphicsPipelineLayout", lv_graphicsPipelineLayout);
+
+
+		m_vulkanResManager.AddVulkanBuffer("VerticesBuffer", std::move(lv_sceneBuffers.m_verticesBuffer));
+		m_vulkanResManager.AddVulkanBuffer("IndicesBuffer", std::move(lv_sceneBuffers.m_indicesBuffer));
 
 		vkDestroyShaderModule(m_device, lv_gradientColorShaderModule, nullptr);
 		vkDestroyShaderModule(m_device, lv_skyShaderModule, nullptr);
@@ -284,6 +328,8 @@ namespace VRenderer
 				VulkanTexture& lv_testTexture = m_vulkanResManager.RetrieveVulkanTexture(fmt::format("Test-Image{}", lv_currentFrameInflightIndex));
 				VkImageView lv_testTextureView = m_vulkanResManager.RetrieveVulkanImageView(fmt::format("ComputeImageView{}", lv_currentFrameInflightIndex));
 				VkPipeline lv_graphicsPipeline = m_vulkanResManager.RetrieveVulkanPipeline("GraphicsPipeline");
+				VkPipelineLayout lv_graphicsPipelineLayout = m_vulkanResManager.RetrieveVulkanPipelineLayout("GraphicsPipelineLayout");
+				VulkanBuffer& lv_indexBuffer = m_vulkanResManager.RetrieveVulkanBuffer("IndicesBuffer");
 
 				ImageLayoutTransitionCmd(l_cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT
 					, lv_testTexture.m_mipMapImageLayouts[0], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
@@ -303,8 +349,8 @@ namespace VRenderer
 				VkViewport lv_viewPort{};
 				lv_viewPort.x = 0.f;
 				lv_viewPort.y = 0.f;
-				lv_viewPort.width = lv_testTexture.m_extent.width;
-				lv_viewPort.height = lv_testTexture.m_extent.height;
+				lv_viewPort.width = static_cast<float>(lv_testTexture.m_extent.width);
+				lv_viewPort.height = static_cast<float>(lv_testTexture.m_extent.height);
 				lv_viewPort.minDepth = 0.f;
 				lv_viewPort.maxDepth = 1.f;
 
@@ -316,7 +362,10 @@ namespace VRenderer
 
 				vkCmdSetScissor(l_cmdBuffer, 0U, 1U, &lv_scissorArea);
 
-				vkCmdDraw(l_cmdBuffer, 3U, 1, 0U, 0U);
+				vkCmdBindIndexBuffer(l_cmdBuffer, lv_indexBuffer.m_buffer, 0, VK_INDEX_TYPE_UINT32);
+				vkCmdPushConstants(l_cmdBuffer, lv_graphicsPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GraphicsPassPushConstant), &m_graphicsPushConstant);
+
+				vkCmdDrawIndexed(l_cmdBuffer, 6, 1, 0U, 0U, 0U);
 
 				vkCmdEndRendering(l_cmdBuffer);
 
@@ -372,7 +421,7 @@ namespace VRenderer
 
 			ImGui::Text("Selected effect: ", lv_selected.m_passName);
 			int lv_index = (int)m_currentComputePassIndex;
-			ImGui::SliderInt("Effect Index", &lv_index, 0, m_computePasses.size() - 1);
+			ImGui::SliderInt("Effect Index", &lv_index, 0, (int)(m_computePasses.size() - 1));
 			m_currentComputePassIndex = lv_index;
 			ImGui::InputFloat4("data1", (float*)&lv_selected.m_pushConstData.m_data1);
 			ImGui::InputFloat4("data2", (float*)&lv_selected.m_pushConstData.m_data2);

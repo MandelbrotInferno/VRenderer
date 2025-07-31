@@ -9,6 +9,7 @@
 #include "VRenderer/VulkanWrappers/VulkanDescriptorSetAllocator.hpp"
 #include "VRenderer/VulkanWrappers/VulkanTimelineSemaphore.hpp"
 #include "VRenderer/Passes/ComputePasses/ComputePass.hpp"
+#include "VRenderer/Passes/GraphicsPasses/GraphicsPassPushConstant.hpp"
 #include <vma/vk_mem_alloc.h>
 #include <array>
 #include <memory>
@@ -75,6 +76,7 @@ namespace VRenderer
 
 		//Test code
 		ComputePassPushConstant m_pushConstDataImGui{};
+		GraphicsPassPushConstant m_graphicsPushConstant{};
 
 	private:
 
