@@ -3,7 +3,6 @@
 
 #define VOLK_IMPLEMENTATION 
 #include "VRenderer/VulkanUtils/VulkanUtils.hpp"
-#include "VRenderer/VulkanWrappers/VulkanCommandbufferReset.hpp"
 #include "VRenderer/VulkanWrappers/VulkanError.hpp"
 #include "VRenderer/VulkanWrappers/VulkanQueue.hpp"
 #include "VRenderer/VulkanWrappers/VulkanTimelineSemaphore.hpp"
@@ -463,6 +462,40 @@ namespace VRenderer
 			}
 
 			return lv_graphicsPipelines;
+		}
+
+		VulkanBuffer AllocateVulkanBuffer(VmaAllocator l_allocator, const VkDeviceSize l_bufferSize, const VkBufferUsageFlags l_usage, const VmaAllocationCreateFlags l_vmaFlags)
+		{
+			using namespace VulkanUtils;
+
+			VulkanBuffer lv_buffer{};
+
+			VkBufferCreateInfo lv_createInfo{};
+			lv_createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+			lv_createInfo.size = l_bufferSize;
+			lv_createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+			lv_createInfo.usage = l_usage;
+
+			VmaAllocationCreateInfo lv_vmaAllocCreateInfo{};
+			lv_vmaAllocCreateInfo.flags = l_vmaFlags;
+			lv_vmaAllocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
+
+			VULKAN_CHECK(vmaCreateBuffer(l_allocator, &lv_createInfo, &lv_vmaAllocCreateInfo, &lv_buffer.m_buffer, &lv_buffer.m_vmaAllocation, &lv_buffer.m_vmaAllocationInfo));
+
+			vmaGetAllocationInfo(l_allocator, lv_buffer.m_vmaAllocation, &lv_buffer.m_vmaAllocationInfo);
+
+			return lv_buffer;
+		}
+
+		VkDeviceAddress GetDeviceAddressOfVkBuffer(VkDevice l_device, VkBuffer l_vkBuffer)
+		{
+			VkBufferDeviceAddressInfo lv_deviceAddressInfo{};
+			lv_deviceAddressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+			lv_deviceAddressInfo.buffer = l_vkBuffer;
+
+			VkDeviceAddress lv_deviceAddress = vkGetBufferDeviceAddress(l_device, &lv_deviceAddressInfo);
+
+			return lv_deviceAddress;
 		}
 	}
 }

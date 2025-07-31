@@ -4,6 +4,9 @@
 
 #include "VRenderer/VulkanWrappers/VulkanTexture.hpp"
 #include "VRenderer/VulkanWrappers/VulkanSubmissionSync.hpp"
+#include "VRenderer/VulkanWrappers/VulkanBuffer.hpp"
+#include "VRenderer/VulkanUtils/GPUSceneBuffers.hpp"
+#include "VRenderer/VulkanWrappers/VulkanCommandbufferReset.hpp"
 #include <volk.h>
 #include <span>
 #include <string_view>
@@ -14,7 +17,7 @@ namespace VRenderer
 	struct VulkanTimelineSemaphore;
 	struct VulkanSwapchainAndPresentSync;
 	struct VulkanQueue;
-	struct VulkanCommandbufferReset;
+	
 
 	namespace VulkanUtils
 	{
@@ -56,5 +59,39 @@ namespace VRenderer
 		void SubmitCommandsToQueue(VulkanQueue& l_queue, const VulkanSubmissionSync l_sync, const VkPipelineStageFlagBits2 l_semaphoreStage, VkCommandBuffer l_cmdBuffer, VulkanSwapchainAndPresentSync& l_swapchainPresentSyncPrimitives, VulkanTimelineSemaphore& l_timelineSemaphore);
 
 		std::vector<VkPipeline> GenerateGraphicsPipelines(VkDevice l_device, const std::span<VulkanGraphicsCreateInfo> l_graphicsCreateInfoHelpers);
+
+		VulkanBuffer AllocateVulkanBuffer(VmaAllocator l_allocator , const VkDeviceSize l_bufferSize, const VkBufferUsageFlags l_usage, const VmaAllocationCreateFlags l_vmaFlags);
+
+		VkDeviceAddress GetDeviceAddressOfVkBuffer(VkDevice l_device, VkBuffer l_vkBuffer);
+
+		template<typename BufferCompStructure>
+		VulkanBuffer AllocateAndPopulateVulkanBuffer(VkDevice l_device, VkQueue l_graphicsQueue, VulkanCommandbufferReset& l_cmdBuffer, VkFence l_fence, VmaAllocator l_allocator, const std::span<BufferCompStructure> l_bufferCPU, const VkBufferUsageFlags l_usage, const VmaAllocationCreateFlags l_vmaFlags)
+		{
+			VulkanBuffer lv_gpuBuffer{};
+
+			lv_gpuBuffer = AllocateVulkanBuffer(l_allocator, l_bufferCPU.size_bytes(), l_usage, l_vmaFlags);
+
+			if (0 != (l_vmaFlags & VMA_ALLOCATION_CREATE_MAPPED_BIT)) {
+				memcpy(lv_gpuBuffer.m_vmaAllocationInfo.pMappedData, l_bufferCPU.data(), l_bufferCPU.size_bytes());
+			}
+			else {
+				VulkanBuffer lv_gpuStagingBuffer = AllocateVulkanBuffer(l_allocator, l_bufferCPU.size_bytes(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+				memcpy(lv_gpuStagingBuffer.m_vmaAllocationInfo.pMappedData, l_bufferCPU.data(), l_bufferCPU.size_bytes());
+
+				auto lv_transferFromStagingBufferToDeviceBufferCmds = [&](VkCommandBuffer l_cmdBuffer)->void
+					{
+						VkBufferCopy lv_region{};
+						lv_region.size = lv_gpuStagingBuffer.m_vmaAllocationInfo.size;
+
+						vkCmdCopyBuffer(l_cmdBuffer, lv_gpuStagingBuffer.m_buffer, lv_gpuBuffer.m_buffer, 1, &lv_region);
+					};
+
+				ExecuteImmediateGPUCommands(l_device, l_graphicsQueue, l_cmdBuffer, l_fence, lv_transferFromStagingBufferToDeviceBufferCmds);
+
+				lv_gpuStagingBuffer.CleanUp(l_allocator);
+			}
+
+			return lv_gpuBuffer;
+		}
 	}
 }
