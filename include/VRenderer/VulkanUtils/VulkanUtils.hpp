@@ -56,6 +56,9 @@ namespace VRenderer
 
 		VkRenderingInfo GenerateRenderingInfo(const VkRect2D& l_area, const std::span<VkRenderingAttachmentInfo> l_colorAttachments, const uint32_t l_totalNumLayers = 1U, const VkRenderingAttachmentInfo* l_depthAttachment = nullptr, const VkRenderingAttachmentInfo* l_stencilAttachment = nullptr);
 
+		VkPipelineColorBlendAttachmentState GenerateAlphaBlendingColorBlendAttachmentState();
+		VkPipelineColorBlendAttachmentState GenerateAdditiveBlendingColorBlendAttachmentState();
+
 		void SubmitCommandsToQueue(VulkanQueue& l_queue, const VulkanSubmissionSync l_sync, const VkPipelineStageFlagBits2 l_semaphoreStage, VkCommandBuffer l_cmdBuffer, VulkanSwapchainAndPresentSync& l_swapchainPresentSyncPrimitives, VulkanTimelineSemaphore& l_timelineSemaphore);
 
 		std::vector<VkPipeline> GenerateGraphicsPipelines(VkDevice l_device, const std::span<VulkanGraphicsCreateInfo> l_graphicsCreateInfoHelpers);

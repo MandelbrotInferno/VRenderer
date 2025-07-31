@@ -303,6 +303,38 @@ namespace VRenderer
 			return lv_renderingInfo;
 		}
 
+
+		VkPipelineColorBlendAttachmentState GenerateAlphaBlendingColorBlendAttachmentState()
+		{
+			VkPipelineColorBlendAttachmentState lv_colorBlendAttachmentState{};
+			lv_colorBlendAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+			lv_colorBlendAttachmentState.blendEnable = VK_TRUE;
+			lv_colorBlendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+			lv_colorBlendAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+			lv_colorBlendAttachmentState.colorBlendOp = VK_BLEND_OP_ADD;
+			lv_colorBlendAttachmentState.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+			lv_colorBlendAttachmentState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+			lv_colorBlendAttachmentState.alphaBlendOp = VK_BLEND_OP_ADD;
+
+			return lv_colorBlendAttachmentState;
+		}
+
+		VkPipelineColorBlendAttachmentState GenerateAdditiveBlendingColorBlendAttachmentState()
+		{
+			VkPipelineColorBlendAttachmentState lv_colorBlendAttachmentState{};
+			lv_colorBlendAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+			lv_colorBlendAttachmentState.blendEnable = VK_TRUE;
+			lv_colorBlendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+			lv_colorBlendAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE;
+			lv_colorBlendAttachmentState.colorBlendOp = VK_BLEND_OP_ADD;
+			lv_colorBlendAttachmentState.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+			lv_colorBlendAttachmentState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+			lv_colorBlendAttachmentState.alphaBlendOp = VK_BLEND_OP_ADD;
+
+			return lv_colorBlendAttachmentState;
+		}
+
+
 		void SubmitCommandsToQueue(VulkanQueue& l_queue, const VulkanSubmissionSync l_sync, const VkPipelineStageFlagBits2 l_semaphoreStage, VkCommandBuffer l_cmdBuffer, VulkanSwapchainAndPresentSync& l_swapchainPresentSyncPrimitives, VulkanTimelineSemaphore& l_timelineSemaphore)
 		{
 			if (VulkanSubmissionSync::WAIT == l_sync) {
