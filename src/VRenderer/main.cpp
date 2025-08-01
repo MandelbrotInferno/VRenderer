@@ -33,25 +33,6 @@ SDL_Window* InitializeVulkanFullScreenBorderlessWindow()
 {
 	SDL_Window* lv_window{};
 
-	int lv_totalNumDisplays{};
-	const SDL_DisplayID* lv_displayIDs = SDL_GetDisplays(&lv_totalNumDisplays);
-	if (nullptr == lv_displayIDs) {
-		SDL_Log("SDL_GetDisplays failed: %s", SDL_GetError());
-		return nullptr;
-	}
-	const SDL_DisplayMode* lv_displayMode{};
-	if (0 < lv_totalNumDisplays) {
-		lv_displayMode = SDL_GetCurrentDisplayMode(lv_displayIDs[0]);
-		if (nullptr == lv_displayMode) {
-			SDL_Log("SDL_GetCurrentDisplayMode failed: %s", SDL_GetError());
-			return nullptr;
-		}
-	}
-	else {
-		SDL_Log("Total number of display IDs is 0. Aborting...");
-		return nullptr;
-	}
-
 	lv_window = SDL_CreateWindow("VRenderer", 512, 512, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
 	
 	if (nullptr == lv_window) {
