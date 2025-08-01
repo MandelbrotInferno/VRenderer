@@ -52,8 +52,8 @@ SDL_Window* InitializeVulkanFullScreenBorderlessWindow()
 		return nullptr;
 	}
 
-	lv_window = SDL_CreateWindow("VRenderer", lv_displayMode[0].w, lv_displayMode[0].h, SDL_WINDOW_FULLSCREEN | SDL_WINDOW_VULKAN);
-
+	lv_window = SDL_CreateWindow("VRenderer", 512, 512, SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
+	
 	if (nullptr == lv_window) {
 		SDL_Log("SDL_CreateWindow failed: %s", SDL_GetError());
 		return nullptr;
@@ -121,7 +121,7 @@ int main()
 				continue;
 			}
 
-			lv_renderer->Draw();
+			lv_renderer->Draw(lv_window.m_window);
 		}
 
 	}
