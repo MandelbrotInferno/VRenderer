@@ -8,7 +8,7 @@
 
 namespace VRenderer
 {
-	namespace VulkanUtils
+	namespace Utilities
 	{
 		struct VulkanGraphicsCreateInfo final
 		{

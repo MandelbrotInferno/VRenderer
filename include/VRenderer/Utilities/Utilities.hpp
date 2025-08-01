@@ -5,8 +5,9 @@
 #include "VRenderer/VulkanWrappers/VulkanTexture.hpp"
 #include "VRenderer/VulkanWrappers/VulkanSubmissionSync.hpp"
 #include "VRenderer/VulkanWrappers/VulkanBuffer.hpp"
-#include "VRenderer/VulkanUtils/GPUSceneBuffers.hpp"
+#include "VRenderer/Utilities/GPUSceneBuffers.hpp"
 #include "VRenderer/VulkanWrappers/VulkanCommandbufferReset.hpp"
+#include <glm/glm.hpp>
 #include <volk.h>
 #include <span>
 #include <string_view>
@@ -19,7 +20,7 @@ namespace VRenderer
 	struct VulkanQueue;
 	
 
-	namespace VulkanUtils
+	namespace Utilities
 	{
 		struct VulkanGraphicsCreateInfo;
 
@@ -96,5 +97,7 @@ namespace VRenderer
 
 			return lv_gpuBuffer;
 		}
+
+		glm::uvec2 GetFullResolutionDimensions();
 	}
 }
