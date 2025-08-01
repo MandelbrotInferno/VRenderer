@@ -2,18 +2,19 @@
 
 
 #define VOLK_IMPLEMENTATION 
-#include "VRenderer/VulkanUtils/VulkanUtils.hpp"
+#include "VRenderer/Utilities/Utilities.hpp"
 #include "VRenderer/VulkanWrappers/VulkanError.hpp"
 #include "VRenderer/VulkanWrappers/VulkanQueue.hpp"
 #include "VRenderer/VulkanWrappers/VulkanTimelineSemaphore.hpp"
 #include "VRenderer/VulkanWrappers/VulkanSwapchainAndPresentSync.hpp"
-#include "VRenderer/VulkanUtils/VulkanGraphicsCreateInfo.hpp"
+#include "VRenderer/Utilities/VulkanGraphicsCreateInfo.hpp"
 #include <fstream>
+#include <SDL3/SDL.h>
 #include <vector>
 
 namespace VRenderer
 {
-	namespace VulkanUtils
+	namespace Utilities
 	{
 		void ImageLayoutTransitionCmd(VkCommandBuffer l_cmdBuffer, VkImageAspectFlags l_aspectMask, VkImageLayout l_oldLayout, VkImageLayout l_newLayout
 			, VkImage l_image, VkAccessFlags2 l_srcAccess, VkAccessFlags2 l_dstAccess
@@ -409,7 +410,7 @@ namespace VRenderer
 
 		std::vector<VkPipeline> GenerateGraphicsPipelines(VkDevice l_device, const std::span<VulkanGraphicsCreateInfo> l_graphicsCreateInfoHelpers)
 		{
-			using namespace VulkanUtils;
+			using namespace Utilities;
 
 			std::vector<VkPipeline> lv_graphicsPipelines{};
 			lv_graphicsPipelines.resize(l_graphicsCreateInfoHelpers.size());
@@ -498,7 +499,7 @@ namespace VRenderer
 
 		VulkanBuffer AllocateVulkanBuffer(VmaAllocator l_allocator, const VkDeviceSize l_bufferSize, const VkBufferUsageFlags l_usage, const VmaAllocationCreateFlags l_vmaFlags)
 		{
-			using namespace VulkanUtils;
+			using namespace Utilities;
 
 			VulkanBuffer lv_buffer{};
 
@@ -528,6 +529,31 @@ namespace VRenderer
 			VkDeviceAddress lv_deviceAddress = vkGetBufferDeviceAddress(l_device, &lv_deviceAddressInfo);
 
 			return lv_deviceAddress;
+		}
+
+		glm::uvec2 GetFullResolutionDimensions()
+		{
+
+			int lv_totalNumDisplays{};
+			const SDL_DisplayID* lv_displayIDs = SDL_GetDisplays(&lv_totalNumDisplays);
+			if (nullptr == lv_displayIDs) {
+				SDL_Log("SDL_GetDisplays failed: %s", SDL_GetError());
+				throw "VulkanUtils::GetFullResolutionDimensions() failed.";
+			}
+			const SDL_DisplayMode* lv_displayMode{};
+			if (0 < lv_totalNumDisplays) {
+				lv_displayMode = SDL_GetCurrentDisplayMode(lv_displayIDs[0]);
+				if (nullptr == lv_displayMode) {
+					SDL_Log("SDL_GetCurrentDisplayMode failed: %s", SDL_GetError());
+					throw "VulkanUtils::GetFullResolutionDimensions() failed.";
+				}
+			}
+			else {
+				SDL_Log("Total number of display IDs is 0. Aborting...");
+				throw "VulkanUtils::GetFullResolutionDimensions() failed.";
+			}
+
+			return glm::vec2{(uint32_t)lv_displayMode[0].w, (uint32_t)lv_displayMode[0].h};
 		}
 	}
 }

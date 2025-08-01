@@ -31,7 +31,7 @@ namespace VRenderer
 		void Init(SDL_Window* l_window);
 		void InitCleanUp();
 
-		void Draw();
+		void Draw(SDL_Window* l_window);
 
 		~Renderer();
 	private:
@@ -72,7 +72,7 @@ namespace VRenderer
 		VulkanCommandbufferReset m_immediateCmdBuffer{};
 		VkFence m_immediateGPUCmdsFence{};
 		bool m_physicalDeviceHasDedicatedCompute{ false };
-
+		bool m_resizeWindow{ false };
 
 		//Test code
 		ComputePassPushConstant m_pushConstDataImGui{};
