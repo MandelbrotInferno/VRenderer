@@ -104,7 +104,7 @@ namespace VRenderer
 }
 
 
-#define LOGGING
+//#define LOGGING
 #ifdef LOGGING
 
 #define START_LOGGING(){\

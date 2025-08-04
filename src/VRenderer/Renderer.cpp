@@ -272,8 +272,7 @@ namespace VRenderer
 		using namespace Utilities;
 
 		if (true == m_resizeWindow) {
-			InitializeVulkanSwapchain(l_window);
-			TransitionImageLayoutSwapchainImagesToPresentUponCreation();
+			ResetResourcesAfterWindowResize(l_window);
 			m_resizeWindow = false;
 		}
 
@@ -303,10 +302,9 @@ namespace VRenderer
 			, std::numeric_limits<uint64_t>::max(), lv_syncPrimitives.m_acquireImageSemaphore
 			, VK_NULL_HANDLE, &lv_swapchainImageIndex);
 
-		if (VK_ERROR_OUT_OF_DATE_KHR == lv_result) {
+		if (VK_ERROR_OUT_OF_DATE_KHR == lv_result || VK_SUBOPTIMAL_KHR == lv_result) {
 			m_resizeWindow = true;
-			vkDeviceWaitIdle(m_device);
-			m_vulkanSwapchain.CleanUp(m_device);
+			ResizeWindow();
 			return;
 		}
 		else {
@@ -488,10 +486,9 @@ namespace VRenderer
 
 		lv_result = vkQueuePresentKHR(m_graphicsQueue.m_queue, &lv_presentInfo);
 
-		if (VK_ERROR_OUT_OF_DATE_KHR == lv_result) {
+		if (VK_ERROR_OUT_OF_DATE_KHR == lv_result || VK_SUBOPTIMAL_KHR == lv_result) {
 			m_resizeWindow = true;
-			vkDeviceWaitIdle(m_device);
-			m_vulkanSwapchain.CleanUp(m_device);
+			ResizeWindow();
 			return;
 		}
 		else {
@@ -841,6 +838,24 @@ namespace VRenderer
 
 		m_mainDescriptorSetAlloc.InitPool(m_device, lv_poolSizes, lv_maxPossibleSetsMainDesSetAlloc);
 	}
+
+
+	void Renderer::ResizeWindow()
+	{
+		vkDeviceWaitIdle(m_device);
+		m_vulkanSwapchain.CleanUp(m_device);
+		for (auto& l_syncPrimitive : m_swapchainPresentSyncPrimitives) {
+			l_syncPrimitive.CleanUp(m_device);
+		}
+	}
+
+	void Renderer::ResetResourcesAfterWindowResize(SDL_Window* l_window)
+	{
+		InitializeVulkanSwapchain(l_window);
+		TransitionImageLayoutSwapchainImagesToPresentUponCreation();
+		InitializeVulkanSwapchainAndPresentSyncPrimitives();
+	}
+
 
 	void Renderer::TransitionImageLayoutSwapchainImagesToPresentUponCreation()
 	{

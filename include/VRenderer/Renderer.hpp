@@ -55,6 +55,9 @@ namespace VRenderer
 		void InitializeDescriptorSetPools();
 		void InitializeIMGUI(SDL_Window* l_window);
 
+		void ResizeWindow();
+		void ResetResourcesAfterWindowResize(SDL_Window* l_window);
+
 	public:
 		
 		VulkanFoundationalElements m_vulkanFoundational{};
