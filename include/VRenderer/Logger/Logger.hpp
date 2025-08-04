@@ -61,8 +61,7 @@ namespace VRenderer
 				lv_finalMsg.append(" [").append(fmt::format_int(l_lineNumber).c_str()).append("]");
 				lv_finalMsg.append(" [").append(l_filePath).append("] : ").append(l_unformattedMsg).append("\n\n");
 
-				auto lv_formattedArgs = fmt::make_format_args(l_args...);
-				lv_finalMsg = fmt::vformat(lv_finalMsg, lv_formattedArgs);
+				lv_finalMsg = fmt::vformat(lv_finalMsg, fmt::make_format_args(l_args...));
 
 				{
 					std::lock_guard lv_lock(m_queueMutex);
