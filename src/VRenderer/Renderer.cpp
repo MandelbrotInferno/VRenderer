@@ -6,12 +6,14 @@
 #include "VRenderer/Utilities/VulkanGraphicsCreateInfo.hpp"
 #include "VRenderer/Passes/GraphicsPasses/Vertex.hpp"
 #include "VRenderer/Utilities/GPUSceneBuffers.hpp"
+#include "VRenderer/Logger/Logger.hpp"
 
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
 #define VMA_IMPLEMENTATION
 #include "VRenderer/Renderer.hpp"
 
+#include <tracy/Tracy.hpp>
 #include <iostream>
 #include <cmath>
 #include <limits>
@@ -289,7 +291,10 @@ namespace VRenderer
 
 		VULKAN_CHECK(vkWaitForFences(m_device, 1, &lv_syncPrimitives.m_fence, VK_TRUE,std::numeric_limits<uint64_t>::max()));
 		VULKAN_CHECK(vkResetFences(m_device, 1, &lv_syncPrimitives.m_fence));
-		
+		LOG(VRenderer::Level::INFO, VRenderer::Category::RENDERING, "PRESENTING was {} and noooo {} amd {} {} {} {} {} {}", 2, " ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "dddddddddddddddddddddddddddddddddddddddddd", "dijijijisjdijsijidjsids", "sidjisjdijsijdijsijdisd", "sjidjsijdisjidjijsid");
+		LOG(VRenderer::Level::INFO, VRenderer::Category::RENDERING, "PRESENTING was {} and noooo {} amd {} {} {} {} {} {}", 2, " ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "dddddddddddddddddddddddddddddddddddddddddd", "dijijijisjdijsijidjsids", "sidjisjdijsijdijsijdisd", "sjidjsijdisjidjijsid");
+		LOG(VRenderer::Level::INFO, VRenderer::Category::RENDERING, "PRESENTING was {} and noooo {} amd {} {} {} {} {} {}", 2, " ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "dddddddddddddddddddddddddddddddddddddddddd", "dijijijisjdijsijidjsids", "sidjisjdijsijdijsijdisd", "sjidjsijdisjidjijsid");
+
 		lv_graphicsCmdBuffer.ResetBuffer();
 		lv_computeCmdBuffer.ResetBuffer();
 
@@ -492,7 +497,16 @@ namespace VRenderer
 		else {
 			VULKAN_CHECK(lv_result);
 		}
-
+		SET_LEVEL(VRenderer::Level::WARNING);
+		LOG(VRenderer::Level::INFO, VRenderer::Category::RENDERING, "PRESENTING was {} and noooo {} amd {} {} {} {} {} {}", 2, " ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "dddddddddddddddddddddddddddddddddddddddddd", "dijijijisjdijsijidjsids", "sidjisjdijsijdijsijdisd", "sjidjsijdisjidjijsid");
+		LOG(VRenderer::Level::ERROR, VRenderer::Category::RENDERING, "DRAWING was {} and noooo {}", 2, " what!!");
+		LOG(VRenderer::Level::INFO, VRenderer::Category::RENDERING, "PRESENTING was {} and noooo {} amd {} {} {} {} {} {}", 2, " ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "dddddddddddddddddddddddddddddddddddddddddd", "dijijijisjdijsijidjsids", "sidjisjdijsijdijsijdisd", "sjidjsijdisjidjijsid");
+		LOG(VRenderer::Level::ERROR, VRenderer::Category::RENDERING, "DRAWING was {} and noooo {}", 2, " what!!");
+		LOG(VRenderer::Level::WARNING, VRenderer::Category::RENDERING, "DRAWING was {} and noooo {}", 2, " what!!");
+		LOG(VRenderer::Level::WARNING, VRenderer::Category::RENDERING, "DRAWING was {} and noooo {}", 2, " what!!");
+		LOG(VRenderer::Level::INFO, VRenderer::Category::RENDERING, "PRESENTING was {} and noooo {} amd {} {} {} {} {} {}", 2, " ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "dddddddddddddddddddddddddddddddddddddddddd", "dijijijisjdijsijidjsids", "sidjisjdijsijdijsijdisd", "sjidjsijdisjidjijsid");
+		LOG(VRenderer::Level::WARNING, VRenderer::Category::RENDERING, "DRAWING was {} and noooo {}", 2, " what!!");
+		SET_LEVEL(VRenderer::Level::INFO);
 		++m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex;
 	}
 

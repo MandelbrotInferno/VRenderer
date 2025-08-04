@@ -95,7 +95,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>TRACY_ENABLE;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);IMGUI_IMPL_VULKAN_USE_VOLK;IMGUI_IMPL_VULKAN_NO_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;TRACY_ENABLE;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);IMGUI_IMPL_VULKAN_USE_VOLK;IMGUI_IMPL_VULKAN_NO_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -116,7 +116,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>TRACY_ENABLE;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);IMGUI_IMPL_VULKAN_USE_VOLK;IMGUI_IMPL_VULKAN_NO_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;TRACY_ENABLE;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);IMGUI_IMPL_VULKAN_USE_VOLK;IMGUI_IMPL_VULKAN_NO_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -136,7 +136,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>TRACY_ENABLE;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);IMGUI_IMPL_VULKAN_USE_VOLK;IMGUI_IMPL_VULKAN_NO_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;TRACY_ENABLE;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);IMGUI_IMPL_VULKAN_USE_VOLK;IMGUI_IMPL_VULKAN_NO_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -157,7 +157,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>TRACY_ENABLE;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);IMGUI_IMPL_VULKAN_USE_VOLK;IMGUI_IMPL_VULKAN_NO_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;TRACY_ENABLE;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);IMGUI_IMPL_VULKAN_USE_VOLK;IMGUI_IMPL_VULKAN_NO_PROTOTYPES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -181,6 +181,7 @@
     <ClCompile Include="manual-dependencies\imgui_draw.cpp" />
     <ClCompile Include="manual-dependencies\imgui_tables.cpp" />
     <ClCompile Include="manual-dependencies\imgui_widgets.cpp" />
+    <ClCompile Include="src\VRenderer\Logger\Logger.cpp" />
     <ClCompile Include="src\VRenderer\main.cpp" />
     <ClCompile Include="src\VRenderer\Renderer.cpp" />
     <ClCompile Include="src\VRenderer\SDL_WindowWrapper.cpp" />
@@ -199,6 +200,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\VRenderer\AppState.hpp" />
+    <ClInclude Include="include\VRenderer\Logger\Category.hpp" />
+    <ClInclude Include="include\VRenderer\Logger\Level.hpp" />
+    <ClInclude Include="include\VRenderer\Logger\Logger.hpp" />
     <ClInclude Include="include\VRenderer\Passes\ComputePasses\ComputePass.hpp" />
     <ClInclude Include="include\VRenderer\Passes\ComputePasses\ComputePassPushConstant.hpp" />
     <ClInclude Include="include\VRenderer\Passes\GraphicsPasses\GraphicsPassPushConstant.hpp" />
