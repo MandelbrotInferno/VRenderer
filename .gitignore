@@ -412,7 +412,8 @@ FodyWeavers.xsd
 vcpkg_installed/
 vcpkg/
 imgui.ini
-
+TracyCaptures/
+TRACY_LATEST(just for test)/
 
 
 
