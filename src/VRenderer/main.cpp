@@ -3,7 +3,9 @@
 
 #include "VRenderer/Renderer.hpp"
 #include "VRenderer/SDL_WindowWrapper.hpp"
+#include "VRenderer/Logger/Logger.hpp"
 
+#include <tracy/Tracy.hpp>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_video.h>
 #include <imgui_impl_sdl3.h>
@@ -46,6 +48,9 @@ SDL_Window* InitializeVulkanFullScreenBorderlessWindow()
 
 int main()
 {
+	using namespace VRenderer;
+	START_LOGGING();
+
 	VRenderer::SDL_WindowWrapper lv_window{};
 	std::unique_ptr<VRenderer::Renderer> lv_renderer = std::make_unique<VRenderer::Renderer>();;
 	
@@ -55,7 +60,7 @@ int main()
 		if (-1 == lv_result) {
 			return -1;
 		}
-
+		LOG(VRenderer::Level::INFO, VRenderer::Category::GENERAL, "InitializeSDL() was {} and noooo {}", 2, " what!!");
 		lv_window.m_window = InitializeVulkanFullScreenBorderlessWindow();
 		if (nullptr == lv_window.m_window) {
 			return -1;
@@ -103,7 +108,11 @@ int main()
 			}
 
 			lv_renderer->Draw(lv_window.m_window);
+			LOG(VRenderer::Level::INFO, VRenderer::Category::RENDERING, "PRESENTING was {} and noooo {} amd {} {} {} {} {} {}", 2, " ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "dddddddddddddddddddddddddddddddddddddddddd", "dijijijisjdijsijidjsids", "sidjisjdijsijdijsijdisd", "sjidjsijdisjidjijsid");
+
+			FrameMark;
 		}
+
 
 	}
 	catch (const char* l_error) {
@@ -112,9 +121,13 @@ int main()
 	catch (const std::out_of_range& l_error) {
 		std::cerr << l_error.what() << std::endl;
 	}
+	catch (const std::exception& l_error) {
+		std::cerr << l_error.what() << ": " << std::strerror(errno) << std::endl;
+	}
 
 	try {
 		lv_renderer->InitCleanUp();
+		END_LOGGING();
 	}
 	catch (const char* l_error) {
 		std::cerr << l_error << std::endl;

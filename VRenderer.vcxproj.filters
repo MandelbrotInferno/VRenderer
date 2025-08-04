@@ -84,9 +84,6 @@
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanFoundationalElements.cpp">
       <Filter>src\VRenderer\VulkanWrappers</Filter>
     </ClCompile>
-    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanResourceManager.cpp">
-      <Filter>src\VRenderer\VulkanWrappers</Filter>
-    </ClCompile>
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanSwapchain.cpp">
       <Filter>src\VRenderer\VulkanWrappers</Filter>
     </ClCompile>
@@ -99,9 +96,9 @@
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanTimelineSemaphore.cpp">
       <Filter>src\VRenderer\VulkanWrappers</Filter>
     </ClCompile>
-    <ClCompile Include="src\VRenderer\VulkanUtils\VulkanUtils.cpp">
-      <Filter>src\VRenderer\VulkanUtils</Filter>
-    </ClCompile>
+    <ClCompile Include="src\VRenderer\Utilities\Utilities.cpp" />
+    <ClCompile Include="src\VRenderer\VulkanResourceManager.cpp" />
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="manual-dependencies\imconfig.h">
@@ -173,17 +170,22 @@
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanTimelineSemaphore.hpp">
       <Filter>include\VRenderer\VulkanWrappers</Filter>
     </ClInclude>
-    <ClInclude Include="include\VRenderer\VulkanUtils\VulkanUtils.hpp">
-      <Filter>include\VRenderer\VulkanUtils</Filter>
-    </ClInclude>
     <ClInclude Include="include\VRenderer\Passes\ComputePasses\ComputePass.hpp">
       <Filter>include\VRenderer\Passes\ComputePasses</Filter>
     </ClInclude>
     <ClInclude Include="include\VRenderer\Passes\ComputePasses\ComputePassPushConstant.hpp">
       <Filter>include\VRenderer\Passes\ComputePasses</Filter>
     </ClInclude>
-    <ClInclude Include="include\VRenderer\VulkanUtils\VulkanGraphicsCreateInfo.hpp">
+    <ClInclude Include="include\VRenderer\Passes\GraphicsPasses\GraphicsPassPushConstant.hpp" />
+    <ClInclude Include="include\VRenderer\Passes\GraphicsPasses\Vertex.hpp" />
+    <ClInclude Include="include\VRenderer\Utilities\Utilities.hpp" />
+    <ClInclude Include="include\VRenderer\Utilities\VulkanGraphicsCreateInfo.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanBuffer.hpp" />
+    <ClInclude Include="include\VRenderer\Utilities\GPUSceneBuffers.hpp">
       <Filter>include\VRenderer\VulkanUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRenderer\AppState.hpp">
+      <Filter>include\VRenderer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
