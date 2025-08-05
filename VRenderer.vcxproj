@@ -215,6 +215,7 @@
     <ClInclude Include="include\VRenderer\VulkanResourceManager.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanBuffer.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanCommandbufferReset.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSet.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSetAllocator.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSetLayoutFactory.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanError.hpp" />

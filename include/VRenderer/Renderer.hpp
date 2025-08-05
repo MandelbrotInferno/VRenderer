@@ -10,6 +10,7 @@
 #include "VRenderer/VulkanWrappers/VulkanTimelineSemaphore.hpp"
 #include "VRenderer/Passes/ComputePasses/ComputePass.hpp"
 #include "VRenderer/Passes/GraphicsPasses/GraphicsPassPushConstant.hpp"
+
 #include <vma/vk_mem_alloc.h>
 #include <array>
 #include <memory>
@@ -86,7 +87,7 @@ namespace VRenderer
 
 	public:
 		//Test code
-		std::array<VkDescriptorSet, m_maxCommandBuffers> m_testComputeSets{};
+		std::array<VulkanDescriptorSet, m_maxCommandBuffers> m_testComputeSets{};
 
 	private:
 		

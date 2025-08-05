@@ -141,14 +141,14 @@ namespace VRenderer
 		lv_writes[0].descriptorCount = 1U;
 		lv_writes[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 		lv_writes[0].dstBinding = 0U;
-		lv_writes[0].dstSet = m_testComputeSets[0];
+		lv_writes[0].dstSet = m_testComputeSets[0].m_set;
 		lv_writes[0].pImageInfo = &lv_imageInfo;
 
 		lv_writes[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		lv_writes[1].descriptorCount = 1U;
 		lv_writes[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 		lv_writes[1].dstBinding = 0U;
-		lv_writes[1].dstSet = m_testComputeSets[1];
+		lv_writes[1].dstSet = m_testComputeSets[1].m_set;
 		lv_writes[1].pImageInfo = &lv_imageInfo2;
 		
 		vkUpdateDescriptorSets(m_device, (uint32_t)lv_writes.size(), lv_writes.data(), 0, nullptr);
@@ -331,7 +331,7 @@ namespace VRenderer
 			
 
 			vkCmdBindPipeline(l_cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, lv_computePipeline);
-			vkCmdBindDescriptorSets(l_cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, lv_computePipelineLayout, 0, 1, &m_testComputeSets[lv_currentFrameInflightIndex], 0U, nullptr);
+			vkCmdBindDescriptorSets(l_cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, lv_computePipelineLayout, 0, 1, &m_testComputeSets[lv_currentFrameInflightIndex].m_set, 0U, nullptr);
 			
 			vkCmdPushConstants(l_cmdBuffer,lv_computePipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(lv_pushData),&lv_pushData);
 			vkCmdDispatch(l_cmdBuffer, (uint32_t)std::ceilf(lv_testTexture.m_extent.width / 16.f), (uint32_t)std::ceilf(lv_testTexture.m_extent.height / 16.f), 1U);
@@ -818,12 +818,10 @@ namespace VRenderer
 
 		VULKAN_CHECK(vkCreateDescriptorPool(m_device, &lv_poolCreateInfo, nullptr, &m_imguiDescriptorPool));
 
-		constexpr uint32_t lv_maxPossibleSetsMainDesSetAlloc = 128U;
-
 		lv_poolSizes.clear();
 		lv_poolSizes = { {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 68U} };
 
-		m_mainDescriptorSetAlloc.InitPool(m_device, lv_poolSizes, lv_maxPossibleSetsMainDesSetAlloc);
+		m_mainDescriptorSetAlloc.InitPool(m_device, lv_poolSizes);
 	}
 
 

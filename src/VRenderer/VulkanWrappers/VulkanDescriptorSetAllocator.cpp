@@ -3,55 +3,83 @@
 
 #include "VRenderer/VulkanWrappers/VulkanDescriptorSetAllocator.hpp"
 #include "VRenderer/VulkanWrappers/VulkanError.hpp"
-
+#include "VRenderer/Utilities/Utilities.hpp"
 
 namespace VRenderer
 {
-	void VulkanDescriptorSetAllocator::InitPool(VkDevice l_device, const std::span<VkDescriptorPoolSize> l_poolSizes, const uint32_t l_maxNumSets)
+	void VulkanDescriptorSetAllocator::InitPool(VkDevice l_device, const std::span<VkDescriptorPoolSize> l_poolSizes)
 	{
-		VkDescriptorPoolCreateInfo lv_poolCreateInfo{};
-		lv_poolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		lv_poolCreateInfo.maxSets = l_maxNumSets;
-		lv_poolCreateInfo.poolSizeCount = static_cast<uint32_t>(l_poolSizes.size());
-		lv_poolCreateInfo.pPoolSizes = l_poolSizes.data();
-		lv_poolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
-		
-		VULKAN_CHECK(vkCreateDescriptorPool(l_device, &lv_poolCreateInfo, nullptr, &m_pool));
+		if (false == m_pools.empty()) {
+			throw "Trying to initialize an already initialized pool. CleanUp the pool before attempting to initialize it again.\n";
+		}
+		m_descriptorPollSizes.reserve(l_poolSizes.size());
+		for (const auto& l_poolSize : l_poolSizes) {
+			m_descriptorPollSizes.push_back(l_poolSize);
+		}
+		auto lv_pool = Utilities::GenerateVkDescriptorPool(l_device, l_poolSizes, m_maxNumSetsAllowedPerPool);
+		m_pools.push_back(lv_pool);
 	}
 
-	VkDescriptorSet VulkanDescriptorSetAllocator::Allocate(VkDevice l_device, const std::span<VkDescriptorSetLayout> l_setLayouts)
+	VulkanDescriptorSet VulkanDescriptorSetAllocator::Allocate(VkDevice l_device, const std::span<VkDescriptorSetLayout> l_setLayouts)
 	{
+		if (true == m_pools.empty()) {
+			throw "Tried to allocate descriptor set without initializing the pool.\n";
+		}
+
+		if (((uint32_t)l_setLayouts.size() + m_totalNumSetAllocFromCurrentPool) > m_maxNumSetsAllowedPerPool) {
+			auto lv_pool = Utilities::GenerateVkDescriptorPool(l_device, m_descriptorPollSizes, m_maxNumSetsAllowedPerPool);
+			++m_currentPoolIndex;
+			m_totalNumSetAllocFromCurrentPool = 0U;
+		}
+
 		VkDescriptorSetAllocateInfo lv_allocateInfo{};
 		lv_allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 		lv_allocateInfo.pSetLayouts = l_setLayouts.data();
 		lv_allocateInfo.descriptorSetCount = static_cast<uint32_t>(l_setLayouts.size());
-		lv_allocateInfo.descriptorPool = m_pool;
+		lv_allocateInfo.descriptorPool = m_pools[m_currentPoolIndex];
 
 		VkDescriptorSet lv_set{};
 		VULKAN_CHECK(vkAllocateDescriptorSets(l_device, &lv_allocateInfo, &lv_set));
 
-		return lv_set;
+		m_totalNumSetAllocFromCurrentPool += (uint32_t)l_setLayouts.size();
+
+		VulkanDescriptorSet lv_vulkanDesSet{};
+		lv_vulkanDesSet.m_indexOfPool = m_currentPoolIndex;
+		lv_vulkanDesSet.m_set = lv_set;
+
+		return lv_vulkanDesSet;
 	}
 
-	void VulkanDescriptorSetAllocator::Deallocate(VkDevice l_device, const std::span<VkDescriptorSet> l_setsToDeallocate)
+	void VulkanDescriptorSetAllocator::Deallocate(VkDevice l_device, VulkanDescriptorSet l_setToDeallocate)
 	{
-		VULKAN_CHECK(vkFreeDescriptorSets(l_device, m_pool, (uint32_t)l_setsToDeallocate.size(), l_setsToDeallocate.data()));
+		if ((uint32_t)m_pools.size() <= l_setToDeallocate.m_indexOfPool) {
+			throw "Tried to deallocate either an already deallocated descriptor set or an invalid descriptor set\n";
+		}
+		VULKAN_CHECK(vkFreeDescriptorSets(l_device, m_pools[l_setToDeallocate.m_indexOfPool] , 1U, &l_setToDeallocate.m_set));
+		--m_totalNumSetAllocFromCurrentPool;
 	}
 
 
 	void VulkanDescriptorSetAllocator::ResetPool(VkDevice l_device)
 	{
-		if (VK_NULL_HANDLE != l_device && VK_NULL_HANDLE != m_pool) {
-			VULKAN_CHECK(vkResetDescriptorPool(l_device, m_pool, 0));
+		if (VK_NULL_HANDLE != l_device && false == m_pools.empty()) {
+			for (auto l_pool : m_pools) {
+				VULKAN_CHECK(vkResetDescriptorPool(l_device, l_pool, 0));
+			}
 		}
-
-		m_pool = VK_NULL_HANDLE;
+		m_currentPoolIndex = 0U;
+		m_totalNumSetAllocFromCurrentPool = 0U;
 	}
 
 	void VulkanDescriptorSetAllocator::CleanUp(VkDevice l_device)
 	{
-		if (VK_NULL_HANDLE != l_device && VK_NULL_HANDLE != m_pool) {
-			vkDestroyDescriptorPool(l_device, m_pool, nullptr);
+		if (VK_NULL_HANDLE != l_device && false == m_pools.empty()) {
+			for (auto l_pool : m_pools) {
+				vkDestroyDescriptorPool(l_device, l_pool, nullptr);
+			}
 		}
+		m_descriptorPollSizes.clear();
+		m_currentPoolIndex = 0U;
+		m_totalNumSetAllocFromCurrentPool = 0U;
 	}
 }
