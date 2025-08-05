@@ -28,6 +28,7 @@ namespace VRenderer
 
 		if (((uint32_t)l_setLayouts.size() + m_totalNumSetAllocFromCurrentPool) > m_maxNumSetsAllowedPerPool) {
 			auto lv_pool = Utilities::GenerateVkDescriptorPool(l_device, m_descriptorPollSizes, m_maxNumSetsAllowedPerPool);
+			m_pools.push_back(lv_pool);
 			++m_currentPoolIndex;
 			m_totalNumSetAllocFromCurrentPool = 0U;
 		}
@@ -52,11 +53,21 @@ namespace VRenderer
 
 	void VulkanDescriptorSetAllocator::Deallocate(VkDevice l_device, VulkanDescriptorSet l_setToDeallocate)
 	{
-		if ((uint32_t)m_pools.size() <= l_setToDeallocate.m_indexOfPool) {
-			throw "Tried to deallocate either an already deallocated descriptor set or an invalid descriptor set\n";
+		if (((uint32_t)m_currentPoolIndex < l_setToDeallocate.m_indexOfPool) || (0U == m_currentPoolIndex && 0U == m_totalNumSetAllocFromCurrentPool) || (true == m_pools.empty())) {
+			throw "Tried to deallocate either an already deallocated descriptor set or an invalid descriptor set or tried deallocating from an uninitialized pool\n";
 		}
 		VULKAN_CHECK(vkFreeDescriptorSets(l_device, m_pools[l_setToDeallocate.m_indexOfPool] , 1U, &l_setToDeallocate.m_set));
 		--m_totalNumSetAllocFromCurrentPool;
+
+		if (0U == m_totalNumSetAllocFromCurrentPool) {
+			if (0U == m_currentPoolIndex) {
+				return;
+			}
+			else {
+				--m_currentPoolIndex;
+				m_totalNumSetAllocFromCurrentPool = m_maxNumSetsAllowedPerPool;
+			}
+		}
 	}
 
 
@@ -81,5 +92,6 @@ namespace VRenderer
 		m_descriptorPollSizes.clear();
 		m_currentPoolIndex = 0U;
 		m_totalNumSetAllocFromCurrentPool = 0U;
+		m_pools.clear();
 	}
 }
