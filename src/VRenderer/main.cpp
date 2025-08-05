@@ -60,7 +60,7 @@ int main()
 		if (-1 == lv_result) {
 			return -1;
 		}
-		LOG(VRenderer::Level::INFO, VRenderer::Category::GENERAL, "InitializeSDL() was {} and noooo {}", 2, " what!!");
+
 		lv_window.m_window = InitializeVulkanFullScreenBorderlessWindow();
 		if (nullptr == lv_window.m_window) {
 			return -1;
@@ -108,7 +108,6 @@ int main()
 			}
 
 			lv_renderer->Draw(lv_window.m_window);
-			LOG(VRenderer::Level::INFO, VRenderer::Category::RENDERING, "PRESENTING was {} and noooo {} amd {} {} {} {} {} {}", 2, " ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "dddddddddddddddddddddddddddddddddddddddddd", "dijijijisjdijsijidjsids", "sidjisjdijsijdijsijdisd", "sjidjsijdisjidjijsid");
 
 			FrameMark;
 		}

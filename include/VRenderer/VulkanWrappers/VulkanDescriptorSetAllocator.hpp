@@ -2,8 +2,11 @@
 
 
 
+#include "VRenderer/VulkanWrappers/VulkanDescriptorSet.hpp"
+
 #include <volk.h>
 #include <span>
+#include <vector>
 
 
 namespace VRenderer
@@ -13,11 +16,11 @@ namespace VRenderer
 	{
 	public:
 
-		void InitPool(VkDevice l_device, const std::span<VkDescriptorPoolSize> l_poolSizes, const uint32_t l_maxNumSets);
+		void InitPool(VkDevice l_device, const std::span<VkDescriptorPoolSize> l_poolSizes);
 
-		VkDescriptorSet Allocate(VkDevice l_device, const std::span<VkDescriptorSetLayout> l_setLayouts);
+		VulkanDescriptorSet Allocate(VkDevice l_device, const std::span<VkDescriptorSetLayout> l_setLayouts);
 
-		void Deallocate(VkDevice l_device, const std::span<VkDescriptorSet> l_setsToDeallocate);
+		void Deallocate(VkDevice l_device, VulkanDescriptorSet l_setToDeallocate);
 
 		void ResetPool(VkDevice l_device);
 
@@ -25,8 +28,11 @@ namespace VRenderer
 
 	private:
 
-		VkDescriptorPool m_pool{};
-		uint32_t m_maxNumSets{};
+		std::vector<VkDescriptorPool> m_pools{};
+		std::vector<VkDescriptorPoolSize> m_descriptorPollSizes{};
+		constexpr static uint32_t m_maxNumSetsAllowedPerPool{4096U};
+		uint32_t m_totalNumSetAllocFromCurrentPool{};
+		uint32_t m_currentPoolIndex{};
 	};
 
 }

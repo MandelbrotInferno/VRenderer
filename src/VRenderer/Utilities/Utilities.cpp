@@ -555,5 +555,20 @@ namespace VRenderer
 
 			return glm::vec2{(uint32_t)lv_displayMode[0].w, (uint32_t)lv_displayMode[0].h};
 		}
+
+		VkDescriptorPool GenerateVkDescriptorPool(VkDevice l_device, const std::span<VkDescriptorPoolSize> l_poolSizes, const uint32_t l_maxNumSets)
+		{
+			VkDescriptorPoolCreateInfo lv_poolCreateInfo{};
+			lv_poolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+			lv_poolCreateInfo.maxSets = l_maxNumSets;
+			lv_poolCreateInfo.poolSizeCount = static_cast<uint32_t>(l_poolSizes.size());
+			lv_poolCreateInfo.pPoolSizes = l_poolSizes.data();
+			lv_poolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
+
+			VkDescriptorPool lv_pool{};
+			VULKAN_CHECK(vkCreateDescriptorPool(l_device, &lv_poolCreateInfo, nullptr, &lv_pool));
+
+			return lv_pool;
+		}
 	}
 }

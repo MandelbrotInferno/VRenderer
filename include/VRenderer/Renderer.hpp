@@ -10,6 +10,7 @@
 #include "VRenderer/VulkanWrappers/VulkanTimelineSemaphore.hpp"
 #include "VRenderer/Passes/ComputePasses/ComputePass.hpp"
 #include "VRenderer/Passes/GraphicsPasses/GraphicsPassPushConstant.hpp"
+
 #include <vma/vk_mem_alloc.h>
 #include <array>
 #include <memory>
@@ -38,7 +39,6 @@ namespace VRenderer
 
 		void CleanUp() noexcept;
 
-		//void RecordCommands(VkCommandBuffer l_computeCmdBuffer ,VkCommandBuffer l_graphicsCmdBuffer, const uint32_t l_swapchainIndex, const uint32_t l_frameInflightIndex);
 
 		void InitializeVulkanFoundationalElementsAndGraphicsQueue(SDL_Window* l_window);
 		void InitializeVulkanSwapchain(SDL_Window* l_window);
@@ -54,6 +54,9 @@ namespace VRenderer
 		void InitializeVmaAllocator();
 		void InitializeDescriptorSetPools();
 		void InitializeIMGUI(SDL_Window* l_window);
+
+		void ResizeWindow();
+		void ResetResourcesAfterWindowResize(SDL_Window* l_window);
 
 	public:
 		
@@ -84,7 +87,7 @@ namespace VRenderer
 
 	public:
 		//Test code
-		std::array<VkDescriptorSet, m_maxCommandBuffers> m_testComputeSets{};
+		std::array<VulkanDescriptorSet, m_maxCommandBuffers> m_testComputeSets{};
 
 	private:
 		

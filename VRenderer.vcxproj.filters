@@ -99,6 +99,7 @@
     <ClCompile Include="src\VRenderer\Utilities\Utilities.cpp" />
     <ClCompile Include="src\VRenderer\VulkanResourceManager.cpp" />
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanBuffer.cpp" />
+    <ClCompile Include="src\VRenderer\Logger\Logger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="manual-dependencies\imconfig.h">
@@ -187,5 +188,8 @@
     <ClInclude Include="include\VRenderer\AppState.hpp">
       <Filter>include\VRenderer</Filter>
     </ClInclude>
+    <ClInclude Include="include\VRenderer\Logger\Category.hpp" />
+    <ClInclude Include="include\VRenderer\Logger\Level.hpp" />
+    <ClInclude Include="include\VRenderer\Logger\Logger.hpp" />
   </ItemGroup>
 </Project>

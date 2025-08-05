@@ -141,14 +141,14 @@ namespace VRenderer
 		lv_writes[0].descriptorCount = 1U;
 		lv_writes[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 		lv_writes[0].dstBinding = 0U;
-		lv_writes[0].dstSet = m_testComputeSets[0];
+		lv_writes[0].dstSet = m_testComputeSets[0].m_set;
 		lv_writes[0].pImageInfo = &lv_imageInfo;
 
 		lv_writes[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		lv_writes[1].descriptorCount = 1U;
 		lv_writes[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
 		lv_writes[1].dstBinding = 0U;
-		lv_writes[1].dstSet = m_testComputeSets[1];
+		lv_writes[1].dstSet = m_testComputeSets[1].m_set;
 		lv_writes[1].pImageInfo = &lv_imageInfo2;
 		
 		vkUpdateDescriptorSets(m_device, (uint32_t)lv_writes.size(), lv_writes.data(), 0, nullptr);
@@ -272,8 +272,7 @@ namespace VRenderer
 		using namespace Utilities;
 
 		if (true == m_resizeWindow) {
-			InitializeVulkanSwapchain(l_window);
-			TransitionImageLayoutSwapchainImagesToPresentUponCreation();
+			ResetResourcesAfterWindowResize(l_window);
 			m_resizeWindow = false;
 		}
 
@@ -291,10 +290,7 @@ namespace VRenderer
 
 		VULKAN_CHECK(vkWaitForFences(m_device, 1, &lv_syncPrimitives.m_fence, VK_TRUE,std::numeric_limits<uint64_t>::max()));
 		VULKAN_CHECK(vkResetFences(m_device, 1, &lv_syncPrimitives.m_fence));
-		LOG(VRenderer::Level::INFO, VRenderer::Category::RENDERING, "PRESENTING was {} and noooo {} amd {} {} {} {} {} {}", 2, " ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "dddddddddddddddddddddddddddddddddddddddddd", "dijijijisjdijsijidjsids", "sidjisjdijsijdijsijdisd", "sjidjsijdisjidjijsid");
-		LOG(VRenderer::Level::INFO, VRenderer::Category::RENDERING, "PRESENTING was {} and noooo {} amd {} {} {} {} {} {}", 2, " ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "dddddddddddddddddddddddddddddddddddddddddd", "dijijijisjdijsijidjsids", "sidjisjdijsijdijsijdisd", "sjidjsijdisjidjijsid");
-		LOG(VRenderer::Level::INFO, VRenderer::Category::RENDERING, "PRESENTING was {} and noooo {} amd {} {} {} {} {} {}", 2, " ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "dddddddddddddddddddddddddddddddddddddddddd", "dijijijisjdijsijidjsids", "sidjisjdijsijdijsijdisd", "sjidjsijdisjidjijsid");
-
+		
 		lv_graphicsCmdBuffer.ResetBuffer();
 		lv_computeCmdBuffer.ResetBuffer();
 
@@ -303,10 +299,9 @@ namespace VRenderer
 			, std::numeric_limits<uint64_t>::max(), lv_syncPrimitives.m_acquireImageSemaphore
 			, VK_NULL_HANDLE, &lv_swapchainImageIndex);
 
-		if (VK_ERROR_OUT_OF_DATE_KHR == lv_result) {
+		if (VK_ERROR_OUT_OF_DATE_KHR == lv_result || VK_SUBOPTIMAL_KHR == lv_result) {
 			m_resizeWindow = true;
-			vkDeviceWaitIdle(m_device);
-			m_vulkanSwapchain.CleanUp(m_device);
+			ResizeWindow();
 			return;
 		}
 		else {
@@ -336,7 +331,7 @@ namespace VRenderer
 			
 
 			vkCmdBindPipeline(l_cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, lv_computePipeline);
-			vkCmdBindDescriptorSets(l_cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, lv_computePipelineLayout, 0, 1, &m_testComputeSets[lv_currentFrameInflightIndex], 0U, nullptr);
+			vkCmdBindDescriptorSets(l_cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, lv_computePipelineLayout, 0, 1, &m_testComputeSets[lv_currentFrameInflightIndex].m_set, 0U, nullptr);
 			
 			vkCmdPushConstants(l_cmdBuffer,lv_computePipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(lv_pushData),&lv_pushData);
 			vkCmdDispatch(l_cmdBuffer, (uint32_t)std::ceilf(lv_testTexture.m_extent.width / 16.f), (uint32_t)std::ceilf(lv_testTexture.m_extent.height / 16.f), 1U);
@@ -488,25 +483,15 @@ namespace VRenderer
 
 		lv_result = vkQueuePresentKHR(m_graphicsQueue.m_queue, &lv_presentInfo);
 
-		if (VK_ERROR_OUT_OF_DATE_KHR == lv_result) {
+		if (VK_ERROR_OUT_OF_DATE_KHR == lv_result || VK_SUBOPTIMAL_KHR == lv_result) {
 			m_resizeWindow = true;
-			vkDeviceWaitIdle(m_device);
-			m_vulkanSwapchain.CleanUp(m_device);
+			ResizeWindow();
 			return;
 		}
 		else {
 			VULKAN_CHECK(lv_result);
 		}
-		SET_LEVEL(VRenderer::Level::WARNING);
-		LOG(VRenderer::Level::INFO, VRenderer::Category::RENDERING, "PRESENTING was {} and noooo {} amd {} {} {} {} {} {}", 2, " ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "dddddddddddddddddddddddddddddddddddddddddd", "dijijijisjdijsijidjsids", "sidjisjdijsijdijsijdisd", "sjidjsijdisjidjijsid");
-		LOG(VRenderer::Level::ERROR, VRenderer::Category::RENDERING, "DRAWING was {} and noooo {}", 2, " what!!");
-		LOG(VRenderer::Level::INFO, VRenderer::Category::RENDERING, "PRESENTING was {} and noooo {} amd {} {} {} {} {} {}", 2, " ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "dddddddddddddddddddddddddddddddddddddddddd", "dijijijisjdijsijidjsids", "sidjisjdijsijdijsijdisd", "sjidjsijdisjidjijsid");
-		LOG(VRenderer::Level::ERROR, VRenderer::Category::RENDERING, "DRAWING was {} and noooo {}", 2, " what!!");
-		LOG(VRenderer::Level::WARNING, VRenderer::Category::RENDERING, "DRAWING was {} and noooo {}", 2, " what!!");
-		LOG(VRenderer::Level::WARNING, VRenderer::Category::RENDERING, "DRAWING was {} and noooo {}", 2, " what!!");
-		LOG(VRenderer::Level::INFO, VRenderer::Category::RENDERING, "PRESENTING was {} and noooo {} amd {} {} {} {} {} {}", 2, " ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd!!!!", "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "dddddddddddddddddddddddddddddddddddddddddd", "dijijijisjdijsijidjsids", "sidjisjdijsijdijsijdisd", "sjidjsijdisjidjijsid");
-		LOG(VRenderer::Level::WARNING, VRenderer::Category::RENDERING, "DRAWING was {} and noooo {}", 2, " what!!");
-		SET_LEVEL(VRenderer::Level::INFO);
+
 		++m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex;
 	}
 
@@ -692,7 +677,6 @@ namespace VRenderer
 		lv_typeCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
 		lv_typeCreateInfo.initialValue = 0U;
 		lv_typeCreateInfo.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
-		lv_typeCreateInfo.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
 
 		VkSemaphoreCreateInfo lv_createInfo{};
 		lv_createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -834,13 +818,29 @@ namespace VRenderer
 
 		VULKAN_CHECK(vkCreateDescriptorPool(m_device, &lv_poolCreateInfo, nullptr, &m_imguiDescriptorPool));
 
-		constexpr uint32_t lv_maxPossibleSetsMainDesSetAlloc = 128U;
-
 		lv_poolSizes.clear();
 		lv_poolSizes = { {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 68U} };
 
-		m_mainDescriptorSetAlloc.InitPool(m_device, lv_poolSizes, lv_maxPossibleSetsMainDesSetAlloc);
+		m_mainDescriptorSetAlloc.InitPool(m_device, lv_poolSizes);
 	}
+
+
+	void Renderer::ResizeWindow()
+	{
+		vkDeviceWaitIdle(m_device);
+		m_vulkanSwapchain.CleanUp(m_device);
+		for (auto& l_syncPrimitive : m_swapchainPresentSyncPrimitives) {
+			l_syncPrimitive.CleanUp(m_device);
+		}
+	}
+
+	void Renderer::ResetResourcesAfterWindowResize(SDL_Window* l_window)
+	{
+		InitializeVulkanSwapchain(l_window);
+		TransitionImageLayoutSwapchainImagesToPresentUponCreation();
+		InitializeVulkanSwapchainAndPresentSyncPrimitives();
+	}
+
 
 	void Renderer::TransitionImageLayoutSwapchainImagesToPresentUponCreation()
 	{
