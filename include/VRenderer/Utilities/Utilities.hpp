@@ -99,5 +99,7 @@ namespace VRenderer
 		}
 
 		glm::uvec2 GetFullResolutionDimensions();
+
+		VkDescriptorPool GenerateVkDescriptorPool(VkDevice l_device, const std::span<VkDescriptorPoolSize> l_poolSizes, const uint32_t l_maxNumSets);
 	}
 }
