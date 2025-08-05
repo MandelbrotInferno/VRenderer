@@ -85,7 +85,7 @@ namespace VRenderer
 				auto lv_transferFromStagingBufferToDeviceBufferCmds = [&](VkCommandBuffer l_cmdBuffer)->void
 					{
 						VkBufferCopy lv_region{};
-						lv_region.size = lv_gpuStagingBuffer.m_vmaAllocationInfo.size;
+						lv_region.size = l_bufferCPU.size_bytes();
 
 						vkCmdCopyBuffer(l_cmdBuffer, lv_gpuStagingBuffer.m_buffer, lv_gpuBuffer.m_buffer, 1, &lv_region);
 					};

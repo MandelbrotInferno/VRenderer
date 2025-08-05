@@ -689,7 +689,6 @@ namespace VRenderer
 		lv_typeCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_TYPE_CREATE_INFO;
 		lv_typeCreateInfo.initialValue = 0U;
 		lv_typeCreateInfo.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
-		lv_typeCreateInfo.semaphoreType = VK_SEMAPHORE_TYPE_TIMELINE;
 
 		VkSemaphoreCreateInfo lv_createInfo{};
 		lv_createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;

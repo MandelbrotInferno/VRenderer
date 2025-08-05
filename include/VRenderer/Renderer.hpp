@@ -38,7 +38,6 @@ namespace VRenderer
 
 		void CleanUp() noexcept;
 
-		//void RecordCommands(VkCommandBuffer l_computeCmdBuffer ,VkCommandBuffer l_graphicsCmdBuffer, const uint32_t l_swapchainIndex, const uint32_t l_frameInflightIndex);
 
 		void InitializeVulkanFoundationalElementsAndGraphicsQueue(SDL_Window* l_window);
 		void InitializeVulkanSwapchain(SDL_Window* l_window);
