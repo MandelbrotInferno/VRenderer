@@ -107,10 +107,11 @@ namespace VRenderer
 		}
 	}
 
-	void Logger::SetCurrentLevel(const Level l_level)
+	void Logger::SetCurrentLevel(const Level l_level, const LevelModeCompareOp l_compOp)
 	{
 		if (m_mainThreadID == std::this_thread::get_id()) {
 			m_currentLevel = l_level;
+			m_compareOp = l_compOp;
 		}
 	}
 }
