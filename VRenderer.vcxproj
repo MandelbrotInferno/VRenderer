@@ -203,6 +203,7 @@
     <ClInclude Include="include\VRenderer\Logger\Category.hpp" />
     <ClInclude Include="include\VRenderer\Logger\Level.hpp" />
     <ClInclude Include="include\VRenderer\Logger\Logger.hpp" />
+    <ClInclude Include="include\VRenderer\Logger\LevelModeCompareOp.hpp" />
     <ClInclude Include="include\VRenderer\Passes\ComputePasses\ComputePass.hpp" />
     <ClInclude Include="include\VRenderer\Passes\ComputePasses\ComputePassPushConstant.hpp" />
     <ClInclude Include="include\VRenderer\Passes\GraphicsPasses\GraphicsPassPushConstant.hpp" />

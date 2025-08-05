@@ -4,6 +4,7 @@
 
 #include "VRenderer/Logger/Category.hpp"
 #include "VRenderer/Logger/Level.hpp"
+#include "VRenderer/Logger/LevelModeCompareOp.hpp"
 
 #include <queue>
 #include <tracy/Tracy.hpp>
@@ -29,8 +30,26 @@ namespace VRenderer
 		void FormatMsgAndEnqueue(const Level l_level, const Category l_category, const uint32_t l_lineNumber, const char* l_filePath, std::string&& l_unformattedMsg, Args&&...l_args)
 		{
 			ZoneScoped;
+			bool lv_formMsg{ false };
 
-			if ((uint32_t)m_currentLevel >= (uint32_t)l_level) {
+			if (LevelModeCompareOp::EQUAL == m_compareOp) {
+				if (l_level == m_currentLevel) {
+					lv_formMsg = true;
+				}
+			}
+			else if (LevelModeCompareOp::EQUAL_LESS == m_compareOp) {
+				if ((uint32_t)m_currentLevel >= (uint32_t)l_level) {
+					lv_formMsg = true;
+				}
+			}
+			else if (LevelModeCompareOp::EQUAL_MORE == m_compareOp) {
+				if ((uint32_t)m_currentLevel <= (uint32_t)l_level) {
+					lv_formMsg = true;
+				}
+			}
+
+
+			if (true == lv_formMsg) {
 				std::string lv_finalMsg{};
 				lv_finalMsg.reserve(2048);
 
@@ -73,7 +92,7 @@ namespace VRenderer
 
 		void StopQueueProcessor();
 
-		void SetCurrentLevel(const Level l_level);
+		void SetCurrentLevel(const Level l_level, const LevelModeCompareOp l_compOp);
 
 	private:
 
@@ -96,6 +115,7 @@ namespace VRenderer
 		std::fstream m_generalLogFile{};
 
 		Level m_currentLevel{};
+		LevelModeCompareOp m_compareOp{};
 
 		std::thread::id m_mainThreadID{};
 		
@@ -103,7 +123,7 @@ namespace VRenderer
 	};
 }
 
-
+#define LOGGING
 #ifdef LOGGING
 
 #define START_LOGGING(){\
@@ -122,9 +142,9 @@ auto& lv_logger = VRenderer::Logger::GetInstance();\
 lv_logger.StopQueueProcessor();\
 }
 
-#define SET_LEVEL(l_level){\
+#define SET_LEVEL(l_level, l_compOp){\
 auto& lv_logger = VRenderer::Logger::GetInstance();\
-lv_logger.SetCurrentLevel(l_level);\
+lv_logger.SetCurrentLevel(l_level, l_compOp);\
 }
 
 #else
@@ -132,6 +152,6 @@ lv_logger.SetCurrentLevel(l_level);\
 #define LOG(l_level, l_category, l_unformattedMsg, ...)
 #define START_LOGGING()
 #define END_LOGGING()
-#define SET_LEVEL(l_level)
+#define SET_LEVEL(l_level, l_compOp)
 
 #endif
