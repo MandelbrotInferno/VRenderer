@@ -12,15 +12,15 @@ namespace VRenderer
 	{
 		m_mainThreadID = std::this_thread::get_id();
 
-		m_renderingLogFile.open("C:/Users/farhan/source/repos/VRenderer/Logs/Rendering.txt", std::ios::trunc | std::ios::out);
+		m_renderingLogFile.open("Logs/Rendering.txt", std::ios::trunc | std::ios::out);
 		if (false == m_renderingLogFile.is_open()) {
 			m_renderingLogFile.exceptions(std::ios::failbit);
 		}
-		m_physicsLogFile.open("C:/Users/farhan/source/repos/VRenderer/Logs/Physics.txt", std::ios::trunc | std::ios::out);
+		m_physicsLogFile.open("Logs/Physics.txt", std::ios::trunc | std::ios::out);
 		if (false == m_physicsLogFile.is_open()) {
 			m_physicsLogFile.exceptions(std::ios::failbit);
 		}
-		m_generalLogFile.open("C:/Users/farhan/source/repos/VRenderer/Logs/General.txt", std::ios::trunc | std::ios::out);
+		m_generalLogFile.open("Logs/General.txt", std::ios::trunc | std::ios::out);
 		if (false == m_generalLogFile.is_open()) {
 			m_generalLogFile.exceptions(std::ios::failbit);
 		}
