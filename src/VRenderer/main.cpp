@@ -14,6 +14,7 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <variant>
 
 
 int InitializeSDL()

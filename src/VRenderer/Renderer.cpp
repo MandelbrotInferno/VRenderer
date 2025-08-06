@@ -7,6 +7,8 @@
 #include "VRenderer/Passes/GraphicsPasses/Vertex.hpp"
 #include "VRenderer/Utilities/GPUSceneBuffers.hpp"
 #include "VRenderer/Logger/Logger.hpp"
+#include "VRenderer/VulkanWrappers/VulkanDescriptorSetUpdater.hpp"
+
 
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
@@ -127,33 +129,16 @@ namespace VRenderer
 		m_vulkanResManager.AddVulkanImageView("ComputeImageView0", lv_cachedTextureView);
 		m_vulkanResManager.AddVulkanImageView("ComputeImageView1", lv_cachedTexture2View);
 		
-		VkDescriptorImageInfo lv_imageInfo{};
-		lv_imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-		lv_imageInfo.imageView = lv_cachedTextureView;
+		VulkanDescriptorSetUpdater lv_desSetUpdater{};
+		lv_desSetUpdater.AddWriteImage(0U, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, lv_cachedTextureView, VK_IMAGE_LAYOUT_GENERAL);
+		lv_desSetUpdater.UpdateSet(m_device, m_testComputeSets[0].m_set);
+		lv_desSetUpdater.Reset();
+
+		lv_desSetUpdater.AddWriteImage(0U, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, lv_cachedTexture2View, VK_IMAGE_LAYOUT_GENERAL);
+		lv_desSetUpdater.UpdateSet(m_device, m_testComputeSets[1].m_set);
+		lv_desSetUpdater.Reset();
+
 		
-		VkDescriptorImageInfo lv_imageInfo2{};
-		lv_imageInfo2.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-		lv_imageInfo2.imageView = lv_cachedTexture2View;
-
-		std::array<VkWriteDescriptorSet, 2U> lv_writes{};
-
-		lv_writes[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		lv_writes[0].descriptorCount = 1U;
-		lv_writes[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-		lv_writes[0].dstBinding = 0U;
-		lv_writes[0].dstSet = m_testComputeSets[0].m_set;
-		lv_writes[0].pImageInfo = &lv_imageInfo;
-
-		lv_writes[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		lv_writes[1].descriptorCount = 1U;
-		lv_writes[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-		lv_writes[1].dstBinding = 0U;
-		lv_writes[1].dstSet = m_testComputeSets[1].m_set;
-		lv_writes[1].pImageInfo = &lv_imageInfo2;
-		
-		vkUpdateDescriptorSets(m_device, (uint32_t)lv_writes.size(), lv_writes.data(), 0, nullptr);
-
-
 		std::array<Vertex, 4> lv_rectVertices;
 
 		lv_rectVertices[0].m_position = { 0.5,-0.5, 0 };
