@@ -191,6 +191,7 @@
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanCommandbufferReset.cpp" />
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanDescriptorSetAllocator.cpp" />
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanDescriptorSetLayoutFactory.cpp" />
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanDescriptorSetUpdater.cpp" />
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanError.cpp" />
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanFoundationalElements.cpp" />
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanSwapchain.cpp" />
@@ -219,6 +220,7 @@
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSet.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSetAllocator.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSetLayoutFactory.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSetUpdater.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanError.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanFoundationalElements.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanQueue.hpp" />
