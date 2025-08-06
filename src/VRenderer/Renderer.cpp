@@ -616,13 +616,31 @@ namespace VRenderer
 		lv_features12.timelineSemaphore = true;
 
 		vkb::PhysicalDeviceSelector lv_selector{ lv_vkbInstance };
-		vkb::PhysicalDevice lv_physicalDevice = lv_selector
+
+		auto lv_physicalDeviceSelector = lv_selector
 			.set_minimum_version(1, 3)
 			.set_required_features_13(lv_features13)
 			.set_required_features_12(lv_features12)
-			.set_surface(m_vulkanFoundational.m_surface)
-			.select()
-			.value();
+			.set_surface(m_vulkanFoundational.m_surface);
+
+		auto lv_physicalDeviceCandidNames = lv_physicalDeviceSelector.select_device_names().value();
+
+		//Sorry Intel ;)
+		std::string lv_nameNotToChoose{"Intel"};
+		size_t lv_physicalDeviceIndex = std::numeric_limits<size_t>::max();
+		for (size_t i = 0; i < lv_physicalDeviceCandidNames.size(); ++i) {
+			if (std::string::npos == lv_physicalDeviceCandidNames[i].find(lv_nameNotToChoose)) {
+				lv_physicalDeviceIndex = i;
+			}
+		}
+
+		if (std::numeric_limits<size_t>::max() == lv_physicalDeviceIndex) {
+			throw "Your device does not have suitable GPU(AMD/NVDIA) hardware to run this app.\n";
+		}
+
+
+
+		vkb::PhysicalDevice lv_physicalDevice = lv_physicalDeviceSelector.select_devices().value()[lv_physicalDeviceIndex];
 
 		m_vulkanFoundational.m_physicalDevice = lv_physicalDevice.physical_device;
 
