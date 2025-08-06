@@ -49,18 +49,14 @@ namespace VRenderer
 	void VulkanDescriptorSetUpdater::UpdateSet(VkDevice l_device, VkDescriptorSet l_set)
 	{
 		for (size_t i = 0U; auto& l_write : m_descriptorWrites) {
+			
 			l_write.dstSet = l_set;
 			auto& lv_infoVar = m_descriptorInfos[i];
 			
-			const auto* lv_infoImage = std::get_if<0>(&lv_infoVar);
-			const auto* lv_infoBuffer = std::get_if<1>(&lv_infoVar);
-
-			if (nullptr == lv_infoBuffer) {
-				l_write.pImageInfo = lv_infoImage;
-			}
-			else {
-				l_write.pBufferInfo = lv_infoBuffer;
-			}
+			const auto* lv_infoImage = std::get_if<VkDescriptorImageInfo>(&lv_infoVar);
+			const auto* lv_infoBuffer = std::get_if<VkDescriptorBufferInfo>(&lv_infoVar);
+			l_write.pImageInfo = lv_infoImage;
+			l_write.pBufferInfo = lv_infoBuffer;
 			
 		}
 

@@ -124,9 +124,6 @@ int main()
 	catch (const std::exception& l_error) {
 		std::cerr << l_error.what() << ": " << std::strerror(errno) << std::endl;
 	}
-	catch (const std::bad_variant_access& l_error) {
-		std::cerr << l_error.what() << std::endl;
-	}
 
 	try {
 		lv_renderer->InitCleanUp();
