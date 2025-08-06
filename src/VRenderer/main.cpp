@@ -53,7 +53,8 @@ int main()
 
 	VRenderer::SDL_WindowWrapper lv_window{};
 	std::unique_ptr<VRenderer::Renderer> lv_renderer = std::make_unique<VRenderer::Renderer>();;
-	
+	SET_LEVEL(Level::ERROR, LevelModeCompareOp::EQUAL);
+	LOG(Level::ERROR, Category::GENERAL, "isihsihishiijdij ijdijsijdi ijidjisjidjisjdi ijisjdiji jisd {} {} {} {}", "hi", "byeeee", "helloooo", "what!!!");
 	try {
 
 		const int lv_result = InitializeSDL();
