@@ -64,16 +64,23 @@ namespace VRenderer
 		VulkanSwapchain m_vulkanSwapchain{};
 		VkDevice m_device{};
 		VmaAllocator m_vmaAlloc{};
+
 		VulkanResourceManager m_vulkanResManager{};
+
 		VulkanDescriptorSetAllocator m_mainDescriptorSetAlloc{};
 		VkDescriptorPool m_imguiDescriptorPool{};
+
 		VulkanQueue m_graphicsQueue{};
 		VulkanQueue m_computeQueue{};
+
 		VkCommandPool m_mainThreadGraphicsCmdPool{};
 		VkCommandPool m_mainThreadComputeCmdPool{};
+
 		VulkanTimelineSemaphore m_timelineComputeGraphicsSemaphore{};
+
 		VulkanCommandbufferReset m_immediateCmdBuffer{};
 		VkFence m_immediateGPUCmdsFence{};
+
 		bool m_physicalDeviceHasDedicatedCompute{ false };
 		bool m_resizeWindow{ false };
 
