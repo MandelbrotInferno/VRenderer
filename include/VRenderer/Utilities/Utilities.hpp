@@ -24,8 +24,7 @@ namespace VRenderer
 	{
 		struct VulkanGraphicsCreateInfo;
 
-		//Should be used with single images that have no mip maps or layers
-		//since it covers everything from level and layer 0 until the end.
+		//Transitions all the mip map and array layers
 		void ImageLayoutTransitionCmd(VkCommandBuffer l_cmdBuffer, VkImageAspectFlags l_aspectMask
 			, VkImageLayout l_oldLayout, VkImageLayout l_newLayout
 			, VkImage l_image, VkAccessFlags2 l_srcAccess, VkAccessFlags2 l_dstAccess
@@ -101,5 +100,9 @@ namespace VRenderer
 		glm::uvec2 GetFullResolutionDimensions();
 
 		VkDescriptorPool GenerateVkDescriptorPool(VkDevice l_device, const std::span<VkDescriptorPoolSize> l_poolSizes, const uint32_t l_maxNumSets);
+
+		VkImageMemoryBarrier2 GenerateVkImageMemoryBarrier2(VkPipelineStageFlags2 l_srcPipelineStage, VkPipelineStageFlags2 l_dstPipelineStage, VkAccessFlags2 l_srcAccess, VkAccessFlags2 l_dstAccess, VkImageLayout l_oldLayout, VkImageLayout l_newLayout, VkImage l_image, VkImageSubresourceRange l_subresRange = {.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT, .baseMipLevel = 0U, .levelCount = VK_REMAINING_MIP_LEVELS, .baseArrayLayer = 0U, .layerCount = VK_REMAINING_ARRAY_LAYERS});
+
+		VkBufferMemoryBarrier2 GenerateVkBufferMemoryBarrier2(VkPipelineStageFlags2 l_srcPipelineStage, VkPipelineStageFlags2 l_dstPipelineStage, VkAccessFlags2 l_srcAccess, VkAccessFlags2 l_dstAccess, VkBuffer l_buffer, VkDeviceSize l_offset = 0U, VkDeviceSize l_size = VK_WHOLE_SIZE);
 	}
 }

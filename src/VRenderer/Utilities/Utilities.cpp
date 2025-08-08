@@ -570,5 +570,37 @@ namespace VRenderer
 
 			return lv_pool;
 		}
+
+		VkImageMemoryBarrier2 GenerateVkImageMemoryBarrier2(VkPipelineStageFlags2 l_srcPipelineStage, VkPipelineStageFlags2 l_dstPipelineStage, VkAccessFlags2 l_srcAccess, VkAccessFlags2 l_dstAccess, VkImageLayout l_oldLayout, VkImageLayout l_newLayout, VkImage l_image, VkImageSubresourceRange l_subresRange)
+		{
+			VkImageMemoryBarrier2 lv_imageMemoBarrier{};
+			lv_imageMemoBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+			lv_imageMemoBarrier.srcStageMask = l_srcPipelineStage;
+			lv_imageMemoBarrier.srcAccessMask = l_srcAccess;
+			lv_imageMemoBarrier.dstStageMask = l_dstPipelineStage;
+			lv_imageMemoBarrier.dstAccessMask = l_dstAccess;
+			lv_imageMemoBarrier.oldLayout = l_oldLayout;
+			lv_imageMemoBarrier.newLayout = l_newLayout;
+			lv_imageMemoBarrier.subresourceRange = l_subresRange;
+			lv_imageMemoBarrier.image = l_image;
+
+			return lv_imageMemoBarrier;
+
+		}
+
+		VkBufferMemoryBarrier2 GenerateVkBufferMemoryBarrier2(VkPipelineStageFlags2 l_srcPipelineStage, VkPipelineStageFlags2 l_dstPipelineStage, VkAccessFlags2 l_srcAccess, VkAccessFlags2 l_dstAccess, VkBuffer l_buffer, VkDeviceSize l_offset, VkDeviceSize l_size)
+		{
+			VkBufferMemoryBarrier2 lv_bufferMemoBarrier{};
+			lv_bufferMemoBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2;
+			lv_bufferMemoBarrier.srcStageMask = l_srcPipelineStage;
+			lv_bufferMemoBarrier.srcAccessMask = l_srcAccess;
+			lv_bufferMemoBarrier.dstStageMask = l_dstPipelineStage;
+			lv_bufferMemoBarrier.dstAccessMask = l_dstAccess;
+			lv_bufferMemoBarrier.size = l_size;
+			lv_bufferMemoBarrier.offset = l_offset;
+			lv_bufferMemoBarrier.buffer = l_buffer;
+
+			return lv_bufferMemoBarrier;
+		}
 	}
 }
