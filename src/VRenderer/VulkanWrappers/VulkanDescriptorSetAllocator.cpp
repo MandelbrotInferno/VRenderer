@@ -40,14 +40,23 @@ namespace VRenderer
 		lv_allocateInfo.descriptorPool = m_pools[m_currentPoolIndex];
 
 		VkDescriptorSet lv_set{};
-		if (VK_ERROR_OUT_OF_POOL_MEMORY == vkAllocateDescriptorSets(l_device, &lv_allocateInfo, &lv_set)) {
+		VkResult lv_result{};
+		lv_result = vkAllocateDescriptorSets(l_device, &lv_allocateInfo, &lv_set);
+		if (VK_ERROR_OUT_OF_POOL_MEMORY == lv_result) {
 			auto lv_pool = Utilities::GenerateVkDescriptorPool(l_device, m_descriptorPollSizes, m_maxNumSetsAllowedPerPool);
 			m_pools.push_back(lv_pool);
 			++m_currentPoolIndex;
 			m_totalNumSetAllocFromCurrentPool = 0U;
-			if (VK_ERROR_OUT_OF_POOL_MEMORY == vkAllocateDescriptorSets(l_device, &lv_allocateInfo, &lv_set)) {
+			lv_result = vkAllocateDescriptorSets(l_device, &lv_allocateInfo, &lv_set);
+			if (VK_ERROR_OUT_OF_POOL_MEMORY == lv_result) {
 				throw "Total number of at least one of the specified descriptor types in the descirptor set layout exceeds the total number of that the pool has of that type.\n";
 			}
+			else {
+				VULKAN_CHECK(lv_result);
+			}
+		}
+		else {
+			VULKAN_CHECK(lv_result);
 		}
 
 		m_totalNumSetAllocFromCurrentPool += (uint32_t)l_setLayouts.size();
