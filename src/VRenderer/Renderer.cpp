@@ -822,7 +822,7 @@ namespace VRenderer
 		VULKAN_CHECK(vkCreateDescriptorPool(m_device, &lv_poolCreateInfo, nullptr, &m_imguiDescriptorPool));
 
 		lv_poolSizes.clear();
-		lv_poolSizes = { {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 68U} };
+		lv_poolSizes = { {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 16384U} , {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 16384U}, {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 4096U}, {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 4096U} };
 
 		m_mainDescriptorSetAlloc.InitPool(m_device, lv_poolSizes);
 	}
