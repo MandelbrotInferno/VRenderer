@@ -181,6 +181,7 @@
     <ClCompile Include="manual-dependencies\imgui_draw.cpp" />
     <ClCompile Include="manual-dependencies\imgui_tables.cpp" />
     <ClCompile Include="manual-dependencies\imgui_widgets.cpp" />
+    <ClCompile Include="manual-dependencies\SPIRV-Reflect\spirv_reflect.c" />
     <ClCompile Include="src\VRenderer\Logger\Logger.cpp" />
     <ClCompile Include="src\VRenderer\main.cpp" />
     <ClCompile Include="src\VRenderer\Renderer.cpp" />
@@ -211,6 +212,7 @@
     <ClInclude Include="include\VRenderer\Passes\GraphicsPasses\Vertex.hpp" />
     <ClInclude Include="include\VRenderer\Renderer.hpp" />
     <ClInclude Include="include\VRenderer\SDL_WindowWrapper.hpp" />
+    <ClInclude Include="include\VRenderer\SynchronizationRequest.hpp" />
     <ClInclude Include="include\VRenderer\Utilities\GPUSceneBuffers.hpp" />
     <ClInclude Include="include\VRenderer\Utilities\Utilities.hpp" />
     <ClInclude Include="include\VRenderer\Utilities\VulkanGraphicsCreateInfo.hpp" />
@@ -238,6 +240,8 @@
     <ClInclude Include="manual-dependencies\imstb_rectpack.h" />
     <ClInclude Include="manual-dependencies\imstb_textedit.h" />
     <ClInclude Include="manual-dependencies\imstb_truetype.h" />
+    <ClInclude Include="manual-dependencies\SPIRV-Reflect\spirv.h" />
+    <ClInclude Include="manual-dependencies\SPIRV-Reflect\spirv_reflect.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

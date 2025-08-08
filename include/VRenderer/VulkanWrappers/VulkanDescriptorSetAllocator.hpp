@@ -30,8 +30,13 @@ namespace VRenderer
 
 		std::vector<VkDescriptorPool> m_pools{};
 		std::vector<VkDescriptorPoolSize> m_descriptorPollSizes{};
+		
+		//Dynamic growth of this set allocator assumes that we can always allocate
+		//m_maxNumSetsAllowedPerPool number of sets no matter the given VkDescriptorSetLayout.
+		//Therefore, our VkDescriptorPoolSize need to be big enough for every set layout.
 		constexpr static uint32_t m_maxNumSetsAllowedPerPool{4096U};
 		uint32_t m_totalNumSetAllocFromCurrentPool{};
+		
 		uint32_t m_currentPoolIndex{};
 	};
 

@@ -100,6 +100,7 @@
     <ClCompile Include="src\VRenderer\VulkanResourceManager.cpp" />
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanBuffer.cpp" />
     <ClCompile Include="src\VRenderer\Logger\Logger.cpp" />
+    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanDescriptorSetUpdater.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="manual-dependencies\imconfig.h">
@@ -191,5 +192,11 @@
     <ClInclude Include="include\VRenderer\Logger\Category.hpp" />
     <ClInclude Include="include\VRenderer\Logger\Level.hpp" />
     <ClInclude Include="include\VRenderer\Logger\Logger.hpp" />
+    <ClInclude Include="include\VRenderer\Logger\LevelModeCompareOp.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSet.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSetUpdater.hpp" />
+    <ClInclude Include="include\VRenderer\SynchronizationRequest.hpp">
+      <Filter>include\VRenderer</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
