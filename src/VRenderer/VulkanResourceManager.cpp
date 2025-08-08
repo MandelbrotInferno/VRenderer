@@ -4,17 +4,44 @@
 
 
 #include "VRenderer/VulkanResourceManager.hpp"
+#include "VRenderer/Utilities/Utilities.hpp"
 #include <cassert>
 
 namespace VRenderer
 {
+	bool VulkanResourceManager::ResourceSynchronizationState::ShouldGenerateBarrier(const bool l_isImage, const VkAccessFlagBits2 l_dstAccessState)
+	{
+		if (false == l_isImage) {
+			
+			if (VK_ACCESS_2_SHADER_STORAGE_READ_BIT == m_latestAccessFlagUsed && VK_ACCESS_2_SHADER_STORAGE_READ_BIT == l_dstAccessState) {
+				return false;
+			}
+			return true;
+		}
+		else {
+
+			if ((VK_ACCESS_2_SHADER_SAMPLED_READ_BIT == m_latestAccessFlagUsed 
+				|| VK_ACCESS_2_SHADER_STORAGE_READ_BIT == m_latestAccessFlagUsed 
+				|| VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT == m_latestAccessFlagUsed
+				|| VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT == m_latestAccessFlagUsed) 
+				&& 
+				(VK_ACCESS_2_SHADER_SAMPLED_READ_BIT == l_dstAccessState
+				|| VK_ACCESS_2_SHADER_STORAGE_READ_BIT == l_dstAccessState
+				|| VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT == l_dstAccessState
+				|| VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT == l_dstAccessState)) {
+				return false;
+			}
+
+			return true;
+
+		}
+	}
 
 	uint32_t VulkanResourceManager::AddVulkanTexture(std::string&& l_name, VulkanTexture&& l_vulkanTexture)
 	{
 		m_vulkanTextures.emplace_back(std::move(l_vulkanTexture));
 		const size_t lv_index = m_vulkanTextures.size()-1U;
-		m_mapVulkanTextureNamesToIndex.emplace(std::move(l_name), lv_index);
-
+		m_mapVulkanTextureNamesToIndexAndState.emplace(std::move(l_name), std::make_pair(lv_index, std::array<ResourceSynchronizationState, 6U>{}));
 		return static_cast<uint32_t>(lv_index);
 	}
 
@@ -55,10 +82,10 @@ namespace VRenderer
 	VulkanTexture& VulkanResourceManager::RetrieveVulkanTexture(std::string_view l_name)
 	{
 		const std::string lv_tempName{ l_name };
-		auto lv_iter = m_mapVulkanTextureNamesToIndex.find(lv_tempName);
+		auto lv_iter = m_mapVulkanTextureNamesToIndexAndState.find(lv_tempName);
 
-		if (m_mapVulkanTextureNamesToIndex.end() != lv_iter) {
-			return m_vulkanTextures[lv_iter->second];
+		if (m_mapVulkanTextureNamesToIndexAndState.end() != lv_iter) {
+			return m_vulkanTextures[lv_iter->second.first];
 		}
 		
 		throw "Requested VulkanTexture was not found in the vulkan resource manager.\n";
@@ -156,7 +183,10 @@ namespace VRenderer
 	{
 		m_vulkanBuffers.push_back(l_vulkanBuffer);
 		const size_t lv_index = m_vulkanBuffers.size() - 1U;
-		m_mapVulkanBufferNamesToIndex.emplace(std::move(l_name), lv_index);
+		ResourceSynchronizationState lv_synchState{};
+		lv_synchState.m_latestAccessFlagUsed = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
+		lv_synchState.m_latestPipelineStageUsedIn = VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT;
+		m_mapVulkanBufferNamesToIndexAndState.emplace(std::move(l_name), std::make_pair(lv_index,lv_synchState));
 		return static_cast<uint32_t>(lv_index);
 	}
 
@@ -164,10 +194,10 @@ namespace VRenderer
 	VulkanBuffer& VulkanResourceManager::RetrieveVulkanBuffer(std::string_view l_name)
 	{
 		const std::string lv_tempName{ l_name };
-		auto lv_iter = m_mapVulkanBufferNamesToIndex.find(lv_tempName);
+		auto lv_iter = m_mapVulkanBufferNamesToIndexAndState.find(lv_tempName);
 
-		if (m_mapVulkanBufferNamesToIndex.end() != lv_iter) {
-			return m_vulkanBuffers[lv_iter->second];
+		if (m_mapVulkanBufferNamesToIndexAndState.end() != lv_iter) {
+			return m_vulkanBuffers[lv_iter->second.first];
 		}
 
 		throw "Requested VulkanBuffer was not found in the vulkan resource manager.\n";
@@ -181,7 +211,97 @@ namespace VRenderer
 		return m_vulkanBuffers[l_bufferHandle];
 	}
 
+	void VulkanResourceManager::SynchronizeResources(VkCommandBuffer l_cmdBuffer, std::span<std::string_view> l_resourcesNames, const std::span<SynchronizationRequest> l_synchRequests)
+	{
+		std::vector<VkImageMemoryBarrier2> lv_imageBarriers2{};
+		std::vector<VkBufferMemoryBarrier2> lv_bufferBarrier2{};
 
+		if (l_resourcesNames.size() != l_synchRequests.size()) {
+			throw "The number of synchronization requests do not match the number of resources names.";
+		}
+
+		if (true == l_resourcesNames.empty()) {
+			return;
+		}
+
+		lv_bufferBarrier2.reserve(l_resourcesNames.size());
+		lv_imageBarriers2.reserve(l_resourcesNames.size());
+
+		for (size_t i = 0U; auto& l_resName : l_resourcesNames) {
+			if (true == l_synchRequests[i].m_imageLayout.has_value()) {
+				
+				auto lv_iter = m_mapVulkanTextureNamesToIndexAndState.find(std::string{ l_resName });
+				if (m_mapVulkanTextureNamesToIndexAndState.end() == lv_iter) {
+					throw "One of the requested textures to be synchronized does not exit amongst the resources.";
+				}
+				auto& lv_synchState = lv_iter->second.second;
+				auto& lv_mipSynchState = lv_synchState[l_synchRequests[i].m_baseMipMap];
+
+				if (true == lv_mipSynchState.ShouldGenerateBarrier(true, l_synchRequests[i].m_accessFlagToBeUsed)) {
+					
+					VkImageAspectFlags lv_aspectFlag{};
+					if (VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL == l_synchRequests[i].m_imageLayout.value()
+						|| VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL == l_synchRequests[i].m_imageLayout.value()) {
+						lv_aspectFlag = VK_IMAGE_ASPECT_DEPTH_BIT;
+					}
+					else {
+						lv_aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
+					}
+					auto& lv_texture = m_vulkanTextures[lv_iter->second.first];
+					lv_imageBarriers2.push_back(Utilities::GenerateVkImageMemoryBarrier2(lv_mipSynchState.m_latestPipelineStageUsedIn
+						, l_synchRequests[i].m_pipelineStageToBeUsedIn
+						, lv_mipSynchState.m_latestAccessFlagUsed
+						, l_synchRequests[i].m_accessFlagToBeUsed
+						, lv_texture.m_mipMapImageLayouts[l_synchRequests[i].m_baseMipMap]
+						, l_synchRequests[i].m_imageLayout.value(), lv_texture.m_image
+						, { .aspectMask = lv_aspectFlag, .baseMipLevel = l_synchRequests[i].m_baseMipMap
+						, .levelCount = 1U
+						, .baseArrayLayer = 0U
+						, .layerCount = VK_REMAINING_ARRAY_LAYERS }));
+
+					lv_texture.m_mipMapImageLayouts[l_synchRequests[i].m_baseMipMap] = l_synchRequests[i].m_imageLayout.value();
+
+					lv_mipSynchState.m_latestAccessFlagUsed = l_synchRequests[i].m_accessFlagToBeUsed;
+					lv_mipSynchState.m_latestPipelineStageUsedIn = l_synchRequests[i].m_pipelineStageToBeUsedIn;
+				}
+
+			}
+			else {
+				auto lv_iter = m_mapVulkanBufferNamesToIndexAndState.find(std::string{ l_resName });
+				if (m_mapVulkanBufferNamesToIndexAndState.end() == lv_iter) {
+					throw "One of the requested buffers to be synchronized does not exit amongst the resources.";
+				}
+				auto& lv_synchState = lv_iter->second.second;
+
+				if (true == lv_synchState.ShouldGenerateBarrier(false, l_synchRequests[i].m_accessFlagToBeUsed)) {
+					auto& lv_buffer = m_vulkanBuffers[lv_iter->second.first];
+					lv_bufferBarrier2.push_back(Utilities::GenerateVkBufferMemoryBarrier2(lv_synchState.m_latestPipelineStageUsedIn
+						, l_synchRequests[i].m_pipelineStageToBeUsedIn
+						, lv_synchState.m_latestAccessFlagUsed
+						, l_synchRequests[i].m_accessFlagToBeUsed, lv_buffer.m_buffer));
+
+					lv_synchState.m_latestAccessFlagUsed = l_synchRequests[i].m_accessFlagToBeUsed;
+					lv_synchState.m_latestPipelineStageUsedIn = l_synchRequests[i].m_pipelineStageToBeUsedIn;
+				}
+
+			}
+
+			++i;
+		}
+
+
+		if (false == lv_bufferBarrier2.empty() || false == lv_imageBarriers2.empty()) {
+			VkDependencyInfo lv_depInfo{};
+			lv_depInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+			lv_depInfo.pImageMemoryBarriers = lv_imageBarriers2.data();
+			lv_depInfo.imageMemoryBarrierCount = static_cast<uint32_t>(lv_imageBarriers2.size());
+			lv_depInfo.pBufferMemoryBarriers = lv_bufferBarrier2.data();
+			lv_depInfo.bufferMemoryBarrierCount = static_cast<uint32_t>(lv_bufferBarrier2.size());
+			
+			vkCmdPipelineBarrier2(l_cmdBuffer, &lv_depInfo);
+		}
+
+	}
 
 	void VulkanResourceManager::CleanUp(VkDevice l_device, VmaAllocator l_allocator) noexcept
 	{

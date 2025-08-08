@@ -300,20 +300,19 @@ namespace VRenderer
 			
 			using namespace Utilities;
 
-			VulkanTexture& lv_testTexture = m_vulkanResManager.RetrieveVulkanTexture(fmt::format("Test-Image{}", lv_currentFrameInflightIndex));
+			auto lv_testTextureName = fmt::format("Test-Image{}", lv_currentFrameInflightIndex);
+			VulkanTexture& lv_testTexture = m_vulkanResManager.RetrieveVulkanTexture(lv_testTextureName);
 			VkPipeline lv_computePipeline = m_computePasses[m_currentComputePassIndex].m_pipeline;
 			auto& lv_pushData = m_computePasses[m_currentComputePassIndex].m_pushConstData;
 			VkPipelineLayout lv_computePipelineLayout = m_vulkanResManager.RetrieveVulkanPipelineLayout("ComputePipelineLayout");
 
-
-			ImageLayoutTransitionCmd(l_cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT
-				, lv_testTexture.m_mipMapImageLayouts[0], VK_IMAGE_LAYOUT_GENERAL
-				, lv_testTexture.m_image, VK_ACCESS_2_TRANSFER_READ_BIT
-				, VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_2_TRANSFER_BIT
-				, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
-			lv_testTexture.m_mipMapImageLayouts[0] = VK_IMAGE_LAYOUT_GENERAL;
-
-			
+			std::array<std::string_view, 1> lv_testTextureNameView{ lv_testTextureName };
+			SynchronizationRequest lv_synchReq{};
+			lv_synchReq.m_accessFlagToBeUsed = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+			lv_synchReq.m_pipelineStageToBeUsedIn = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+			lv_synchReq.m_imageLayout.emplace(VK_IMAGE_LAYOUT_GENERAL);
+			std::array<SynchronizationRequest, 1> lv_synchReqs{ lv_synchReq };
+			m_vulkanResManager.SynchronizeResources(l_cmdBuffer, lv_testTextureNameView, lv_synchReqs);
 
 			vkCmdBindPipeline(l_cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, lv_computePipeline);
 			vkCmdBindDescriptorSets(l_cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, lv_computePipelineLayout, 0, 1, &m_testComputeSets[lv_currentFrameInflightIndex].m_set, 0U, nullptr);
@@ -325,19 +324,19 @@ namespace VRenderer
 		auto lv_graphicsCmds = [&, lv_swapchainImageIndex, lv_currentFrameInflightIndex](VkCommandBuffer l_cmdBuffer)->void
 			{
 				using namespace Utilities;
-				
-				VulkanTexture& lv_testTexture = m_vulkanResManager.RetrieveVulkanTexture(fmt::format("Test-Image{}", lv_currentFrameInflightIndex));
+				auto lv_testTextureName = fmt::format("Test-Image{}", lv_currentFrameInflightIndex);
+				VulkanTexture& lv_testTexture = m_vulkanResManager.RetrieveVulkanTexture(lv_testTextureName);
 				VkImageView lv_testTextureView = m_vulkanResManager.RetrieveVulkanImageView(fmt::format("ComputeImageView{}", lv_currentFrameInflightIndex));
 				VkPipeline lv_graphicsPipeline = m_vulkanResManager.RetrieveVulkanPipeline("GraphicsPipeline");
 				VkPipelineLayout lv_graphicsPipelineLayout = m_vulkanResManager.RetrieveVulkanPipelineLayout("GraphicsPipelineLayout");
 				VulkanBuffer& lv_indexBuffer = m_vulkanResManager.RetrieveVulkanBuffer("IndicesBuffer");
 
-				ImageLayoutTransitionCmd(l_cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT
-					, lv_testTexture.m_mipMapImageLayouts[0], VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-					, lv_testTexture.m_image, VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT
-					, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT
-					, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
-				lv_testTexture.m_mipMapImageLayouts[0] = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+				std::array<std::string_view, 1> lv_testTextureNames{lv_testTextureName};
+				std::array<SynchronizationRequest, 1> lv_synchReqsTest{};
+				lv_synchReqsTest[0].m_accessFlagToBeUsed = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+				lv_synchReqsTest[0].m_pipelineStageToBeUsedIn = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+				lv_synchReqsTest[0].m_imageLayout.emplace(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+				m_vulkanResManager.SynchronizeResources(l_cmdBuffer , lv_testTextureNames, lv_synchReqsTest);
 
 				auto lv_renderAttachmentInfo = GenerateRenderAttachmentInfo(lv_testTextureView);
 				std::array<VkRenderingAttachmentInfo, 1> lv_pRenderAttachmentInfo{lv_renderAttachmentInfo};
@@ -370,20 +369,21 @@ namespace VRenderer
 
 				vkCmdEndRendering(l_cmdBuffer);
 
-				ImageLayoutTransitionCmd(l_cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT
-					, lv_testTexture.m_mipMapImageLayouts[0], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
-					, lv_testTexture.m_image, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT
-					, VK_ACCESS_2_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT
-					, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
-				lv_testTexture.m_mipMapImageLayouts[0] = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+				{
+					std::array<SynchronizationRequest, 1> lv_synchReqsTest{};
+					lv_synchReqsTest[0].m_accessFlagToBeUsed = VK_ACCESS_2_TRANSFER_READ_BIT;
+					lv_synchReqsTest[0].m_pipelineStageToBeUsedIn = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+					lv_synchReqsTest[0].m_imageLayout.emplace(VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+					m_vulkanResManager.SynchronizeResources(l_cmdBuffer, lv_testTextureNames, lv_synchReqsTest);
 
+				}
 
-				ImageLayoutTransitionCmd(l_cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT
-					, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-					, m_vulkanSwapchain.m_images[lv_swapchainImageIndex], VK_ACCESS_2_MEMORY_READ_BIT
-					, VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT
-					, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
-
+					ImageLayoutTransitionCmd(l_cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT
+						, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+						, m_vulkanSwapchain.m_images[lv_swapchainImageIndex], VK_ACCESS_2_MEMORY_READ_BIT
+						, VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT
+						, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
+				
 				auto& lv_swapchainExtent = m_vulkanSwapchain.m_extent;
 				std::array<VkOffset3D, 2> lv_srcRegion{ VkOffset3D{}, VkOffset3D{.x = (int)lv_testTexture.m_extent.width, .y = (int)lv_testTexture.m_extent.height, .z = 1} };
 				std::array<VkOffset3D, 2> lv_dstRegion{ VkOffset3D{}, VkOffset3D{.x = (int)lv_swapchainExtent.width, .y = (int)lv_swapchainExtent.height, .z = 1} };
