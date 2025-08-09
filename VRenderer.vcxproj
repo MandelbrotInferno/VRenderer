@@ -188,6 +188,7 @@
     <ClCompile Include="src\VRenderer\SDL_WindowWrapper.cpp" />
     <ClCompile Include="src\VRenderer\Utilities\Utilities.cpp" />
     <ClCompile Include="src\VRenderer\VulkanResourceManager.cpp" />
+    <ClCompile Include="src\VRenderer\VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV.cpp" />
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanBuffer.cpp" />
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanCommandbufferReset.cpp" />
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanDescriptorSetAllocator.cpp" />
@@ -217,6 +218,7 @@
     <ClInclude Include="include\VRenderer\Utilities\Utilities.hpp" />
     <ClInclude Include="include\VRenderer\Utilities\VulkanGraphicsCreateInfo.hpp" />
     <ClInclude Include="include\VRenderer\VulkanResourceManager.hpp" />
+    <ClInclude Include="include\VRenderer\VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanBuffer.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanCommandbufferReset.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSet.hpp" />

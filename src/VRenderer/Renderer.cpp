@@ -8,7 +8,7 @@
 #include "VRenderer/Utilities/GPUSceneBuffers.hpp"
 #include "VRenderer/Logger/Logger.hpp"
 #include "VRenderer/VulkanWrappers/VulkanDescriptorSetUpdater.hpp"
-
+#include "VRenderer/VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV.hpp"
 
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
@@ -25,6 +25,7 @@
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_vulkan.h>
+#include <filesystem>
 
 
 namespace VRenderer
@@ -72,7 +73,7 @@ namespace VRenderer
 		InitializeDescriptorSetPools();
 		InitializeIMGUI(l_window);
 
-
+		GenerateAllVulkanSetLayoutsAndPipelineLayouts();
 		//Testing code
 		auto lv_fullScreenDimensions = Utilities::GetFullResolutionDimensions();
 		VulkanTexture lv_testTexture = Utilities::GenerateVulkanTexture(m_vmaAlloc, VK_FORMAT_R16G16B16A16_SFLOAT, VkExtent3D{.width = lv_fullScreenDimensions.x, .height = lv_fullScreenDimensions.y, .depth = 1}, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT);
@@ -114,12 +115,14 @@ namespace VRenderer
 
 		VULKAN_CHECK(vkQueueWaitIdle(m_graphicsQueue.m_queue));
 
-		VulkanDescriptorSetLayoutFactory lv_setLayoutFactory{};
-		lv_setLayoutFactory.AddBinding(0U, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1U, VK_SHADER_STAGE_COMPUTE_BIT);
-		VkDescriptorSetLayout lv_computeSetLayout = lv_setLayoutFactory.GenerateSetLayout(m_device);
-		m_vulkanResManager.AddVulkanSetLayout("ComputeSetLayout", lv_computeSetLayout);
-
-		std::array<VkDescriptorSetLayout, 1> lv_ptComputeSetLayout{ lv_computeSetLayout };
+		//VulkanDescriptorSetLayoutFactory lv_setLayoutFactory{};
+		//lv_setLayoutFactory.AddBinding(0U, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1U, VK_SHADER_STAGE_COMPUTE_BIT);
+		//VkDescriptorSetLayout lv_computeSetLayout = lv_setLayoutFactory.GenerateSetLayout(m_device);
+		//for (auto& l_setLayout : lv_vulkanComputeSetLayouts) {
+			//m_vulkanResManager.AddVulkanSetLayout(std::move(l_setLayout.first), l_setLayout.second);
+		//}
+		
+		std::array<VkDescriptorSetLayout, 1> lv_ptComputeSetLayout{ m_vulkanResManager.RetrieveVulkanDescriptorSetLayout("TestComputePass0")};
 		m_testComputeSets[0] = m_mainDescriptorSetAlloc.Allocate(m_device, lv_ptComputeSetLayout);
 		m_testComputeSets[1] = m_mainDescriptorSetAlloc.Allocate(m_device, lv_ptComputeSetLayout);
 
@@ -171,22 +174,24 @@ namespace VRenderer
 		m_graphicsPushConstant.m_worldMatrix = glm::mat4{ 1.f };
 
 
-		std::array<VkPushConstantRange,1> lv_pushConsRange{};
-		lv_pushConsRange[0].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-		lv_pushConsRange[0].offset = 0U;
-		lv_pushConsRange[0].size = sizeof(ComputePassPushConstant);
+		//std::array<VkPushConstantRange,1> lv_pushConsRange{};
+		//lv_pushConsRange[0].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+		//lv_pushConsRange[0].offset = 0U;
+		//lv_pushConsRange[0].size = sizeof(ComputePassPushConstant);
 
-		VkPipelineLayout lv_computePipelineLayout = Utilities::GenerateVkPipelineLayout(m_device, lv_ptComputeSetLayout, lv_pushConsRange);
+		//VkPipelineLayout lv_computePipelineLayout = Utilities::GenerateVkPipelineLayout(m_device, {}, lv_pushConsRange);
 
-		lv_pushConsRange[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-		lv_pushConsRange[0].size = sizeof(GraphicsPassPushConstant);
-		VkPipelineLayout lv_graphicsPipelineLayout = Utilities::GenerateVkPipelineLayout(m_device, {}, lv_pushConsRange);
+		//lv_pushConsRange[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+		//lv_pushConsRange[0].size = sizeof(GraphicsPassPushConstant);
+		//VkPipelineLayout lv_graphicsPipelineLayout = Utilities::GenerateVkPipelineLayout(m_device, {}, lv_pushConsRange);
 
-		VkShaderModule lv_gradientColorShaderModule = Utilities::GenerateVkShaderModule("shaders/SPIRV-CompiledShaders/GradientColor.spv", m_device);
-		VkShaderModule lv_skyShaderModule = Utilities::GenerateVkShaderModule("shaders/SPIRV-CompiledShaders/Sky.spv", m_device);
-		VkShaderModule lv_triangleVertShaderModule = Utilities::GenerateVkShaderModule("shaders/SPIRV-CompiledShaders/RectangleTriangleVert.spv", m_device);
-		VkShaderModule lv_triangleFragShaderModule = Utilities::GenerateVkShaderModule("shaders/SPIRV-CompiledShaders/TriangleFrag.spv", m_device);
+		VkShaderModule lv_gradientColorShaderModule = Utilities::GenerateVkShaderModule("shaders/TestComputePass/SPV/GradientColor.spv", m_device);
+		VkShaderModule lv_skyShaderModule = Utilities::GenerateVkShaderModule("shaders/TestSkyComputePass/SPV/Sky.spv", m_device);
+		VkShaderModule lv_triangleVertShaderModule = Utilities::GenerateVkShaderModule("shaders/ColoredRectangleRenderPass/SPV/RectangleTriangleVert.spv", m_device);
+		VkShaderModule lv_triangleFragShaderModule = Utilities::GenerateVkShaderModule("shaders/ColoredRectangleRenderPass/SPV/TriangleFrag.spv", m_device);
 
+		auto lv_computePipelineLayout = m_vulkanResManager.RetrieveVulkanPipelineLayout("TestComputePass");
+		auto lv_graphicsPipelineLayout = m_vulkanResManager.RetrieveVulkanPipelineLayout("ColoredRectangleRenderPass");
 		VkPipeline lv_GradientColorPipeline = Utilities::GenerateComputeVkPipeline(m_device, lv_computePipelineLayout, lv_gradientColorShaderModule, "main");
 		VkPipeline lv_skyPipeline = Utilities::GenerateComputeVkPipeline(m_device, lv_computePipelineLayout, lv_skyShaderModule, "main");
 		
@@ -232,8 +237,8 @@ namespace VRenderer
 		m_vulkanResManager.AddVulkanPipeline("GradientColorPipeline", lv_GradientColorPipeline);
 		m_vulkanResManager.AddVulkanPipeline("SkyPipeline", lv_skyPipeline);
 
-		m_vulkanResManager.AddVulkanPipelineLayout("ComputePipelineLayout", lv_computePipelineLayout);
-		m_vulkanResManager.AddVulkanPipelineLayout("GraphicsPipelineLayout", lv_graphicsPipelineLayout);
+		//m_vulkanResManager.AddVulkanPipelineLayout("ComputePipelineLayout", lv_computePipelineLayout);
+		//m_vulkanResManager.AddVulkanPipelineLayout("GraphicsPipelineLayout", lv_graphicsPipelineLayout);
 
 
 		m_vulkanResManager.AddVulkanBuffer("VerticesBuffer", std::move(lv_sceneBuffers.m_verticesBuffer));
@@ -304,7 +309,7 @@ namespace VRenderer
 			VulkanTexture& lv_testTexture = m_vulkanResManager.RetrieveVulkanTexture(lv_testTextureName);
 			VkPipeline lv_computePipeline = m_computePasses[m_currentComputePassIndex].m_pipeline;
 			auto& lv_pushData = m_computePasses[m_currentComputePassIndex].m_pushConstData;
-			VkPipelineLayout lv_computePipelineLayout = m_vulkanResManager.RetrieveVulkanPipelineLayout("ComputePipelineLayout");
+			VkPipelineLayout lv_computePipelineLayout = m_vulkanResManager.RetrieveVulkanPipelineLayout("TestComputePass");
 
 			std::array<std::string_view, 1> lv_testTextureNameView{ lv_testTextureName };
 			SynchronizationRequest lv_synchReq{};
@@ -328,7 +333,7 @@ namespace VRenderer
 				VulkanTexture& lv_testTexture = m_vulkanResManager.RetrieveVulkanTexture(lv_testTextureName);
 				VkImageView lv_testTextureView = m_vulkanResManager.RetrieveVulkanImageView(fmt::format("ComputeImageView{}", lv_currentFrameInflightIndex));
 				VkPipeline lv_graphicsPipeline = m_vulkanResManager.RetrieveVulkanPipeline("GraphicsPipeline");
-				VkPipelineLayout lv_graphicsPipelineLayout = m_vulkanResManager.RetrieveVulkanPipelineLayout("GraphicsPipelineLayout");
+				VkPipelineLayout lv_graphicsPipelineLayout = m_vulkanResManager.RetrieveVulkanPipelineLayout("ColoredRectangleRenderPass");
 				VulkanBuffer& lv_indexBuffer = m_vulkanResManager.RetrieveVulkanBuffer("IndicesBuffer");
 
 				std::array<std::string_view, 1> lv_testTextureNames{lv_testTextureName};
@@ -478,6 +483,26 @@ namespace VRenderer
 		}
 
 		++m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex;
+	}
+
+	void Renderer::GenerateAllVulkanSetLayoutsAndPipelineLayouts()
+	{
+		std::vector<std::string> lv_allSpvFilePaths{};
+		lv_allSpvFilePaths.reserve(64U);
+		const std::filesystem::path lv_shaderRootFolder{ m_shaderRootPath };
+
+		for (const auto& l_entry : std::filesystem::directory_iterator(lv_shaderRootFolder)) {
+			if (true == l_entry.is_directory()) {
+				std::string lv_tempString = l_entry.path().string();
+				lv_tempString.append("\\SPV");
+				lv_allSpvFilePaths.emplace_back(std::move(lv_tempString));
+			}
+		}
+
+		VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV lv_generator{};
+		for (const auto& l_spvFilePath : lv_allSpvFilePaths) {
+			lv_generator.GenerateVulkanPipelineLayoutAndSetLayouts(m_device, m_vulkanResManager, l_spvFilePath);
+		}
 	}
 
 
