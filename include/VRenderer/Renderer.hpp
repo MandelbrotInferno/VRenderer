@@ -58,6 +58,8 @@ namespace VRenderer
 		void ResizeWindow();
 		void ResetResourcesAfterWindowResize(SDL_Window* l_window);
 
+		void GenerateAllVulkanSetLayoutsAndPipelineLayouts();
+
 	public:
 		
 		VulkanFoundationalElements m_vulkanFoundational{};
@@ -83,6 +85,8 @@ namespace VRenderer
 
 		bool m_physicalDeviceHasDedicatedCompute{ false };
 		bool m_resizeWindow{ false };
+
+		std::string m_shaderRootPath{"shaders"};
 
 		//Test code
 		ComputePassPushConstant m_pushConstDataImGui{};
