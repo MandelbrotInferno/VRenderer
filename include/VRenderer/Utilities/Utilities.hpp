@@ -97,6 +97,39 @@ namespace VRenderer
 			return lv_gpuBuffer;
 		}
 
+		template<typename CPUBufferType>
+		void PopulateVulkanTexture(VkDevice l_device, VulkanTexture& l_allocTextureToPopulate, VkQueue l_graphicsQueue, VulkanCommandbufferReset& l_cmdBuffer, VkFence l_fence, VmaAllocator l_allocator, const std::span<CPUBufferType> l_bufferCPU, const uint32_t l_mipLevel = 0U, const uint32_t l_baseArrayLevel = 0U, const uint32_t l_layerCount = 1U)
+		{
+			VulkanBuffer lv_stageBuffer = AllocateAndPopulateVulkanBuffer<CPUBufferType>(l_device, l_graphicsQueue, l_cmdBuffer, l_fence, l_allocator, l_bufferCPU, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT);
+
+			auto lv_copyBufferToVulkanTexture = [&](VkCommandBuffer l_cmdBuffer)->void
+				{
+					VkBufferImageCopy lv_copyStructure{};
+					lv_copyStructure.imageExtent = l_allocTextureToPopulate.m_extent;
+					lv_copyStructure.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+					lv_copyStructure.imageSubresource.baseArrayLayer = l_baseArrayLevel;
+					lv_copyStructure.imageSubresource.layerCount = l_layerCount;
+					lv_copyStructure.imageSubresource.mipLevel = l_mipLevel;
+
+					ImageLayoutTransitionCmd(l_cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED
+						, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, l_allocTextureToPopulate.m_image
+						, VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT, VK_ACCESS_2_TRANSFER_WRITE_BIT
+						, VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
+
+					vkCmdCopyBufferToImage(l_cmdBuffer, lv_stageBuffer.m_buffer, l_allocTextureToPopulate.m_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &lv_copyStructure);
+
+					ImageLayoutTransitionCmd(l_cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+						, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, l_allocTextureToPopulate.m_image
+						, VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_ACCESS_2_SHADER_SAMPLED_READ_BIT
+						, VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT);
+
+				};
+
+			ExecuteImmediateGPUCommands(l_device, l_graphicsQueue, l_cmdBuffer, l_fence, lv_copyBufferToVulkanTexture);
+
+			lv_stageBuffer.CleanUp(l_allocator);
+		}
+
 		glm::uvec2 GetFullResolutionDimensions();
 
 		VkDescriptorPool GenerateVkDescriptorPool(VkDevice l_device, const std::span<VkDescriptorPoolSize> l_poolSizes, const uint32_t l_maxNumSets);
