@@ -182,6 +182,8 @@
     <ClCompile Include="manual-dependencies\imgui_tables.cpp" />
     <ClCompile Include="manual-dependencies\imgui_widgets.cpp" />
     <ClCompile Include="manual-dependencies\SPIRV-Reflect\spirv_reflect.c" />
+    <ClCompile Include="src\SceneDataGenerator\SceneData.cpp" />
+    <ClCompile Include="src\SceneDataGenerator\SceneDataGenerator.cpp" />
     <ClCompile Include="src\VRenderer\Logger\Logger.cpp" />
     <ClCompile Include="src\VRenderer\main.cpp" />
     <ClCompile Include="src\VRenderer\Renderer.cpp" />
@@ -202,6 +204,10 @@
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanTimelineSemaphore.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\SceneDataGenerator\GeometryData\Mesh.hpp" />
+    <ClInclude Include="include\SceneDataGenerator\GeometryData\Vertex.hpp" />
+    <ClInclude Include="include\SceneDataGenerator\SceneData.hpp" />
+    <ClInclude Include="include\SceneDataGenerator\SceneDataGenerator.hpp" />
     <ClInclude Include="include\VRenderer\AppState.hpp" />
     <ClInclude Include="include\VRenderer\Logger\Category.hpp" />
     <ClInclude Include="include\VRenderer\Logger\Level.hpp" />
@@ -210,11 +216,11 @@
     <ClInclude Include="include\VRenderer\Passes\ComputePasses\ComputePass.hpp" />
     <ClInclude Include="include\VRenderer\Passes\ComputePasses\ComputePassPushConstant.hpp" />
     <ClInclude Include="include\VRenderer\Passes\GraphicsPasses\GraphicsPassPushConstant.hpp" />
-    <ClInclude Include="include\VRenderer\Passes\GraphicsPasses\Vertex.hpp" />
     <ClInclude Include="include\VRenderer\Renderer.hpp" />
     <ClInclude Include="include\VRenderer\SDL_WindowWrapper.hpp" />
     <ClInclude Include="include\VRenderer\SynchronizationRequest.hpp" />
     <ClInclude Include="include\VRenderer\Utilities\GPUSceneBuffers.hpp" />
+    <ClInclude Include="include\VRenderer\Utilities\GPUUniformBufferData.hpp" />
     <ClInclude Include="include\VRenderer\Utilities\Utilities.hpp" />
     <ClInclude Include="include\VRenderer\Utilities\VulkanGraphicsCreateInfo.hpp" />
     <ClInclude Include="include\VRenderer\VulkanResourceManager.hpp" />

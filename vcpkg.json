@@ -1,13 +1,14 @@
 {
   "dependencies": [
-    "fastgltf",
+    "assimp",
+    "meshoptimizer",
     "fmt",
     "glm",
     "stb",
     "vk-bootstrap",
     "volk",
     "vulkan-memory-allocator",
-	"tracy",
+    "tracy",
     {
       "name": "sdl3",
       "features": [

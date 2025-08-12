@@ -4,7 +4,7 @@
 #include "VRenderer/Utilities/Utilities.hpp"
 #include "VRenderer/VulkanWrappers/VulkanDescriptorSetLayoutFactory.hpp"
 #include "VRenderer/Utilities/VulkanGraphicsCreateInfo.hpp"
-#include "VRenderer/Passes/GraphicsPasses/Vertex.hpp"
+#include "SceneDataGenerator/GeometryData/Vertex.hpp"
 #include "VRenderer/Utilities/GPUSceneBuffers.hpp"
 #include "VRenderer/Logger/Logger.hpp"
 #include "VRenderer/VulkanWrappers/VulkanDescriptorSetUpdater.hpp"
@@ -142,17 +142,12 @@ namespace VRenderer
 		lv_desSetUpdater.Reset();
 
 		
-		std::array<Vertex, 4> lv_rectVertices;
+		std::array<Scene::Vertex, 4> lv_rectVertices;
 
 		lv_rectVertices[0].m_position = { 0.5,-0.5, 0 };
 		lv_rectVertices[1].m_position = { 0.5,0.5, 0 };
 		lv_rectVertices[2].m_position = { -0.5,-0.5, 0 };
 		lv_rectVertices[3].m_position = { -0.5,0.5, 0 };
-
-		lv_rectVertices[0].m_color = { 0,0, 0,1 };
-		lv_rectVertices[1].m_color = { 0.5,0.5,0.5 ,1 };
-		lv_rectVertices[2].m_color = { 1,0, 0,1 };
-		lv_rectVertices[3].m_color = { 0,1, 0,1 };
 
 		std::array<uint32_t, 6> lv_rectIndices;
 
@@ -166,7 +161,7 @@ namespace VRenderer
 
 		GPUSceneBuffers lv_sceneBuffers{};
 
-		lv_sceneBuffers.m_verticesBuffer = Utilities::AllocateAndPopulateVulkanBuffer<Vertex>(m_device, m_graphicsQueue.m_queue, m_immediateCmdBuffer, m_immediateGPUCmdsFence, m_vmaAlloc, lv_rectVertices, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT);
+		lv_sceneBuffers.m_verticesBuffer = Utilities::AllocateAndPopulateVulkanBuffer<Scene::Vertex>(m_device, m_graphicsQueue.m_queue, m_immediateCmdBuffer, m_immediateGPUCmdsFence, m_vmaAlloc, lv_rectVertices, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT);
 		lv_sceneBuffers.m_indicesBuffer = Utilities::AllocateAndPopulateVulkanBuffer<uint32_t>(m_device, m_graphicsQueue.m_queue, m_immediateCmdBuffer, m_immediateGPUCmdsFence, m_vmaAlloc, lv_rectIndices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT);
 		lv_sceneBuffers.m_verticesDeviceAddr = Utilities::GetDeviceAddressOfVkBuffer(m_device, lv_sceneBuffers.m_verticesBuffer.m_buffer);
 

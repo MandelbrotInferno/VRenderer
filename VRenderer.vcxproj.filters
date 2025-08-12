@@ -19,14 +19,8 @@
     <Filter Include="src\VRenderer">
       <UniqueIdentifier>{42f88326-a311-421e-a06e-7666d6c10342}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\VRenderer\VulkanUtils">
-      <UniqueIdentifier>{46325164-a5e0-45d4-bfb0-b25669a1990a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="include\VRenderer\VulkanWrappers">
       <UniqueIdentifier>{dd68b035-c071-459a-83dc-3808099957bb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\VRenderer\VulkanUtils">
-      <UniqueIdentifier>{c70badd6-1c35-4c1f-a7d6-26d2d61636c0}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\VRenderer\VulkanWrappers">
       <UniqueIdentifier>{8d917480-6d8d-4d0d-9fac-c2e5a2070a61}</UniqueIdentifier>
@@ -36,6 +30,21 @@
     </Filter>
     <Filter Include="include\VRenderer\Passes\ComputePasses">
       <UniqueIdentifier>{d73a67a4-dfb7-4cd8-8c77-f87daed491f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\VRenderer\Utilities">
+      <UniqueIdentifier>{46325164-a5e0-45d4-bfb0-b25669a1990a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\VRenderer\Utilities">
+      <UniqueIdentifier>{c70badd6-1c35-4c1f-a7d6-26d2d61636c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\SceneDataGenerator">
+      <UniqueIdentifier>{4031113a-ad04-47a8-b908-8ab4d3920cce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\SceneDataGenerator\GeometryData">
+      <UniqueIdentifier>{d36a0b78-091e-469f-b07e-114cbd3710c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\SceneDataGenerator">
+      <UniqueIdentifier>{7fe203ff-89cb-41b1-b6de-2181cc50d2d0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -101,6 +110,14 @@
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanBuffer.cpp" />
     <ClCompile Include="src\VRenderer\Logger\Logger.cpp" />
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanDescriptorSetUpdater.cpp" />
+    <ClCompile Include="manual-dependencies\SPIRV-Reflect\spirv_reflect.c" />
+    <ClCompile Include="src\VRenderer\VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV.cpp" />
+    <ClCompile Include="src\SceneDataGenerator\SceneDataGenerator.cpp">
+      <Filter>src\SceneDataGenerator</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SceneDataGenerator\SceneData.cpp">
+      <Filter>src\SceneDataGenerator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="manual-dependencies\imconfig.h">
@@ -179,12 +196,11 @@
       <Filter>include\VRenderer\Passes\ComputePasses</Filter>
     </ClInclude>
     <ClInclude Include="include\VRenderer\Passes\GraphicsPasses\GraphicsPassPushConstant.hpp" />
-    <ClInclude Include="include\VRenderer\Passes\GraphicsPasses\Vertex.hpp" />
     <ClInclude Include="include\VRenderer\Utilities\Utilities.hpp" />
     <ClInclude Include="include\VRenderer\Utilities\VulkanGraphicsCreateInfo.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanBuffer.hpp" />
     <ClInclude Include="include\VRenderer\Utilities\GPUSceneBuffers.hpp">
-      <Filter>include\VRenderer\VulkanUtils</Filter>
+      <Filter>include\VRenderer\Utilities</Filter>
     </ClInclude>
     <ClInclude Include="include\VRenderer\AppState.hpp">
       <Filter>include\VRenderer</Filter>
@@ -197,6 +213,24 @@
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSetUpdater.hpp" />
     <ClInclude Include="include\VRenderer\SynchronizationRequest.hpp">
       <Filter>include\VRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRenderer\VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV.hpp" />
+    <ClInclude Include="manual-dependencies\SPIRV-Reflect\spirv.h" />
+    <ClInclude Include="manual-dependencies\SPIRV-Reflect\spirv_reflect.h" />
+    <ClInclude Include="include\VRenderer\Utilities\GPUUniformBufferData.hpp">
+      <Filter>include\VRenderer\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SceneDataGenerator\SceneDataGenerator.hpp">
+      <Filter>include\SceneDataGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SceneDataGenerator\SceneData.hpp">
+      <Filter>include\SceneDataGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SceneDataGenerator\GeometryData\Mesh.hpp">
+      <Filter>include\SceneDataGenerator\GeometryData</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SceneDataGenerator\GeometryData\Vertex.hpp">
+      <Filter>include\SceneDataGenerator\GeometryData</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

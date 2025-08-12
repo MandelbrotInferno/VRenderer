@@ -4,6 +4,7 @@
 #include "VRenderer/Renderer.hpp"
 #include "VRenderer/SDL_WindowWrapper.hpp"
 #include "VRenderer/Logger/Logger.hpp"
+#include "SceneDataGenerator/SceneDataGenerator.hpp"
 
 #include <tracy/Tracy.hpp>
 #include <SDL3/SDL.h>
@@ -51,11 +52,14 @@ int main()
 {
 	using namespace VRenderer;
 	START_LOGGING();
+	SET_LEVEL(Level::INFO, LevelModeCompareOp::EQUAL);
+	Scene::SceneDataGenerator lv_sceneDataGenerator{};
 
 	VRenderer::SDL_WindowWrapper lv_window{};
 	std::unique_ptr<VRenderer::Renderer> lv_renderer = std::make_unique<VRenderer::Renderer>();;
 	
 	try {
+		auto lv_sceneData = lv_sceneDataGenerator.Generate("SerializedFiles/SceneDataBinary", "Scenes/Sponza/NewSponza_Main_glTF_003.gltf");
 
 		const int lv_result = InitializeSDL();
 		if (-1 == lv_result) {

@@ -520,6 +520,8 @@ namespace VRenderer
 			return lv_buffer;
 		}
 
+
+
 		VkDeviceAddress GetDeviceAddressOfVkBuffer(VkDevice l_device, VkBuffer l_vkBuffer)
 		{
 			VkBufferDeviceAddressInfo lv_deviceAddressInfo{};

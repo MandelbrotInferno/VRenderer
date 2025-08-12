@@ -414,5 +414,7 @@ vcpkg/
 imgui.ini
 TRACY_LATEST(just for test)/
 TracyCaptures/
+Scenes/
+SerializedFiles/
 
 
