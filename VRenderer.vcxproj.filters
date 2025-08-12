@@ -37,6 +37,15 @@
     <Filter Include="src\VRenderer\Utilities">
       <UniqueIdentifier>{c70badd6-1c35-4c1f-a7d6-26d2d61636c0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\SceneDataGenerator">
+      <UniqueIdentifier>{4031113a-ad04-47a8-b908-8ab4d3920cce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\SceneDataGenerator\GeometryData">
+      <UniqueIdentifier>{d36a0b78-091e-469f-b07e-114cbd3710c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\SceneDataGenerator">
+      <UniqueIdentifier>{7fe203ff-89cb-41b1-b6de-2181cc50d2d0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="manual-dependencies\imgui.cpp">
@@ -103,6 +112,12 @@
     <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanDescriptorSetUpdater.cpp" />
     <ClCompile Include="manual-dependencies\SPIRV-Reflect\spirv_reflect.c" />
     <ClCompile Include="src\VRenderer\VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV.cpp" />
+    <ClCompile Include="src\SceneDataGenerator\SceneDataGenerator.cpp">
+      <Filter>src\SceneDataGenerator</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SceneDataGenerator\SceneData.cpp">
+      <Filter>src\SceneDataGenerator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="manual-dependencies\imconfig.h">
@@ -181,7 +196,6 @@
       <Filter>include\VRenderer\Passes\ComputePasses</Filter>
     </ClInclude>
     <ClInclude Include="include\VRenderer\Passes\GraphicsPasses\GraphicsPassPushConstant.hpp" />
-    <ClInclude Include="include\VRenderer\Passes\GraphicsPasses\Vertex.hpp" />
     <ClInclude Include="include\VRenderer\Utilities\Utilities.hpp" />
     <ClInclude Include="include\VRenderer\Utilities\VulkanGraphicsCreateInfo.hpp" />
     <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanBuffer.hpp" />
@@ -205,6 +219,18 @@
     <ClInclude Include="manual-dependencies\SPIRV-Reflect\spirv_reflect.h" />
     <ClInclude Include="include\VRenderer\Utilities\GPUUniformBufferData.hpp">
       <Filter>include\VRenderer\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SceneDataGenerator\SceneDataGenerator.hpp">
+      <Filter>include\SceneDataGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SceneDataGenerator\SceneData.hpp">
+      <Filter>include\SceneDataGenerator</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SceneDataGenerator\GeometryData\Mesh.hpp">
+      <Filter>include\SceneDataGenerator\GeometryData</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SceneDataGenerator\GeometryData\Vertex.hpp">
+      <Filter>include\SceneDataGenerator\GeometryData</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
