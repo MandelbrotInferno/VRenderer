@@ -147,6 +147,7 @@ namespace Scene
 				lv_indicesCurrentOffset += (3U * lv_currentMesh->mNumFaces);
 			}
 			
+			BuildSceneGraph(lv_assimpSceneData);
 			SerializeGeneratedSceneData(l_serializedFilePath);
 		}
 		else {
@@ -261,5 +262,79 @@ namespace Scene
 		memcpy(m_currentSceneData.m_indicesOfAllMeshesInScene.data(), &lv_sceneData[lv_bytesProcessedUntilNow],sizeof(uint32_t) * lv_size);
 		lv_bytesProcessedUntilNow += (sizeof(uint32_t) * lv_size);
 		
+	}
+
+	void SceneDataGenerator::BuildSceneGraph(const aiScene* l_assimpScene)
+	{
+		const uint32_t lv_totalNodesInScene = FindTotalNumNodesInScene(l_assimpScene->mRootNode) + 1U;
+		m_currentSceneData.m_nodes.reserve(lv_totalNodesInScene);
+		m_currentSceneData.m_modalTransformations.reserve(lv_totalNodesInScene);
+		m_currentSceneData.m_localTransformations.reserve(lv_totalNodesInScene);
+
+		auto& lv_rootNode = m_currentSceneData.m_nodes.emplace_back(Node{});
+		m_currentSceneData.m_modalTransformations.emplace_back(ConvertaiMat4ToGlmMat4(l_assimpScene->mRootNode->mTransformation));
+		m_currentSceneData.m_localTransformations.emplace_back(glm::mat4{1.f});
+		lv_rootNode.m_childHandle = AddNodesToSceneGraph(l_assimpScene->mRootNode, 0U, 0U, m_currentSceneData.m_modalTransformations[0]);
+		
+	}
+
+	uint32_t SceneDataGenerator::FindTotalNumNodesInScene(const aiNode* l_assimpNode)
+	{
+		uint32_t lv_totalNumNodesInThisSubtree{};
+		if (nullptr == l_assimpNode) {
+			return lv_totalNumNodesInThisSubtree;
+		}
+
+		const uint32_t lv_totalNumChildren = l_assimpNode->mNumChildren;
+		lv_totalNumNodesInThisSubtree += lv_totalNumChildren;
+		for (uint32_t i = 0U; i < lv_totalNumChildren; ++i) {
+			lv_totalNumNodesInThisSubtree += FindTotalNumNodesInScene(l_assimpNode->mChildren[i]);
+		}
+
+		return lv_totalNumNodesInThisSubtree;
+	}
+
+	uint32_t SceneDataGenerator::AddNodesToSceneGraph(const aiNode* l_assimpNode, const uint32_t l_parentHandle, const uint32_t l_levelOfParent, const glm::mat4& l_modalTransOfParent)
+	{
+		uint32_t lv_firstChildIndex{std::numeric_limits<uint32_t>::max()};
+		const uint32_t lv_totalNumChildren = l_assimpNode->mNumChildren;
+		if (0U != lv_totalNumChildren) {
+			lv_firstChildIndex = static_cast<uint32_t>(m_currentSceneData.m_nodes.size());
+		}
+
+		for (uint32_t i = 0; i < l_assimpNode->mNumMeshes; ++i) {
+			m_currentSceneData.m_meshHandlesToNodes.insert(std::make_pair(l_assimpNode->mMeshes[i], l_parentHandle));
+		}
+		
+
+		const uint32_t lv_currentNodeLevel = l_levelOfParent + 1U;
+		const uint32_t lv_lastSiblingIndex = lv_firstChildIndex + lv_totalNumChildren - 1U;
+		for (uint32_t i = 0U; i < lv_totalNumChildren; ++i) {
+
+			const auto& lv_assimpChildNode = l_assimpNode->mChildren[i];
+			for (uint32_t j = 0; j < lv_assimpChildNode->mNumMeshes; ++j) {
+				m_currentSceneData.m_meshHandlesToNodes.insert(std::make_pair((uint32_t)lv_assimpChildNode->mMeshes[j], lv_firstChildIndex + i));
+			}
+			m_currentSceneData.m_nodes.emplace_back(Node{.m_parentHandle = l_parentHandle,.m_nextSiblingHandle = ((lv_totalNumChildren-1U) == i) ? std::numeric_limits<uint32_t>::max()  : (uint32_t)(m_currentSceneData.m_nodes.size() + 1U) ,.m_lastSiblingHandle = lv_lastSiblingIndex, .m_level = lv_currentNodeLevel});
+			const auto& lv_localTransformation = m_currentSceneData.m_localTransformations.emplace_back(ConvertaiMat4ToGlmMat4(lv_assimpChildNode->mTransformation));
+			m_currentSceneData.m_modalTransformations.emplace_back(l_modalTransOfParent * lv_localTransformation);
+		}
+
+		for (uint32_t i = 0U; i < lv_totalNumChildren; ++i) {
+			m_currentSceneData.m_nodes[lv_firstChildIndex + i].m_childHandle = AddNodesToSceneGraph(l_assimpNode->mChildren[i], lv_firstChildIndex + i, lv_currentNodeLevel, m_currentSceneData.m_modalTransformations[lv_firstChildIndex+i]);
+		}
+
+		return lv_firstChildIndex;
+	}
+
+	glm::mat4 SceneDataGenerator::ConvertaiMat4ToGlmMat4(const aiMatrix4x4& l_assimpMatrix)
+	{
+		auto lv_assimpMatrix = l_assimpMatrix;
+		lv_assimpMatrix = lv_assimpMatrix.Transpose();
+		glm::mat4 lv_result{ lv_assimpMatrix.a1, lv_assimpMatrix.a2, lv_assimpMatrix.a3, lv_assimpMatrix.a4,
+							lv_assimpMatrix.b1, lv_assimpMatrix.b2, lv_assimpMatrix.b3, lv_assimpMatrix.b4,
+							lv_assimpMatrix.c1, lv_assimpMatrix.c2, lv_assimpMatrix.c3, lv_assimpMatrix.c4,
+							lv_assimpMatrix.d1, lv_assimpMatrix.d2, lv_assimpMatrix.d3, lv_assimpMatrix.d4};
+		return lv_result;
 	}
 }

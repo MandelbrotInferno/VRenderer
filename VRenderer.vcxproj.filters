@@ -232,5 +232,8 @@
     <ClInclude Include="include\SceneDataGenerator\GeometryData\Vertex.hpp">
       <Filter>include\SceneDataGenerator\GeometryData</Filter>
     </ClInclude>
+    <ClInclude Include="include\SceneDataGenerator\Node.hpp">
+      <Filter>include\SceneDataGenerator</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
