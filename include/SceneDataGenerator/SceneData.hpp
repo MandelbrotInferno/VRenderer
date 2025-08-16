@@ -7,6 +7,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <unordered_map>
+#include <string>
 
 namespace Scene
 {
@@ -27,5 +28,9 @@ namespace Scene
 		std::vector<glm::mat4> m_localTransformations{};
 
 		std::unordered_map<uint32_t, uint32_t> m_meshHandlesToNodes{};
+
+		//Debugging data
+		std::unordered_map<uint32_t, std::string> m_nodeHandlesToTheirNames{};
+		std::vector<std::string> m_textureNames{};
 	};
 }

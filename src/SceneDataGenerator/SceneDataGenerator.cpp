@@ -64,7 +64,6 @@ namespace Scene
 			m_currentSceneData.m_meshMetaDatas.resize(lv_totalNumMeshesInScene);
 			m_currentSceneData.m_indicesOfAllMeshesInScene.resize(lv_totalNumLod0IndicesInScene);
 
-			
 			uint32_t lv_verticesCurrentOffset{};
 			uint32_t lv_indicesCurrentOffset{};
 			for (uint32_t i = 0U; i < lv_totalNumMeshesInScene; ++i) {
@@ -76,7 +75,7 @@ namespace Scene
 				m_currentSceneData.m_meshMetaDatas[i].m_totalNumVertices = lv_assimpSceneData->mMeshes[i]->mNumVertices;
 				m_currentSceneData.m_meshMetaDatas[i].m_firstVertexHandle = lv_verticesCurrentOffset;
 				m_currentSceneData.m_meshMetaDatas[i].m_firstIndexHandle = lv_indicesCurrentOffset;
-
+				m_currentSceneData.m_meshMetaDatas[i].m_textureHandle = lv_currentMesh->mMaterialIndex;
 
 				bool lv_hasNormals = lv_currentMesh->HasNormals();
 				bool lv_hasTangentAndBitangent = lv_currentMesh->HasTangentsAndBitangents();
@@ -131,6 +130,7 @@ namespace Scene
 							lv_vertex.m_uv_y = lv_assimpUV.y;
 						}
 					}
+
 				}
 
 				for (uint32_t j = 0U; j < lv_currentMesh->mNumFaces; ++j) {
@@ -147,6 +147,13 @@ namespace Scene
 				lv_indicesCurrentOffset += (3U * lv_currentMesh->mNumFaces);
 			}
 			
+			const uint32_t lv_totalNumTextures = lv_assimpSceneData->mNumMaterials;
+			m_currentSceneData.m_textureNames.resize(lv_totalNumTextures);
+			for (uint32_t i = 0U; i < lv_totalNumTextures; ++i) {
+				m_currentSceneData.m_textureNames[i] = std::move(std::string(lv_assimpSceneData->mMaterials[i]->GetName().C_Str()));
+			}
+			
+
 			BuildSceneGraph(lv_assimpSceneData);
 			SerializeGeneratedSceneData(l_serializedFilePath);
 		}
@@ -270,10 +277,12 @@ namespace Scene
 		m_currentSceneData.m_nodes.reserve(lv_totalNodesInScene);
 		m_currentSceneData.m_modalTransformations.reserve(lv_totalNodesInScene);
 		m_currentSceneData.m_localTransformations.reserve(lv_totalNodesInScene);
+		m_currentSceneData.m_nodeHandlesToTheirNames.reserve(lv_totalNodesInScene);
 
 		auto& lv_rootNode = m_currentSceneData.m_nodes.emplace_back(Node{});
 		m_currentSceneData.m_modalTransformations.emplace_back(ConvertaiMat4ToGlmMat4(l_assimpScene->mRootNode->mTransformation));
 		m_currentSceneData.m_localTransformations.emplace_back(glm::mat4{1.f});
+		m_currentSceneData.m_nodeHandlesToTheirNames.insert(std::make_pair(0U, std::string(l_assimpScene->mRootNode->mName.C_Str())));
 		lv_rootNode.m_childHandle = AddNodesToSceneGraph(l_assimpScene->mRootNode, 0U, 0U, m_currentSceneData.m_modalTransformations[0]);
 		
 	}
@@ -314,6 +323,7 @@ namespace Scene
 			const auto& lv_assimpChildNode = l_assimpNode->mChildren[i];
 			for (uint32_t j = 0; j < lv_assimpChildNode->mNumMeshes; ++j) {
 				m_currentSceneData.m_meshHandlesToNodes.insert(std::make_pair((uint32_t)lv_assimpChildNode->mMeshes[j], lv_firstChildIndex + i));
+				m_currentSceneData.m_nodeHandlesToTheirNames.insert(std::make_pair(lv_firstChildIndex+i, std::string(lv_assimpChildNode->mName.C_Str())));
 			}
 			m_currentSceneData.m_nodes.emplace_back(Node{.m_parentHandle = l_parentHandle,.m_nextSiblingHandle = ((lv_totalNumChildren-1U) == i) ? std::numeric_limits<uint32_t>::max()  : (uint32_t)(m_currentSceneData.m_nodes.size() + 1U) ,.m_lastSiblingHandle = lv_lastSiblingIndex, .m_level = lv_currentNodeLevel});
 			const auto& lv_localTransformation = m_currentSceneData.m_localTransformations.emplace_back(ConvertaiMat4ToGlmMat4(lv_assimpChildNode->mTransformation));
