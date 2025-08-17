@@ -155,120 +155,15 @@ namespace Scene
 			
 
 			BuildSceneGraph(lv_assimpSceneData);
-			SerializeGeneratedSceneData(l_serializedFilePath);
+			m_currentSceneData.Save(l_serializedFilePath);
 		}
 		else {
-			DeserializeSceneDataBinaryFile(l_serializedFilePath);
+			m_currentSceneData.Load(l_serializedFilePath);
 		}
 		
 		SceneData lv_returnSceneData = std::move(m_currentSceneData);
 		m_currentSceneData.Clear();
 		return lv_returnSceneData;
-	}
-
-	void SceneDataGenerator::SerializeGeneratedSceneData(std::string_view l_serializedFilePath)
-	{
-
-		std::ofstream lv_serializeFile{ l_serializedFilePath.data(), std::ios_base::out | std::ios_base::trunc | std::ios_base::binary};
-
-		if (false == lv_serializeFile.is_open()) {
-			LOG(VRenderer::Level::INFO, VRenderer::Category::GENERAL, "Import of the requested file : {} failed by assimp due to {}.", );
-			throw "Failed to serialize generated scene data.\n";
-		}
-
-		constexpr uint32_t lv_meshHeaderMagicNumber = 0x12345678;
-
-		const size_t lv_sizeOfSerializedBinaryData = sizeof(uint32_t) * (4U) + sizeof(Mesh)*m_currentSceneData.m_meshMetaDatas.size() + sizeof(Vertex)*m_currentSceneData.m_verticesOfAllMeshesInScene.size() + sizeof(uint32_t)*m_currentSceneData.m_indicesOfAllMeshesInScene.size();
-		std::vector<char> lv_serializedBinaryData{};
-		lv_serializedBinaryData.resize(lv_sizeOfSerializedBinaryData);
-
-		size_t lv_totalNumBytesWrittenUntilNow{};
-		memcpy(&lv_serializedBinaryData[lv_totalNumBytesWrittenUntilNow], &lv_meshHeaderMagicNumber, sizeof(uint32_t));
-		lv_totalNumBytesWrittenUntilNow += sizeof(uint32_t);
-
-		const uint32_t lv_totalNumOfMeshes = static_cast<uint32_t>(m_currentSceneData.m_meshMetaDatas.size());
-		memcpy(&lv_serializedBinaryData[lv_totalNumBytesWrittenUntilNow], &lv_totalNumOfMeshes, sizeof(uint32_t));
-		lv_totalNumBytesWrittenUntilNow += sizeof(uint32_t);
-
-		memcpy(&lv_serializedBinaryData[lv_totalNumBytesWrittenUntilNow], m_currentSceneData.m_meshMetaDatas.data(), sizeof(Mesh) * (size_t)lv_totalNumOfMeshes);
-		lv_totalNumBytesWrittenUntilNow += (lv_totalNumOfMeshes * sizeof(Mesh));
-
-		const uint32_t lv_totalNumVertices = static_cast<uint32_t>(m_currentSceneData.m_verticesOfAllMeshesInScene.size());
-		memcpy(&lv_serializedBinaryData[lv_totalNumBytesWrittenUntilNow], &lv_totalNumVertices, sizeof(uint32_t));
-		lv_totalNumBytesWrittenUntilNow += sizeof(uint32_t);
-
-		memcpy(&lv_serializedBinaryData[lv_totalNumBytesWrittenUntilNow], m_currentSceneData.m_verticesOfAllMeshesInScene.data(), sizeof(Vertex) * (size_t)lv_totalNumVertices);
-		lv_totalNumBytesWrittenUntilNow += (sizeof(Vertex) * lv_totalNumVertices);
-
-		const uint32_t lv_totalNumIndices = static_cast<uint32_t>(m_currentSceneData.m_indicesOfAllMeshesInScene.size());
-		memcpy(&lv_serializedBinaryData[lv_totalNumBytesWrittenUntilNow], &lv_totalNumIndices, sizeof(uint32_t));
-		lv_totalNumBytesWrittenUntilNow += sizeof(uint32_t);
-
-		memcpy(&lv_serializedBinaryData[lv_totalNumBytesWrittenUntilNow], m_currentSceneData.m_indicesOfAllMeshesInScene.data(), sizeof(uint32_t)*lv_totalNumIndices);
-		lv_totalNumBytesWrittenUntilNow += (sizeof(uint32_t) * lv_totalNumIndices);
-
-		auto& lv_ostream = lv_serializeFile.write((const char*)lv_serializedBinaryData.data(), lv_serializedBinaryData.size());
-
-		if (true == lv_ostream.bad() || true == lv_ostream.fail()) {
-			LOG(VRenderer::Level::INFO, VRenderer::Category::GENERAL, "Failed to write serialized data to {}", l_serializedFilePath);
-			throw "Failed to output serialized data.";
-		}
-		lv_serializeFile.flush();
-	}
-
-	void SceneDataGenerator::DeserializeSceneDataBinaryFile(std::string_view l_serializedFilePath)
-	{
-		m_currentSceneData.Clear();
-
-		std::ifstream lv_serializedSceneDataFile{l_serializedFilePath.data(), std::ios_base::ate | std::ios_base::binary};
-
-		if (false == lv_serializedSceneDataFile.is_open()) {
-			LOG(VRenderer::Level::INFO, VRenderer::Category::GENERAL, "Failed to open serialized file {} for deserialization.", l_serializedFilePath);
-			throw "Deserialization failed.";
-		}
-
-		std::vector<char> lv_sceneData{};
-		lv_sceneData.resize(lv_serializedSceneDataFile.tellg());
-		lv_serializedSceneDataFile.seekg(0);
-
-		lv_serializedSceneDataFile.read(lv_sceneData.data(), lv_sceneData.size());
-
-		uint32_t lv_bytesProcessedUntilNow{};
-
-		uint32_t lv_magicNumberHeader{};
-		memcpy(&lv_magicNumberHeader, &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(uint32_t));
-		lv_bytesProcessedUntilNow += sizeof(uint32_t);
-
-		if (0x12345678 != lv_magicNumberHeader) {
-			LOG(VRenderer::Level::INFO, VRenderer::Category::GENERAL, "The scene data binary file is corrupted due to header mismatch.");
-			throw "Failed to deserialize.\n";
-		}
-
-		uint32_t lv_size{};
-		memcpy(&lv_size, &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(uint32_t));
-		lv_bytesProcessedUntilNow += sizeof(uint32_t);
-
-		m_currentSceneData.m_meshMetaDatas.resize(lv_size);
-
-		memcpy(m_currentSceneData.m_meshMetaDatas.data(), &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(Mesh) * lv_size);
-		lv_bytesProcessedUntilNow += (sizeof(Mesh) * lv_size);
-
-		memcpy(&lv_size, &lv_sceneData[lv_bytesProcessedUntilNow],sizeof(uint32_t));
-		lv_bytesProcessedUntilNow += sizeof(uint32_t);
-
-		m_currentSceneData.m_verticesOfAllMeshesInScene.resize(lv_size);
-
-		memcpy(m_currentSceneData.m_verticesOfAllMeshesInScene.data(), &lv_sceneData[lv_bytesProcessedUntilNow],sizeof(Vertex) * lv_size);
-		lv_bytesProcessedUntilNow += (sizeof(Vertex)*lv_size);
-
-		memcpy(&lv_size, &lv_sceneData[lv_bytesProcessedUntilNow],sizeof(uint32_t));
-		lv_bytesProcessedUntilNow += (sizeof(uint32_t));
-
-		m_currentSceneData.m_indicesOfAllMeshesInScene.resize(lv_size);
-
-		memcpy(m_currentSceneData.m_indicesOfAllMeshesInScene.data(), &lv_sceneData[lv_bytesProcessedUntilNow],sizeof(uint32_t) * lv_size);
-		lv_bytesProcessedUntilNow += (sizeof(uint32_t) * lv_size);
-		
 	}
 
 	void SceneDataGenerator::BuildSceneGraph(const aiScene* l_assimpScene)

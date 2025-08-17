@@ -19,9 +19,6 @@ namespace Scene
 
 	private:
 
-		void SerializeGeneratedSceneData(std::string_view l_serializedFilePath);
-		void DeserializeSceneDataBinaryFile(std::string_view l_serializedFilePath);
-
 		void BuildSceneGraph(const aiScene* l_assimpScene);
 		uint32_t FindTotalNumNodesInScene(const aiNode* l_assimpNode);
 		uint32_t AddNodesToSceneGraph(const aiNode* l_assimpNode, const uint32_t l_parentHandle, const uint32_t l_levelOfParent, const glm::mat4& l_modalTransOfParent);
