@@ -208,6 +208,7 @@
     <ClInclude Include="include\SceneDataGenerator\GeometryData\Vertex.hpp" />
     <ClInclude Include="include\SceneDataGenerator\SceneData.hpp" />
     <ClInclude Include="include\SceneDataGenerator\SceneDataGenerator.hpp" />
+    <ClInclude Include="include\SceneDataGenerator\Node.hpp" />
     <ClInclude Include="include\VRenderer\AppState.hpp" />
     <ClInclude Include="include\VRenderer\Logger\Category.hpp" />
     <ClInclude Include="include\VRenderer\Logger\Level.hpp" />
