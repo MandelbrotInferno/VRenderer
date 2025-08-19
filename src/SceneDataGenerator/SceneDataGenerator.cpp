@@ -158,7 +158,7 @@ namespace Scene
 			m_currentSceneData.Save(l_serializedFilePath);
 		}
 		else {
-			m_currentSceneData.Load(l_serializedFilePath);
+			Load(l_serializedFilePath);
 		}
 		
 		SceneData lv_returnSceneData = std::move(m_currentSceneData);
@@ -241,5 +241,151 @@ namespace Scene
 							lv_assimpMatrix.c1, lv_assimpMatrix.c2, lv_assimpMatrix.c3, lv_assimpMatrix.c4,
 							lv_assimpMatrix.d1, lv_assimpMatrix.d2, lv_assimpMatrix.d3, lv_assimpMatrix.d4};
 		return lv_result;
+	}
+
+	void SceneDataGenerator::Load(std::string_view l_filePathToLoadFrom)
+	{
+		m_currentSceneData.Clear();
+
+		std::ifstream lv_serializedSceneDataFile{ l_filePathToLoadFrom.data(), std::ios_base::ate | std::ios_base::binary };
+
+		if (false == lv_serializedSceneDataFile.is_open()) {
+			LOG(VRenderer::Level::INFO, VRenderer::Category::GENERAL, "Failed to open serialized file {} for deserialization.", l_filePathToLoadFrom);
+			throw "Deserialization failed.";
+		}
+
+		std::vector<unsigned char> lv_sceneData{};
+		lv_sceneData.resize(lv_serializedSceneDataFile.tellg());
+		lv_serializedSceneDataFile.seekg(0);
+
+		lv_serializedSceneDataFile.read((char*)lv_sceneData.data(), lv_sceneData.size());
+
+		size_t lv_bytesProcessedUntilNow{};
+		size_t lv_magicNumberHeader{};
+		size_t lv_size{};
+
+		{
+			memcpy(&lv_magicNumberHeader, &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(size_t));
+			lv_bytesProcessedUntilNow += sizeof(size_t);
+		}
+
+		if (0x123456789FFFFFFF != lv_magicNumberHeader) {
+			LOG(VRenderer::Level::INFO, VRenderer::Category::GENERAL, "The scene data binary file is corrupted due to header mismatch.");
+			throw "Failed to deserialize.\n";
+		}
+
+		{
+			memcpy(&lv_size, &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(size_t));
+			lv_bytesProcessedUntilNow += sizeof(size_t);
+
+			m_currentSceneData.m_meshMetaDatas.resize(lv_size);
+			memcpy(m_currentSceneData.m_meshMetaDatas.data(), &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(Mesh) * lv_size);
+			lv_bytesProcessedUntilNow += (sizeof(Mesh) * lv_size);
+		}
+
+		{
+			memcpy(&lv_size, &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(size_t));
+			lv_bytesProcessedUntilNow += sizeof(size_t);
+
+			m_currentSceneData.m_verticesOfAllMeshesInScene.resize(lv_size);
+			memcpy(m_currentSceneData.m_verticesOfAllMeshesInScene.data(), &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(Vertex) * lv_size);
+			lv_bytesProcessedUntilNow += (sizeof(Vertex) * lv_size);
+		}
+
+		{
+			memcpy(&lv_size, &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(size_t));
+			lv_bytesProcessedUntilNow += (sizeof(size_t));
+
+			m_currentSceneData.m_indicesOfAllMeshesInScene.resize(lv_size);
+			memcpy(m_currentSceneData.m_indicesOfAllMeshesInScene.data(), &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(uint32_t) * lv_size);
+			lv_bytesProcessedUntilNow += (sizeof(uint32_t) * lv_size);
+		}
+
+		{
+			memcpy(&lv_size, &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(size_t));
+			lv_bytesProcessedUntilNow += (sizeof(size_t));
+
+			m_currentSceneData.m_nodes.resize(lv_size);
+			memcpy(m_currentSceneData.m_nodes.data(), &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(Node) * lv_size);
+			lv_bytesProcessedUntilNow += (sizeof(Node) * lv_size);
+		}
+
+		{
+			memcpy(&lv_size, &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(size_t));
+			lv_bytesProcessedUntilNow += (sizeof(size_t));
+
+			m_currentSceneData.m_modalTransformations.resize(lv_size);
+			memcpy(m_currentSceneData.m_modalTransformations.data(), &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(glm::mat4) * lv_size);
+			lv_bytesProcessedUntilNow += (sizeof(glm::mat4) * lv_size);
+		}
+
+		{
+			memcpy(&lv_size, &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(size_t));
+			lv_bytesProcessedUntilNow += (sizeof(size_t));
+
+			m_currentSceneData.m_localTransformations.resize(lv_size);
+			memcpy(m_currentSceneData.m_localTransformations.data(), &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(glm::mat4) * lv_size);
+			lv_bytesProcessedUntilNow += (sizeof(glm::mat4) * lv_size);
+		}
+
+		{
+			memcpy(&lv_size, &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(size_t));
+			lv_bytesProcessedUntilNow += (sizeof(size_t));
+
+			m_currentSceneData.m_meshHandlesToNodes.reserve(lv_size);
+			for (size_t i = 0U; i < lv_size; ++i) {
+				std::pair<uint32_t, uint32_t> lv_pair{};
+				memcpy(&lv_pair.first, &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(uint32_t));
+				lv_bytesProcessedUntilNow += sizeof(uint32_t);
+				memcpy(&lv_pair.second, &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(uint32_t));
+				lv_bytesProcessedUntilNow += sizeof(uint32_t);
+				m_currentSceneData.m_meshHandlesToNodes.insert(lv_pair);
+			}
+		}
+
+
+		{
+			memcpy(&lv_size, &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(size_t));
+			lv_bytesProcessedUntilNow += (sizeof(size_t));
+
+			m_currentSceneData.m_nodeHandlesToTheirNames.reserve(lv_size);
+			for (size_t i = 0U; i < lv_size; ++i) {
+				std::pair<uint32_t, std::string> lv_pair{};
+
+				memcpy(&lv_pair.first, &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(uint32_t));
+				lv_bytesProcessedUntilNow += sizeof(uint32_t);
+
+				size_t lv_sizeOfString{};
+				memcpy(&lv_sizeOfString, &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(size_t));
+				lv_bytesProcessedUntilNow += sizeof(size_t);
+
+				lv_pair.second.resize(lv_sizeOfString);
+				memcpy(lv_pair.second.data(), &lv_sceneData[lv_bytesProcessedUntilNow], lv_sizeOfString);
+				lv_bytesProcessedUntilNow += lv_sizeOfString;
+
+				m_currentSceneData.m_nodeHandlesToTheirNames.insert(lv_pair);
+			}
+		}
+
+		{
+			memcpy(&lv_size, &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(size_t));
+			lv_bytesProcessedUntilNow += (sizeof(size_t));
+
+			m_currentSceneData.m_textureNames.reserve(lv_size);
+			for (size_t i = 0U; i < lv_size; ++i) {
+
+				std::string lv_textureName{};
+
+				size_t lv_sizeOfString{};
+				memcpy(&lv_sizeOfString, &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(size_t));
+				lv_bytesProcessedUntilNow += sizeof(size_t);
+
+				lv_textureName.resize(lv_sizeOfString);
+				memcpy(lv_textureName.data(), &lv_sceneData[lv_bytesProcessedUntilNow], lv_sizeOfString);
+				lv_bytesProcessedUntilNow += lv_sizeOfString;
+
+				m_currentSceneData.m_textureNames.emplace_back(std::move(lv_textureName));
+			}
+		}
 	}
 }
