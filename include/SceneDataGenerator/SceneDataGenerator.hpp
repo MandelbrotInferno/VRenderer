@@ -25,6 +25,9 @@ namespace Scene
 
 		glm::mat4 ConvertaiMat4ToGlmMat4(const aiMatrix4x4& l_assimpMatrix);
 
+
+		void Load(std::string_view l_filePathToLoadFrom);
+
 	private:
 
 		SceneData m_currentSceneData{};

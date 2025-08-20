@@ -8,6 +8,7 @@
     "vk-bootstrap",
     "volk",
     "vulkan-memory-allocator",
+	"ktx",
     "tracy",
     {
       "name": "sdl3",

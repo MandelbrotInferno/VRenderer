@@ -19,7 +19,6 @@ namespace Scene
 		void Clear();
 
 		void Save(std::string_view l_filePathToSaveTo);
-		void Load(std::string_view l_filePathToLoadFrom);
 
 	public:
 
