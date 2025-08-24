@@ -44,13 +44,14 @@ namespace Scene
 			lv_totalNumBytesNodeHandlesToTheirNames += (sizeof(uint32_t) + l_pair.second.size() + 1U);
 		}
 
-		const size_t lv_sizeOfSerializedBinaryData = sizeof(size_t) * (10U)
+		const size_t lv_sizeOfSerializedBinaryData = sizeof(size_t) * (11U)
 			+ sizeof(Mesh) * m_meshMetaDatas.size()
 			+ sizeof(Vertex) * m_verticesOfAllMeshesInScene.size()
 			+ sizeof(uint32_t) * m_indicesOfAllMeshesInScene.size()
 			+ sizeof(Node) * m_nodes.size()
 			+ sizeof(glm::mat4) * m_modalTransformations.size()
 			+ sizeof(glm::mat4) * m_localTransformations.size()
+			+ sizeof(Material) * m_materials.size()
 			+ sizeof(std::pair<uint32_t, uint32_t>) * m_meshHandlesToNodes.size()
 			+ lv_totalNumBytesNodeHandlesToTheirNames + sizeof(size_t) * m_nodeHandlesToTheirNames.size()
 			+ sizeof(char) * lv_totalNumCharsInTextureNames + (sizeof(size_t) * m_textureNames.size());
@@ -121,6 +122,16 @@ namespace Scene
 
 			memcpy(&lv_serializedBinaryData[lv_totalNumBytesWrittenUntilNow], m_localTransformations.data(), sizeof(glm::mat4) * lv_totalNumLocalTransforms);
 			lv_totalNumBytesWrittenUntilNow += (sizeof(glm::mat4) * lv_totalNumLocalTransforms);
+		}
+
+
+		{
+			const size_t lv_totalNumMaterials = m_materials.size();
+			memcpy(&lv_serializedBinaryData[lv_totalNumBytesWrittenUntilNow], &lv_totalNumMaterials, sizeof(size_t));
+			lv_totalNumBytesWrittenUntilNow += sizeof(size_t);
+
+			memcpy(&lv_serializedBinaryData[lv_totalNumBytesWrittenUntilNow], m_materials.data(), sizeof(Material) * lv_totalNumMaterials);
+			lv_totalNumBytesWrittenUntilNow += (sizeof(Material) * lv_totalNumMaterials);
 		}
 
 

@@ -206,6 +206,7 @@
   <ItemGroup>
     <ClInclude Include="include\SceneDataGenerator\GeometryData\Mesh.hpp" />
     <ClInclude Include="include\SceneDataGenerator\GeometryData\Vertex.hpp" />
+    <ClInclude Include="include\SceneDataGenerator\Material.hpp" />
     <ClInclude Include="include\SceneDataGenerator\SceneData.hpp" />
     <ClInclude Include="include\SceneDataGenerator\SceneDataGenerator.hpp" />
     <ClInclude Include="include\SceneDataGenerator\Node.hpp" />

@@ -82,6 +82,7 @@ namespace Scene
 				m_currentSceneData.m_meshMetaDatas[i].m_totalNumVertices = lv_assimpSceneData->mMeshes[i]->mNumVertices;
 				m_currentSceneData.m_meshMetaDatas[i].m_firstVertexHandle = lv_verticesCurrentOffset;
 				m_currentSceneData.m_meshMetaDatas[i].m_firstIndexHandle = lv_indicesCurrentOffset;
+				m_currentSceneData.m_meshMetaDatas[i].m_materialHandle = lv_assimpSceneData->mMeshes[i]->mMaterialIndex;
 
 				bool lv_hasNormals = lv_currentMesh->HasNormals();
 				bool lv_hasTangentAndBitangent = lv_currentMesh->HasTangentsAndBitangents();
@@ -238,6 +239,8 @@ namespace Scene
 		constexpr size_t lv_totalNumTexTypes{5U};
 		const uint32_t lv_totalNumMaterials = l_assimpScene->mNumMaterials;
 		m_currentSceneData.m_textureNames.reserve(lv_totalNumMaterials * lv_totalNumTexTypes);
+		m_currentSceneData.m_materials.resize(lv_totalNumMaterials);
+
 		std::vector<std::string> lv_originalTexturePaths{};
 		lv_originalTexturePaths.reserve(lv_totalNumMaterials * lv_totalNumTexTypes);
 		const std::string lv_sceneFolderPath{ l_sceneFolderPath };
@@ -259,21 +262,25 @@ namespace Scene
 			if (false == lv_diffuseTexName.Empty()) {
 				m_currentSceneData.m_textureNames.emplace_back(lv_compressedTexturesFolderPath + GetTextureNameWithoutPathAndExtension(lv_diffuseTexName) + lv_extension);
 				lv_originalTexturePaths.emplace_back(lv_sceneFolderPath + lv_diffuseTexName.C_Str());
+				m_currentSceneData.m_materials[i].m_baseColorMapHandle = static_cast<uint16_t>(lv_originalTexturePaths.size() - 1U);
 			}
 			
 
 			if (false == lv_normalTexName.Empty()) {
 				lv_originalTexturePaths.emplace_back(lv_sceneFolderPath + lv_normalTexName.C_Str());
 				m_currentSceneData.m_textureNames.emplace_back(lv_compressedTexturesFolderPath + GetTextureNameWithoutPathAndExtension(lv_normalTexName) + lv_extension);
+				m_currentSceneData.m_materials[i].m_normalMapHandle = static_cast<uint16_t>(lv_originalTexturePaths.size() - 1U);
 			}
 			if (false == lv_emissiveTexName.Empty()) {
 				lv_originalTexturePaths.emplace_back(lv_sceneFolderPath + lv_emissiveTexName.C_Str());
 				m_currentSceneData.m_textureNames.emplace_back(lv_compressedTexturesFolderPath + GetTextureNameWithoutPathAndExtension(lv_emissiveTexName) + lv_extension);
+				m_currentSceneData.m_materials[i].m_emissiveMapHandle = static_cast<uint16_t>(lv_originalTexturePaths.size() - 1U);
 			}
 			
 			if (false == lv_gltfMetallicRoughnessTexName.Empty()) {
 				lv_originalTexturePaths.emplace_back(lv_sceneFolderPath + lv_gltfMetallicRoughnessTexName.C_Str());
 				m_currentSceneData.m_textureNames.emplace_back(lv_compressedTexturesFolderPath + GetTextureNameWithoutPathAndExtension(lv_gltfMetallicRoughnessTexName) + lv_extension);
+				m_currentSceneData.m_materials[i].m_roughnessMetallicMapHandle = static_cast<uint16_t>(lv_originalTexturePaths.size() - 1U);
 			}
 
 		}
@@ -478,6 +485,15 @@ namespace Scene
 			m_currentSceneData.m_localTransformations.resize(lv_size);
 			memcpy(m_currentSceneData.m_localTransformations.data(), &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(glm::mat4) * lv_size);
 			lv_bytesProcessedUntilNow += (sizeof(glm::mat4) * lv_size);
+		}
+
+		{
+			memcpy(&lv_size, &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(size_t));
+			lv_bytesProcessedUntilNow += (sizeof(size_t));
+
+			m_currentSceneData.m_materials.resize(lv_size);
+			memcpy(m_currentSceneData.m_materials.data(), &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(Material) * lv_size);
+			lv_bytesProcessedUntilNow += (sizeof(Material) * lv_size);
 		}
 
 		{

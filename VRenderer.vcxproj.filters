@@ -235,5 +235,8 @@
     <ClInclude Include="include\SceneDataGenerator\Node.hpp">
       <Filter>include\SceneDataGenerator</Filter>
     </ClInclude>
+    <ClInclude Include="include\SceneDataGenerator\Material.hpp">
+      <Filter>include\SceneDataGenerator</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
