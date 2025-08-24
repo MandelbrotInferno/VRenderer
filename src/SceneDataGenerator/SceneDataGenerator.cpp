@@ -8,13 +8,20 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <assimp/types.h>
 #include <fmt/core.h>
 #include <fstream>
+#include <ktx.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#include <stb_image_resize2.h>
+#include <volk.h>
 
 
 namespace Scene
 {
-	SceneData SceneDataGenerator::Generate(std::string_view l_serializedFilePath, std::string_view l_sceneFilePath)
+	SceneData SceneDataGenerator::Generate(std::string_view l_serializedFilePath, std::string_view l_sceneFilePath, std::string_view l_sceneFolderPath)
 	{
 		bool lv_shouldGenerate{ true };
 		std::filesystem::directory_entry lv_serializedFileBinary{ l_serializedFilePath };
@@ -75,7 +82,6 @@ namespace Scene
 				m_currentSceneData.m_meshMetaDatas[i].m_totalNumVertices = lv_assimpSceneData->mMeshes[i]->mNumVertices;
 				m_currentSceneData.m_meshMetaDatas[i].m_firstVertexHandle = lv_verticesCurrentOffset;
 				m_currentSceneData.m_meshMetaDatas[i].m_firstIndexHandle = lv_indicesCurrentOffset;
-				m_currentSceneData.m_meshMetaDatas[i].m_textureHandle = lv_currentMesh->mMaterialIndex;
 
 				bool lv_hasNormals = lv_currentMesh->HasNormals();
 				bool lv_hasTangentAndBitangent = lv_currentMesh->HasTangentsAndBitangents();
@@ -147,13 +153,8 @@ namespace Scene
 				lv_indicesCurrentOffset += (3U * lv_currentMesh->mNumFaces);
 			}
 			
-			const uint32_t lv_totalNumTextures = lv_assimpSceneData->mNumMaterials;
-			m_currentSceneData.m_textureNames.resize(lv_totalNumTextures);
-			for (uint32_t i = 0U; i < lv_totalNumTextures; ++i) {
-				m_currentSceneData.m_textureNames[i] = std::move(std::string(lv_assimpSceneData->mMaterials[i]->GetName().C_Str()));
-			}
 			
-
+			GenerateCompressedDownscaledKTXtextures(lv_assimpSceneData, l_sceneFolderPath);
 			BuildSceneGraph(lv_assimpSceneData);
 			m_currentSceneData.Save(l_serializedFilePath);
 		}
@@ -232,6 +233,134 @@ namespace Scene
 		return lv_firstChildIndex;
 	}
 
+	void SceneDataGenerator::GenerateCompressedDownscaledKTXtextures(const aiScene* l_assimpScene, std::string_view l_sceneFolderPath)
+	{
+		constexpr size_t lv_totalNumTexTypes{5U};
+		const uint32_t lv_totalNumMaterials = l_assimpScene->mNumMaterials;
+		m_currentSceneData.m_textureNames.reserve(lv_totalNumMaterials * lv_totalNumTexTypes);
+		std::vector<std::string> lv_originalTexturePaths{};
+		lv_originalTexturePaths.reserve(lv_totalNumMaterials * lv_totalNumTexTypes);
+		const std::string lv_sceneFolderPath{ l_sceneFolderPath };
+		const std::string lv_compressedTexturesFolderPath{ lv_sceneFolderPath + "CompressedTextures/" };
+		const std::string lv_extension{ ".ktx2" };
+		for (uint32_t i = 0U; i < lv_totalNumMaterials; ++i) {
+
+			const auto* lv_currentMat = l_assimpScene->mMaterials[i];
+			aiString lv_diffuseTexName{};
+			aiString lv_normalTexName{};
+			aiString lv_emissiveTexName{};
+			aiString lv_gltfMetallicRoughnessTexName{};
+
+			aiGetMaterialTexture(lv_currentMat, aiTextureType_DIFFUSE, 0, &lv_diffuseTexName);
+			aiGetMaterialTexture(lv_currentMat, aiTextureType_NORMALS, 0, &lv_normalTexName);
+			aiGetMaterialTexture(lv_currentMat, aiTextureType_EMISSIVE, 0, &lv_emissiveTexName);
+			aiGetMaterialTexture(lv_currentMat, aiTextureType_GLTF_METALLIC_ROUGHNESS, 0, &lv_gltfMetallicRoughnessTexName);
+			
+			if (false == lv_diffuseTexName.Empty()) {
+				m_currentSceneData.m_textureNames.emplace_back(lv_compressedTexturesFolderPath + GetTextureNameWithoutPathAndExtension(lv_diffuseTexName) + lv_extension);
+				lv_originalTexturePaths.emplace_back(lv_sceneFolderPath + lv_diffuseTexName.C_Str());
+			}
+			
+
+			if (false == lv_normalTexName.Empty()) {
+				lv_originalTexturePaths.emplace_back(lv_sceneFolderPath + lv_normalTexName.C_Str());
+				m_currentSceneData.m_textureNames.emplace_back(lv_compressedTexturesFolderPath + GetTextureNameWithoutPathAndExtension(lv_normalTexName) + lv_extension);
+			}
+			if (false == lv_emissiveTexName.Empty()) {
+				lv_originalTexturePaths.emplace_back(lv_sceneFolderPath + lv_emissiveTexName.C_Str());
+				m_currentSceneData.m_textureNames.emplace_back(lv_compressedTexturesFolderPath + GetTextureNameWithoutPathAndExtension(lv_emissiveTexName) + lv_extension);
+			}
+			
+			if (false == lv_gltfMetallicRoughnessTexName.Empty()) {
+				lv_originalTexturePaths.emplace_back(lv_sceneFolderPath + lv_gltfMetallicRoughnessTexName.C_Str());
+				m_currentSceneData.m_textureNames.emplace_back(lv_compressedTexturesFolderPath + GetTextureNameWithoutPathAndExtension(lv_gltfMetallicRoughnessTexName) + lv_extension);
+			}
+
+		}
+
+		if (false == std::filesystem::create_directory(lv_compressedTexturesFolderPath)) {
+			throw "Failed to create CompressedTextures/ directory in the scene folder.\n";
+		}
+
+		constexpr size_t lv_totalNumMipmpas{ 6U };
+		for (size_t i = 0; i < lv_originalTexturePaths.size(); ++i) {
+
+			constexpr int lv_channels{ 4 };
+			int lv_originalWidth{}, lv_originalHeight{};
+
+			unsigned char* lv_pixels = stbi_load(lv_originalTexturePaths[i].c_str(), &lv_originalWidth, &lv_originalHeight, nullptr, lv_channels);
+			
+			if (nullptr == lv_pixels) {
+				printf("Failed to load %s\n", lv_originalTexturePaths[i].c_str());
+				throw "Failed to open one of the original textures to compress them.\n";
+			}
+
+			std::vector<unsigned char> lv_downscalePixels{};
+			lv_downscalePixels.resize(lv_originalHeight * lv_originalWidth);
+			int lv_downscaleWidth{}, lv_dowscaleHeight{};
+			unsigned char* lv_resizeResult{};
+			if (lv_originalWidth > 1024) {
+				lv_dowscaleHeight = lv_originalHeight / 4;
+				lv_downscaleWidth = lv_originalWidth / 4;
+				lv_resizeResult = stbir_resize_uint8_linear(lv_pixels, lv_originalWidth, lv_originalHeight, 0, lv_downscalePixels.data(), lv_downscaleWidth, lv_dowscaleHeight, 0, STBIR_RGBA);
+			}
+			else {
+				lv_dowscaleHeight = lv_originalHeight;
+				lv_downscaleWidth = lv_originalWidth;
+				lv_resizeResult = stbir_resize_uint8_linear(lv_pixels, lv_originalWidth, lv_originalHeight, 0, lv_downscalePixels.data(), lv_originalWidth, lv_originalHeight, 0, STBIR_RGBA);
+			}
+			if (nullptr == lv_resizeResult) {
+				throw "Failed to downscale one of the textures.\n";
+			}
+
+			stbi_image_free(lv_pixels);
+
+			ktxTexture2* lv_ktx2Texture{};
+			ktxTextureCreateInfo lv_ktxTexCreateInfo{};
+			lv_ktxTexCreateInfo.baseDepth = 1U;
+			lv_ktxTexCreateInfo.baseWidth = static_cast<uint32_t>(lv_downscaleWidth);
+			lv_ktxTexCreateInfo.baseHeight = static_cast<uint32_t>(lv_dowscaleHeight);
+			lv_ktxTexCreateInfo.generateMipmaps = KTX_TRUE;
+			lv_ktxTexCreateInfo.numDimensions = 2U;
+			lv_ktxTexCreateInfo.numLevels = lv_totalNumMipmpas;
+			lv_ktxTexCreateInfo.vkFormat = VK_FORMAT_R8G8B8A8_UNORM;
+			lv_ktxTexCreateInfo.numFaces = 1U;
+			lv_ktxTexCreateInfo.numLayers = 1U;
+			lv_ktxTexCreateInfo.isArray = KTX_FALSE;
+
+			auto lv_result = ktxTexture2_Create(&lv_ktxTexCreateInfo, KTX_TEXTURE_CREATE_ALLOC_STORAGE, &lv_ktx2Texture);
+
+			if (KTX_SUCCESS != lv_result) {
+				throw "Failed to create ktxTexture2.";
+			}
+			
+			int lv_mipmapWidth = lv_downscaleWidth, lv_mipmapHeight = lv_dowscaleHeight;
+			for (size_t j = 0U; j < lv_totalNumMipmpas; ++j) {
+				size_t lv_offset{};
+				ktxTexture_GetImageOffset(ktxTexture(lv_ktx2Texture), j, 0, 0, &lv_offset);
+				lv_resizeResult = stbir_resize_uint8_linear(lv_downscalePixels.data(), lv_originalWidth/2, lv_originalHeight/2, 0, ktxTexture_GetData(ktxTexture(lv_ktx2Texture)) + lv_offset, lv_mipmapWidth, lv_mipmapHeight, 0, STBIR_RGBA);
+				if (nullptr == lv_resizeResult) {
+					throw "Generating mipmap data failed for one of the textures.\n";
+				}
+				lv_mipmapHeight = lv_mipmapHeight / 2;
+				lv_mipmapWidth = lv_mipmapWidth / 2;
+			}
+
+			
+			auto lv_compressionResult = ktxTexture2_CompressBasis(lv_ktx2Texture, 128);
+			if (KTX_SUCCESS != lv_compressionResult) {
+				throw "Compression failed.\n";
+			}
+			auto lv_transcodeResult = ktxTexture2_TranscodeBasis(lv_ktx2Texture, KTX_TTF_BC7_RGBA, 0);
+			if (KTX_SUCCESS != lv_transcodeResult) {
+				throw "Transcoding from basis to BC7 failed.\n";
+			}
+
+			ktxTexture_WriteToNamedFile(ktxTexture(lv_ktx2Texture), m_currentSceneData.m_textureNames[i].c_str());
+			ktxTexture_Destroy(ktxTexture(lv_ktx2Texture));
+		}
+	}
+
 	glm::mat4 SceneDataGenerator::ConvertaiMat4ToGlmMat4(const aiMatrix4x4& l_assimpMatrix)
 	{
 		auto lv_assimpMatrix = l_assimpMatrix;
@@ -241,6 +370,29 @@ namespace Scene
 							lv_assimpMatrix.c1, lv_assimpMatrix.c2, lv_assimpMatrix.c3, lv_assimpMatrix.c4,
 							lv_assimpMatrix.d1, lv_assimpMatrix.d2, lv_assimpMatrix.d3, lv_assimpMatrix.d4};
 		return lv_result;
+	}
+
+	std::string SceneDataGenerator::GetTextureNameWithoutPathAndExtension(const aiString& l_assimpTexturePath)
+	{
+		std::string lv_resultString{ l_assimpTexturePath.C_Str() };
+		const size_t lv_posOfChar = lv_resultString.find_last_of("/");
+		const size_t lv_posOfDot = lv_resultString.find_last_of(".");
+
+		if (lv_posOfChar != std::string::npos) {
+			if (lv_posOfDot != std::string::npos) {
+				lv_resultString = lv_resultString.substr(lv_posOfChar + 1U, lv_posOfDot - lv_posOfChar - 1U);
+			}
+			else {
+				lv_resultString = lv_resultString.substr(lv_posOfChar + 1U);
+			}
+		}
+		else {
+			if (lv_posOfDot != std::string::npos) {
+				lv_resultString = lv_resultString.substr(0U, lv_posOfDot);
+			}
+		}
+
+		return lv_resultString;
 	}
 
 	void SceneDataGenerator::Load(std::string_view l_filePathToLoadFrom)

@@ -59,7 +59,7 @@ int main()
 	std::unique_ptr<VRenderer::Renderer> lv_renderer = std::make_unique<VRenderer::Renderer>();;
 	
 	try {
-		auto lv_sceneData = lv_sceneDataGenerator.Generate("SerializedFiles/SceneDataBinary", "Scenes/Sponza/NewSponza_Main_glTF_003.gltf");
+		auto lv_sceneData = lv_sceneDataGenerator.Generate("SerializedFiles/SceneDataBinary", "Scenes/Sponza/NewSponza_Main_glTF_003.gltf", "Scenes/Sponza/");
 
 		const int lv_result = InitializeSDL();
 		if (-1 == lv_result) {
