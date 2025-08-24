@@ -100,7 +100,6 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\manual-dependencies;$(ProjectDir)\manual-dependencies\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
@@ -122,6 +121,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\manual-dependencies;$(ProjectDir)\manual-dependencies\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>MaxSpeed</Optimization>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -141,7 +141,6 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\manual-dependencies;$(ProjectDir)\manual-dependencies\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
@@ -163,6 +162,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\manual-dependencies;$(ProjectDir)\manual-dependencies\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>MaxSpeed</Optimization>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -206,6 +206,7 @@
   <ItemGroup>
     <ClInclude Include="include\SceneDataGenerator\GeometryData\Mesh.hpp" />
     <ClInclude Include="include\SceneDataGenerator\GeometryData\Vertex.hpp" />
+    <ClInclude Include="include\SceneDataGenerator\Material.hpp" />
     <ClInclude Include="include\SceneDataGenerator\SceneData.hpp" />
     <ClInclude Include="include\SceneDataGenerator\SceneDataGenerator.hpp" />
     <ClInclude Include="include\SceneDataGenerator\Node.hpp" />
