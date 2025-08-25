@@ -27,6 +27,7 @@
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_vulkan.h>
 #include <filesystem>
+#include <ktxvulkan.h>
 
 
 namespace VRenderer
@@ -54,7 +55,7 @@ namespace VRenderer
 
 
 
-	void Renderer::Init(SDL_Window* l_window)
+	void Renderer::Init(SDL_Window* l_window, const Scene::SceneData& l_sceneData)
 	{
 		InitializeVulkanFoundationalElementsAndGraphicsQueue(l_window);
 		InitializeVulkanSwapchain(l_window);
@@ -115,14 +116,9 @@ namespace VRenderer
 		VULKAN_CHECK(vkQueueSubmit2(m_graphicsQueue.m_queue, 1, &lv_submitInfo, VK_NULL_HANDLE));
 
 		VULKAN_CHECK(vkQueueWaitIdle(m_graphicsQueue.m_queue));
-
-		//VulkanDescriptorSetLayoutFactory lv_setLayoutFactory{};
-		//lv_setLayoutFactory.AddBinding(0U, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1U, VK_SHADER_STAGE_COMPUTE_BIT);
-		//VkDescriptorSetLayout lv_computeSetLayout = lv_setLayoutFactory.GenerateSetLayout(m_device);
-		//for (auto& l_setLayout : lv_vulkanComputeSetLayouts) {
-			//m_vulkanResManager.AddVulkanSetLayout(std::move(l_setLayout.first), l_setLayout.second);
-		//}
 		
+		GenerateAllKTXVulkanTexturesOfScene(l_sceneData);
+
 		std::array<VkDescriptorSetLayout, 1> lv_ptComputeSetLayout{ m_vulkanResManager.RetrieveVulkanDescriptorSetLayout("TestComputePass0")};
 		m_testComputeSets[0] = m_mainDescriptorSetAlloc.Allocate(m_device, lv_ptComputeSetLayout);
 		m_testComputeSets[1] = m_mainDescriptorSetAlloc.Allocate(m_device, lv_ptComputeSetLayout);
@@ -168,18 +164,6 @@ namespace VRenderer
 
 		m_graphicsPushConstant.m_allVerticesBufferAddress = lv_sceneBuffers.m_verticesDeviceAddr;
 		m_graphicsPushConstant.m_worldMatrix = glm::mat4{ 1.f };
-
-
-		//std::array<VkPushConstantRange,1> lv_pushConsRange{};
-		//lv_pushConsRange[0].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-		//lv_pushConsRange[0].offset = 0U;
-		//lv_pushConsRange[0].size = sizeof(ComputePassPushConstant);
-
-		//VkPipelineLayout lv_computePipelineLayout = Utilities::GenerateVkPipelineLayout(m_device, {}, lv_pushConsRange);
-
-		//lv_pushConsRange[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-		//lv_pushConsRange[0].size = sizeof(GraphicsPassPushConstant);
-		//VkPipelineLayout lv_graphicsPipelineLayout = Utilities::GenerateVkPipelineLayout(m_device, {}, lv_pushConsRange);
 
 		VkShaderModule lv_gradientColorShaderModule = Utilities::GenerateVkShaderModule("shaders/TestComputePass/SPV/GradientColor.spv", m_device);
 		VkShaderModule lv_skyShaderModule = Utilities::GenerateVkShaderModule("shaders/TestSkyComputePass/SPV/Sky.spv", m_device);
@@ -253,7 +237,7 @@ namespace VRenderer
 		}
 	}
 
-	void Renderer::Draw(SDL_Window* l_window, Scene::SceneData& l_sceneData)
+	void Renderer::Draw(SDL_Window* l_window, const Scene::SceneData& l_sceneData)
 	{
 		using namespace Utilities;
 
@@ -863,6 +847,41 @@ namespace VRenderer
 		InitializeVulkanSwapchain(l_window);
 		TransitionImageLayoutSwapchainImagesToPresentUponCreation();
 		InitializeVulkanSwapchainAndPresentSyncPrimitives();
+	}
+
+
+	void Renderer::GenerateAllKTXVulkanTexturesOfScene(const Scene::SceneData& l_sceneData)
+	{
+		ktxVulkanDeviceInfo lv_ktxVulkanDeviceInfo{};
+		ktxVulkanDeviceInfo_Construct(&lv_ktxVulkanDeviceInfo, m_vulkanFoundational.m_physicalDevice, m_device, m_graphicsQueue.m_queue, m_mainThreadGraphicsCmdPool, nullptr);
+
+		for (const auto& l_textureName : l_sceneData.m_textureNames) {
+			ktxTexture2* lv_ktxTexture{};
+			auto lv_ktxTextureResult = ktxTexture2_CreateFromNamedFile(l_textureName.c_str(), KTX_TEXTURE_CREATE_NO_FLAGS, &lv_ktxTexture);
+
+			if (KTX_SUCCESS != lv_ktxTextureResult) {
+				LOG(Level::ERROR, Category::RENDERING, "Failed to load ktx texture {}.", l_textureName.c_str());
+				throw "Failed to create a ktx texture.\n";
+			}
+
+			auto lv_transcodeResult = ktxTexture2_TranscodeBasis(lv_ktxTexture, KTX_TTF_BC7_RGBA, 0);
+			if (KTX_SUCCESS != lv_transcodeResult) {
+				throw "Transcoding from basis to BC7 failed.\n";
+			}
+
+			ktxVulkanTexture lv_ktxVulkanTexture{};
+			lv_ktxTextureResult = ktxTexture2_VkUploadEx(lv_ktxTexture, &lv_ktxVulkanDeviceInfo, &lv_ktxVulkanTexture,
+				VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_SAMPLED_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+			if (KTX_SUCCESS != lv_ktxTextureResult) {
+				LOG(Level::ERROR, Category::RENDERING, "Failed to create vulkan texture from {}.", l_textureName.c_str());
+				throw "Failed to create vulkan texture.\n";
+			}
+			
+			ktxTexture_Destroy(ktxTexture(lv_ktxTexture));
+
+			m_vulkanResManager.AddKtxVulkanTexture(std::move(lv_ktxVulkanTexture));
+		}
 	}
 
 

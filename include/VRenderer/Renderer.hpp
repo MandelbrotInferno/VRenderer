@@ -34,10 +34,10 @@ namespace VRenderer
 		VulkanSwapchainAndPresentSync& GetCurrentFrameSwapchainPresentSyncPrimitives();
 		uint32_t GetCurrentFrameInflightIndex() const;
 
-		void Init(SDL_Window* l_window);
+		void Init(SDL_Window* l_window, const Scene::SceneData& l_sceneData);
 		void InitCleanUp();
 
-		void Draw(SDL_Window* l_window, Scene::SceneData& l_sceneData);
+		void Draw(SDL_Window* l_window, const Scene::SceneData& l_sceneData);
 
 		~Renderer();
 	private:
@@ -64,6 +64,8 @@ namespace VRenderer
 		void ResetResourcesAfterWindowResize(SDL_Window* l_window);
 
 		void GenerateAllVulkanSetLayoutsAndPipelineLayouts();
+
+		void GenerateAllKTXVulkanTexturesOfScene(const Scene::SceneData& l_sceneData);
 
 	public:
 		

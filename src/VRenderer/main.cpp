@@ -52,12 +52,12 @@ int main()
 {
 	using namespace VRenderer;
 	START_LOGGING();
-	SET_LEVEL(Level::INFO, LevelModeCompareOp::EQUAL);
+	SET_LEVEL(Level::ERROR, LevelModeCompareOp::EQUAL);
 	Scene::SceneDataGenerator lv_sceneDataGenerator{};
 	Scene::SceneData lv_sceneData{};
 
 	VRenderer::SDL_WindowWrapper lv_window{};
-	std::unique_ptr<VRenderer::Renderer> lv_renderer = std::make_unique<VRenderer::Renderer>();;
+	std::unique_ptr<VRenderer::Renderer> lv_renderer = std::make_unique<VRenderer::Renderer>();
 	
 	try {
 		lv_sceneData = lv_sceneDataGenerator.Generate("SerializedFiles/SceneDataBinary", "Scenes/Sponza/NewSponza_Main_glTF_003.gltf", "Scenes/Sponza/");
@@ -73,7 +73,7 @@ int main()
 			return -1;
 		}
 
-		lv_renderer->Init(lv_window.m_window);
+		lv_renderer->Init(lv_window.m_window, lv_sceneData);
 
 		SDL_Event lv_event{};
 		SDL_WindowFlags lv_windowFlags{};
