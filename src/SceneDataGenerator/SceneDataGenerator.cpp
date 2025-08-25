@@ -17,6 +17,8 @@
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include <stb_image_resize2.h>
 #include <volk.h>
+#include <algorithm>
+#include <execution>
 
 
 namespace Scene
@@ -245,7 +247,7 @@ namespace Scene
 		lv_originalTexturePaths.reserve(lv_totalNumMaterials * lv_totalNumTexTypes);
 		const std::string lv_sceneFolderPath{ l_sceneFolderPath };
 		const std::string lv_compressedTexturesFolderPath{ lv_sceneFolderPath + "CompressedTextures/" };
-		const std::string lv_extension{ ".ktx2" };
+		const std::string lv_extension{ ".ktx" };
 		for (uint32_t i = 0U; i < lv_totalNumMaterials; ++i) {
 
 			const auto* lv_currentMat = l_assimpScene->mMaterials[i];
@@ -289,83 +291,102 @@ namespace Scene
 			throw "Failed to create CompressedTextures/ directory in the scene folder.\n";
 		}
 
-		constexpr size_t lv_totalNumMipmpas{ 6U };
-		for (size_t i = 0; i < lv_originalTexturePaths.size(); ++i) {
-
-			constexpr int lv_channels{ 4 };
-			int lv_originalWidth{}, lv_originalHeight{};
-
-			unsigned char* lv_pixels = stbi_load(lv_originalTexturePaths[i].c_str(), &lv_originalWidth, &lv_originalHeight, nullptr, lv_channels);
-			
-			if (nullptr == lv_pixels) {
-				printf("Failed to load %s\n", lv_originalTexturePaths[i].c_str());
-				throw "Failed to open one of the original textures to compress them.\n";
-			}
-
-			std::vector<unsigned char> lv_downscalePixels{};
-			lv_downscalePixels.resize(lv_originalHeight * lv_originalWidth);
-			int lv_downscaleWidth{}, lv_dowscaleHeight{};
-			unsigned char* lv_resizeResult{};
-			if (lv_originalWidth > 1024) {
-				lv_dowscaleHeight = lv_originalHeight / 4;
-				lv_downscaleWidth = lv_originalWidth / 4;
-				lv_resizeResult = stbir_resize_uint8_linear(lv_pixels, lv_originalWidth, lv_originalHeight, 0, lv_downscalePixels.data(), lv_downscaleWidth, lv_dowscaleHeight, 0, STBIR_RGBA);
-			}
-			else {
-				lv_dowscaleHeight = lv_originalHeight;
-				lv_downscaleWidth = lv_originalWidth;
-				lv_resizeResult = stbir_resize_uint8_linear(lv_pixels, lv_originalWidth, lv_originalHeight, 0, lv_downscalePixels.data(), lv_originalWidth, lv_originalHeight, 0, STBIR_RGBA);
-			}
-			if (nullptr == lv_resizeResult) {
-				throw "Failed to downscale one of the textures.\n";
-			}
-
-			stbi_image_free(lv_pixels);
-
-			ktxTexture2* lv_ktx2Texture{};
-			ktxTextureCreateInfo lv_ktxTexCreateInfo{};
-			lv_ktxTexCreateInfo.baseDepth = 1U;
-			lv_ktxTexCreateInfo.baseWidth = static_cast<uint32_t>(lv_downscaleWidth);
-			lv_ktxTexCreateInfo.baseHeight = static_cast<uint32_t>(lv_dowscaleHeight);
-			lv_ktxTexCreateInfo.generateMipmaps = KTX_TRUE;
-			lv_ktxTexCreateInfo.numDimensions = 2U;
-			lv_ktxTexCreateInfo.numLevels = lv_totalNumMipmpas;
-			lv_ktxTexCreateInfo.vkFormat = VK_FORMAT_R8G8B8A8_UNORM;
-			lv_ktxTexCreateInfo.numFaces = 1U;
-			lv_ktxTexCreateInfo.numLayers = 1U;
-			lv_ktxTexCreateInfo.isArray = KTX_FALSE;
-
-			auto lv_result = ktxTexture2_Create(&lv_ktxTexCreateInfo, KTX_TEXTURE_CREATE_ALLOC_STORAGE, &lv_ktx2Texture);
-
-			if (KTX_SUCCESS != lv_result) {
-				throw "Failed to create ktxTexture2.";
-			}
-			
-			int lv_mipmapWidth = lv_downscaleWidth, lv_mipmapHeight = lv_dowscaleHeight;
-			for (size_t j = 0U; j < lv_totalNumMipmpas; ++j) {
-				size_t lv_offset{};
-				ktxTexture_GetImageOffset(ktxTexture(lv_ktx2Texture), j, 0, 0, &lv_offset);
-				lv_resizeResult = stbir_resize_uint8_linear(lv_downscalePixels.data(), lv_originalWidth/2, lv_originalHeight/2, 0, ktxTexture_GetData(ktxTexture(lv_ktx2Texture)) + lv_offset, lv_mipmapWidth, lv_mipmapHeight, 0, STBIR_RGBA);
-				if (nullptr == lv_resizeResult) {
-					throw "Generating mipmap data failed for one of the textures.\n";
-				}
-				lv_mipmapHeight = lv_mipmapHeight / 2;
-				lv_mipmapWidth = lv_mipmapWidth / 2;
-			}
-
-			
-			auto lv_compressionResult = ktxTexture2_CompressBasis(lv_ktx2Texture, 128);
-			if (KTX_SUCCESS != lv_compressionResult) {
-				throw "Compression failed.\n";
-			}
-			auto lv_transcodeResult = ktxTexture2_TranscodeBasis(lv_ktx2Texture, KTX_TTF_BC7_RGBA, 0);
-			if (KTX_SUCCESS != lv_transcodeResult) {
-				throw "Transcoding from basis to BC7 failed.\n";
-			}
-
-			ktxTexture_WriteToNamedFile(ktxTexture(lv_ktx2Texture), m_currentSceneData.m_textureNames[i].c_str());
-			ktxTexture_Destroy(ktxTexture(lv_ktx2Texture));
+		std::vector<uint32_t> lv_indirectionIndices{};
+		lv_indirectionIndices.resize(lv_originalTexturePaths.size());
+		for (size_t i = 0U; i < lv_indirectionIndices.size(); ++i) {
+			lv_indirectionIndices[i] = static_cast<uint32_t>(i);
 		}
+
+		auto lv_compressorLambda = [this, &lv_originalTexturePaths, &lv_indirectionIndices](const uint32_t i) -> void
+			{
+				constexpr size_t lv_totalNumMipmpas{ 6U };
+			
+
+					constexpr int lv_channels{ 4 };
+					int lv_originalWidth{}, lv_originalHeight{};
+
+					unsigned char* lv_pixels = stbi_load(lv_originalTexturePaths[i].c_str(), &lv_originalWidth, &lv_originalHeight, nullptr, lv_channels);
+
+					if (nullptr == lv_pixels) {
+						printf("Failed to load %s\n", lv_originalTexturePaths[i].c_str());
+						throw "Failed to open one of the original textures to compress them.\n";
+					}
+
+					std::vector<unsigned char> lv_downscalePixels{};
+					int lv_downscaleWidth{}, lv_dowscaleHeight{};
+					unsigned char* lv_resizeResult{};
+					if (lv_originalWidth >= 4096) {
+						lv_dowscaleHeight = lv_originalHeight / 4;
+						lv_downscaleWidth = lv_originalWidth / 4;
+					}
+					else if (lv_originalWidth <= 2048 && lv_originalWidth > 1024) {
+						lv_dowscaleHeight = lv_originalHeight / 2;
+						lv_downscaleWidth = lv_originalWidth / 2;
+					}
+					else {
+						lv_dowscaleHeight = lv_originalHeight;
+						lv_downscaleWidth = lv_originalWidth;
+					}
+
+					lv_downscalePixels.resize(lv_dowscaleHeight * lv_downscaleWidth * lv_channels);
+					lv_resizeResult = stbir_resize_uint8_linear(lv_pixels, lv_originalWidth, lv_originalHeight, 0, lv_downscalePixels.data(), lv_downscaleWidth, lv_dowscaleHeight, 0, STBIR_RGBA);
+					if (nullptr == lv_resizeResult) {
+						throw "Failed to downscale one of the textures.\n";
+					}
+
+					stbi_image_free(lv_pixels);
+
+					ktxTexture2* lv_ktx2Texture{};
+					ktxTextureCreateInfo lv_ktxTexCreateInfo{};
+					lv_ktxTexCreateInfo.baseDepth = 1U;
+					lv_ktxTexCreateInfo.baseWidth = static_cast<uint32_t>(lv_downscaleWidth);
+					lv_ktxTexCreateInfo.baseHeight = static_cast<uint32_t>(lv_dowscaleHeight);
+					lv_ktxTexCreateInfo.generateMipmaps = KTX_FALSE;
+					lv_ktxTexCreateInfo.numDimensions = 2U;
+					lv_ktxTexCreateInfo.numLevels = lv_totalNumMipmpas;
+					lv_ktxTexCreateInfo.vkFormat = VK_FORMAT_R8G8B8A8_UNORM;
+					lv_ktxTexCreateInfo.numFaces = 1U;
+					lv_ktxTexCreateInfo.numLayers = 1U;
+					lv_ktxTexCreateInfo.isArray = KTX_FALSE;
+
+					auto lv_result = ktxTexture2_Create(&lv_ktxTexCreateInfo, KTX_TEXTURE_CREATE_ALLOC_STORAGE, &lv_ktx2Texture);
+
+					if (KTX_SUCCESS != lv_result) {
+						throw "Failed to create ktxTexture2.";
+					}
+
+					int lv_mipmapWidth = lv_downscaleWidth, lv_mipmapHeight = lv_dowscaleHeight;
+					for (size_t j = 0U; j < lv_totalNumMipmpas; ++j) {
+						size_t lv_offset{};
+						std::vector<unsigned char> lv_resizedTempData{};
+						lv_resizedTempData.resize(lv_channels * lv_mipmapHeight * lv_mipmapWidth);
+						lv_resizeResult = stbir_resize_uint8_linear(lv_downscalePixels.data(), lv_downscaleWidth, lv_dowscaleHeight, 0, lv_resizedTempData.data(), lv_mipmapWidth, lv_mipmapHeight, 0, STBIR_RGBA);
+						if (nullptr == lv_resizeResult) {
+							throw "Generating mipmap data failed for one of the textures.\n";
+						}
+
+						auto lv_result = ktxTexture_SetImageFromMemory(ktxTexture(lv_ktx2Texture), j, 0, 0, lv_resizedTempData.data(), lv_resizedTempData.size());
+
+						if (KTX_SUCCESS != lv_result) {
+							throw "setImageFromMemory() failed for one of the ktx2 textures.\n";
+						}
+						lv_mipmapHeight = lv_mipmapHeight / 2;
+						lv_mipmapWidth = lv_mipmapWidth / 2;
+					}
+
+
+					auto lv_compressionResult = ktxTexture2_CompressBasis(lv_ktx2Texture, 128);
+					if (KTX_SUCCESS != lv_compressionResult) {
+						throw "Compression failed.\n";
+					}
+
+
+					ktxTexture_WriteToNamedFile(ktxTexture(lv_ktx2Texture), m_currentSceneData.m_textureNames[i].c_str());
+					ktxTexture_Destroy(ktxTexture(lv_ktx2Texture));
+				
+			};
+
+		std::for_each(std::execution::par_unseq, lv_indirectionIndices.cbegin(), lv_indirectionIndices.cend(), lv_compressorLambda);
 	}
 
 	glm::mat4 SceneDataGenerator::ConvertaiMat4ToGlmMat4(const aiMatrix4x4& l_assimpMatrix)
