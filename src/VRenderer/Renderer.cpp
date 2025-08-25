@@ -9,6 +9,7 @@
 #include "VRenderer/Logger/Logger.hpp"
 #include "VRenderer/VulkanWrappers/VulkanDescriptorSetUpdater.hpp"
 #include "VRenderer/VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV.hpp"
+#include "SceneDataGenerator/SceneData.hpp"
 
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
@@ -252,7 +253,7 @@ namespace VRenderer
 		}
 	}
 
-	void Renderer::Draw(SDL_Window* l_window)
+	void Renderer::Draw(SDL_Window* l_window, Scene::SceneData& l_sceneData)
 	{
 		using namespace Utilities;
 

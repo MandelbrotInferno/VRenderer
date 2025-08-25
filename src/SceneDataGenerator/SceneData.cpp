@@ -19,6 +19,7 @@ namespace Scene
 		m_textureNames.clear();
 		m_nodeHandlesToTheirNames.clear();
 		m_meshHandlesToNodes.clear();
+		m_materials.clear();
 	}
 
 

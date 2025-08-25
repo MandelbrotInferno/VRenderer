@@ -18,6 +18,11 @@
 
 struct SDL_Window;
 
+namespace Scene
+{
+	struct SceneData;
+}
+
 namespace VRenderer
 {
 	class Renderer final
@@ -32,7 +37,7 @@ namespace VRenderer
 		void Init(SDL_Window* l_window);
 		void InitCleanUp();
 
-		void Draw(SDL_Window* l_window);
+		void Draw(SDL_Window* l_window, Scene::SceneData& l_sceneData);
 
 		~Renderer();
 	private:

@@ -38,5 +38,7 @@ namespace Scene
 		//Debugging data
 		std::unordered_map<uint32_t, std::string> m_nodeHandlesToTheirNames{};
 		std::vector<std::string> m_textureNames{};
+
+		bool m_completelyInitialized{ false };
 	};
 }
