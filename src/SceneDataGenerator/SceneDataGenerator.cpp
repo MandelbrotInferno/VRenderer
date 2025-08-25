@@ -156,7 +156,6 @@ namespace Scene
 				lv_indicesCurrentOffset += (3U * lv_currentMesh->mNumFaces);
 			}
 			
-			
 			GenerateCompressedDownscaledKTXtextures(lv_assimpSceneData, l_sceneFolderPath);
 			BuildSceneGraph(lv_assimpSceneData);
 			m_currentSceneData.Save(l_serializedFilePath);
@@ -164,7 +163,6 @@ namespace Scene
 		else {
 			Load(l_serializedFilePath);
 		}
-		
 		SceneData lv_returnSceneData = std::move(m_currentSceneData);
 		m_currentSceneData.Clear();
 		return lv_returnSceneData;
@@ -287,9 +285,17 @@ namespace Scene
 
 		}
 
-		if (false == std::filesystem::create_directory(lv_compressedTexturesFolderPath)) {
-			throw "Failed to create CompressedTextures/ directory in the scene folder.\n";
+		if (true == std::filesystem::exists(lv_compressedTexturesFolderPath)) {
+			if (false == std::filesystem::is_empty(lv_compressedTexturesFolderPath)) {
+				return;
+			}
 		}
+		else {
+			if (false == std::filesystem::create_directory(lv_compressedTexturesFolderPath)) {
+				throw "Failed to create compressed folder directory.\n";
+			}
+		}
+		
 
 		std::vector<uint32_t> lv_indirectionIndices{};
 		lv_indirectionIndices.resize(lv_originalTexturePaths.size());
