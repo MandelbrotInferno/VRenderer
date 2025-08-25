@@ -79,6 +79,17 @@ namespace VRenderer
 	}
 
 
+	void VulkanResourceManager::AddKtxVulkanTexture(ktxVulkanTexture&& l_ktxVkTexture)
+	{
+		m_ktxVulkanTextures.emplace_back(std::move(l_ktxVkTexture));
+	}
+
+
+	const std::vector<ktxVulkanTexture>& VulkanResourceManager::GetAllKTXVulkanTextures()
+	{
+		return m_ktxVulkanTextures;
+	}
+
 	VulkanTexture& VulkanResourceManager::RetrieveVulkanTexture(std::string_view l_name)
 	{
 		const std::string lv_tempName{ l_name };
@@ -326,6 +337,10 @@ namespace VRenderer
 
 			for (auto& l_vulkanBuffer : m_vulkanBuffers) {
 				l_vulkanBuffer.CleanUp(l_allocator);
+			}
+
+			for (auto& l_ktxVkTexture : m_ktxVulkanTextures) {
+				ktxVulkanTexture_Destruct(&l_ktxVkTexture, l_device, nullptr);
 			}
 		}
 	}

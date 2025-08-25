@@ -14,6 +14,7 @@
 #include <span>
 #include <string_view>
 #include <array>
+#include <ktxvulkan.h>
 
 namespace VRenderer
 {
@@ -54,6 +55,10 @@ namespace VRenderer
 		//Make sure every name you provide is unique
 		uint32_t AddVulkanBuffer(std::string&& l_name, VulkanBuffer&& l_vulkanBuffer);
 
+		void AddKtxVulkanTexture(ktxVulkanTexture&& l_ktxVkTexture);
+
+		const std::vector<ktxVulkanTexture>& GetAllKTXVulkanTextures();
+
 		VulkanTexture& RetrieveVulkanTexture(std::string_view l_name);
 		VkImageView RetrieveVulkanImageView(std::string_view l_name);
 		VkDescriptorSetLayout RetrieveVulkanDescriptorSetLayout(std::string_view l_name);
@@ -80,6 +85,9 @@ namespace VRenderer
 		std::vector<VkPipeline> m_vulkanPipelines{};
 		std::vector<VkPipelineLayout> m_vulkanPipelineLayouts{};
 		std::vector<VulkanBuffer> m_vulkanBuffers{};
+
+		//These ktx vulkan textures are only used to load compressed ktx format textures of meshes
+		std::vector<ktxVulkanTexture> m_ktxVulkanTextures{};
 
 		std::unordered_map<std::string, size_t> m_mapVulkanImageViewsNamesToIndex{};
 		std::unordered_map<std::string, size_t> m_mapVulkanSetLayoutNamesToIndex{};
