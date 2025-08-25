@@ -371,7 +371,7 @@ namespace Scene
 							throw "Generating mipmap data failed for one of the textures.\n";
 						}
 
-						auto lv_result = ktxTexture_SetImageFromMemory(ktxTexture(lv_ktx2Texture), j, 0, 0, lv_resizedTempData.data(), lv_resizedTempData.size());
+						auto lv_result = ktxTexture_SetImageFromMemory(ktxTexture(lv_ktx2Texture), (ktx_uint32_t)j, 0, 0, lv_resizedTempData.data(), (ktx_uint32_t)lv_resizedTempData.size());
 
 						if (KTX_SUCCESS != lv_result) {
 							throw "setImageFromMemory() failed for one of the ktx2 textures.\n";
