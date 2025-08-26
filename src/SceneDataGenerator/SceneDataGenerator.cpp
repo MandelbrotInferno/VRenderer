@@ -70,7 +70,7 @@ namespace Scene
 			lv_totalNumLod0IndicesInScene *= 3U;
 
 			m_currentSceneData.m_verticesOfAllMeshesInScene.resize(lv_totalNumVerticesInScene);
-			m_currentSceneData.m_meshMetaDatas.resize(lv_totalNumMeshesInScene);
+			m_currentSceneData.m_meshes.resize(lv_totalNumMeshesInScene);
 			m_currentSceneData.m_indicesOfAllMeshesInScene.resize(lv_totalNumLod0IndicesInScene);
 
 			uint32_t lv_verticesCurrentOffset{};
@@ -81,10 +81,10 @@ namespace Scene
 
 				LOG(VRenderer::Level::INFO, VRenderer::Category::GENERAL, "\nMesh {} is being processed...\n", lv_currentMesh->mName.C_Str());
 
-				m_currentSceneData.m_meshMetaDatas[i].m_totalNumVertices = lv_assimpSceneData->mMeshes[i]->mNumVertices;
-				m_currentSceneData.m_meshMetaDatas[i].m_firstVertexHandle = lv_verticesCurrentOffset;
-				m_currentSceneData.m_meshMetaDatas[i].m_firstIndexHandle = lv_indicesCurrentOffset;
-				m_currentSceneData.m_meshMetaDatas[i].m_materialHandle = lv_assimpSceneData->mMeshes[i]->mMaterialIndex;
+				m_currentSceneData.m_meshes[i].m_totalNumVertices = lv_assimpSceneData->mMeshes[i]->mNumVertices;
+				m_currentSceneData.m_meshes[i].m_firstVertexHandle = lv_verticesCurrentOffset;
+				m_currentSceneData.m_meshes[i].m_firstIndexHandle = lv_indicesCurrentOffset;
+				m_currentSceneData.m_meshes[i].m_materialHandle = lv_assimpSceneData->mMeshes[i]->mMaterialIndex;
 
 				bool lv_hasNormals = lv_currentMesh->HasNormals();
 				bool lv_hasTangentAndBitangent = lv_currentMesh->HasTangentsAndBitangents();
@@ -464,8 +464,8 @@ namespace Scene
 			memcpy(&lv_size, &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(size_t));
 			lv_bytesProcessedUntilNow += sizeof(size_t);
 
-			m_currentSceneData.m_meshMetaDatas.resize(lv_size);
-			memcpy(m_currentSceneData.m_meshMetaDatas.data(), &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(Mesh) * lv_size);
+			m_currentSceneData.m_meshes.resize(lv_size);
+			memcpy(m_currentSceneData.m_meshes.data(), &lv_sceneData[lv_bytesProcessedUntilNow], sizeof(Mesh) * lv_size);
 			lv_bytesProcessedUntilNow += (sizeof(Mesh) * lv_size);
 		}
 

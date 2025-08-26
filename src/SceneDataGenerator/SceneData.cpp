@@ -10,7 +10,7 @@ namespace Scene
 {
 	void SceneData::Clear()
 	{
-		m_meshMetaDatas.clear();
+		m_meshes.clear();
 		m_verticesOfAllMeshesInScene.clear();
 		m_indicesOfAllMeshesInScene.clear();
 		m_nodes.clear();
@@ -46,7 +46,7 @@ namespace Scene
 		}
 
 		const size_t lv_sizeOfSerializedBinaryData = sizeof(size_t) * (11U)
-			+ sizeof(Mesh) * m_meshMetaDatas.size()
+			+ sizeof(Mesh) * m_meshes.size()
 			+ sizeof(Vertex) * m_verticesOfAllMeshesInScene.size()
 			+ sizeof(uint32_t) * m_indicesOfAllMeshesInScene.size()
 			+ sizeof(Node) * m_nodes.size()
@@ -68,11 +68,11 @@ namespace Scene
 		}
 
 		{
-			const size_t lv_totalNumOfMeshes = m_meshMetaDatas.size();
+			const size_t lv_totalNumOfMeshes = m_meshes.size();
 			memcpy(&lv_serializedBinaryData[lv_totalNumBytesWrittenUntilNow], &lv_totalNumOfMeshes, sizeof(size_t));
 			lv_totalNumBytesWrittenUntilNow += sizeof(size_t);
 
-			memcpy(&lv_serializedBinaryData[lv_totalNumBytesWrittenUntilNow], m_meshMetaDatas.data(), sizeof(Mesh) * lv_totalNumOfMeshes);
+			memcpy(&lv_serializedBinaryData[lv_totalNumBytesWrittenUntilNow], m_meshes.data(), sizeof(Mesh) * lv_totalNumOfMeshes);
 			lv_totalNumBytesWrittenUntilNow += (lv_totalNumOfMeshes * sizeof(Mesh));
 		}
 

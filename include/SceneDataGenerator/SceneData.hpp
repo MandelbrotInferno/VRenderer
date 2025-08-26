@@ -23,7 +23,7 @@ namespace Scene
 
 	public:
 
-		std::vector<Mesh> m_meshMetaDatas{};
+		std::vector<Mesh> m_meshes{};
 		std::vector<Vertex> m_verticesOfAllMeshesInScene{};
 		std::vector<uint32_t> m_indicesOfAllMeshesInScene{};
 
