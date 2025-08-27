@@ -95,17 +95,9 @@ namespace VRenderer
 
 		std::string m_shaderRootPath{"shaders"};
 
-		//Test code
-		ComputePassPushConstant m_pushConstDataImGui{};
-		GraphicsPassPushConstant m_graphicsPushConstant{};
-
 	private:
 
 		static constexpr uint32_t m_maxCommandBuffers{ 2U };
-
-	public:
-		//Test code
-		std::array<VulkanDescriptorSet, m_maxCommandBuffers> m_testComputeSets{};
 
 	private:
 		
@@ -113,9 +105,5 @@ namespace VRenderer
 		std::array<VulkanCommandbufferReset, m_maxCommandBuffers> m_vulkanGraphicsCmdBuffers{};
 		std::array<VulkanCommandbufferReset, m_maxCommandBuffers> m_vulkanComputeCmdBuffers{};
 		std::array<VulkanSwapchainAndPresentSync, m_maxCommandBuffers> m_swapchainPresentSyncPrimitives{};
-
-		//Test code
-		std::array<ComputePass, 2> m_computePasses{};
-		uint32_t m_currentComputePassIndex{1U};
 	};
 }
