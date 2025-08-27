@@ -11,7 +11,8 @@ namespace Scene
 
 		uint32_t m_firstIndexHandle{};
 		uint32_t m_firstVertexHandle{};
-		uint32_t m_totalNumVertices{};
+		uint32_t m_totalNumIndices{};
 		uint32_t m_materialHandle{};
+		uint32_t m_modelTransformationHandle{};
 	};
 }

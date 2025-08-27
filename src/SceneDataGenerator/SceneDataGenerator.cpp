@@ -81,11 +81,11 @@ namespace Scene
 
 				LOG(VRenderer::Level::INFO, VRenderer::Category::GENERAL, "\nMesh {} is being processed...\n", lv_currentMesh->mName.C_Str());
 
-				m_currentSceneData.m_meshes[i].m_totalNumVertices = lv_assimpSceneData->mMeshes[i]->mNumVertices;
+				m_currentSceneData.m_meshes[i].m_totalNumIndices = lv_assimpSceneData->mMeshes[i]->mNumFaces * 3U;
 				m_currentSceneData.m_meshes[i].m_firstVertexHandle = lv_verticesCurrentOffset;
 				m_currentSceneData.m_meshes[i].m_firstIndexHandle = lv_indicesCurrentOffset;
 				m_currentSceneData.m_meshes[i].m_materialHandle = lv_assimpSceneData->mMeshes[i]->mMaterialIndex;
-
+				
 				bool lv_hasNormals = lv_currentMesh->HasNormals();
 				bool lv_hasTangentAndBitangent = lv_currentMesh->HasTangentsAndBitangents();
 				bool lv_hasTexCoords = lv_currentMesh->HasTextureCoords(0);
@@ -158,6 +158,13 @@ namespace Scene
 			
 			GenerateCompressedDownscaledKTXtextures(lv_assimpSceneData, l_sceneFolderPath);
 			BuildSceneGraph(lv_assimpSceneData);
+
+			size_t lv_sumOfAllTotalNumIndicesOfEachMesh{};
+			for (size_t i = 0U; i < m_currentSceneData.m_meshes.size(); ++i) {
+				lv_sumOfAllTotalNumIndicesOfEachMesh += m_currentSceneData.m_meshes[i].m_totalNumIndices;
+			}
+			assert(lv_sumOfAllTotalNumIndicesOfEachMesh == m_currentSceneData.m_indicesOfAllMeshesInScene.size());
+
 			m_currentSceneData.Save(l_serializedFilePath);
 		}
 		else {
@@ -181,6 +188,12 @@ namespace Scene
 		m_currentSceneData.m_localTransformations.emplace_back(glm::mat4{1.f});
 		m_currentSceneData.m_nodeHandlesToTheirNames.insert(std::make_pair(0U, std::string(l_assimpScene->mRootNode->mName.C_Str())));
 		lv_rootNode.m_childHandle = AddNodesToSceneGraph(l_assimpScene->mRootNode, 0U, 0U, m_currentSceneData.m_modalTransformations[0]);
+
+		const size_t lv_totalNumMeshesInScene = m_currentSceneData.m_meshes.size();
+		for (size_t i = 0U; i < lv_totalNumMeshesInScene; ++i) {
+			const uint32_t lv_nodeHandleOfCurrentMesh = m_currentSceneData.m_meshHandlesToNodes[i];
+			m_currentSceneData.m_meshes[i].m_modelTransformationHandle = lv_nodeHandleOfCurrentMesh;
+		}
 		
 	}
 
