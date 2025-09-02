@@ -79,13 +79,13 @@ namespace VRenderer
 	}
 
 
-	void VulkanResourceManager::AddKtxVulkanTexture(ktxVulkanTexture&& l_ktxVkTexture)
+	void VulkanResourceManager::AddKtxVulkanTexture(ktxVulkanTexture&& l_ktxVkTexture, VkSampler l_sampler)
 	{
-		m_ktxVulkanTextures.emplace_back(std::move(l_ktxVkTexture));
+		m_ktxVulkanTextures.emplace_back(std::move(l_ktxVkTexture), l_sampler);
 	}
 
 
-	const std::vector<ktxVulkanTexture>& VulkanResourceManager::GetAllKTXVulkanTextures()
+	const std::vector<std::pair<ktxVulkanTexture, VkSampler>>& VulkanResourceManager::GetAllKTXVulkanTextures()
 	{
 		return m_ktxVulkanTextures;
 	}
@@ -321,7 +321,7 @@ namespace VRenderer
 				vkDestroyImageView(l_device, l_vulkanImageView, nullptr);
 			}
 			for (auto& l_vulkanTexture : m_vulkanTextures) {
-				l_vulkanTexture.CleanUp(l_allocator);
+				l_vulkanTexture.CleanUp(l_device, l_allocator);
 			}
 			for (auto l_vulkanSetLayout : m_vulkanSetLayouts) {
 				vkDestroyDescriptorSetLayout(l_device, l_vulkanSetLayout, nullptr);
@@ -340,7 +340,8 @@ namespace VRenderer
 			}
 
 			for (auto& l_ktxVkTexture : m_ktxVulkanTextures) {
-				ktxVulkanTexture_Destruct(&l_ktxVkTexture, l_device, nullptr);
+				ktxVulkanTexture_Destruct(&l_ktxVkTexture.first, l_device, nullptr);
+				vkDestroySampler(l_device, l_ktxVkTexture.second, nullptr);
 			}
 		}
 	}

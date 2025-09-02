@@ -55,9 +55,9 @@ namespace VRenderer
 		//Make sure every name you provide is unique
 		uint32_t AddVulkanBuffer(std::string&& l_name, VulkanBuffer&& l_vulkanBuffer);
 
-		void AddKtxVulkanTexture(ktxVulkanTexture&& l_ktxVkTexture);
+		void AddKtxVulkanTexture(ktxVulkanTexture&& l_ktxVkTexture, VkSampler l_sampler);
 
-		const std::vector<ktxVulkanTexture>& GetAllKTXVulkanTextures();
+		const std::vector<std::pair<ktxVulkanTexture, VkSampler>>& GetAllKTXVulkanTextures();
 
 		VulkanTexture& RetrieveVulkanTexture(std::string_view l_name);
 		VkImageView RetrieveVulkanImageView(std::string_view l_name);
@@ -87,7 +87,7 @@ namespace VRenderer
 		std::vector<VulkanBuffer> m_vulkanBuffers{};
 
 		//These ktx vulkan textures are only used to load compressed ktx format textures of meshes
-		std::vector<ktxVulkanTexture> m_ktxVulkanTextures{};
+		std::vector<std::pair<ktxVulkanTexture, VkSampler>> m_ktxVulkanTextures{};
 
 		std::unordered_map<std::string, size_t> m_mapVulkanImageViewsNamesToIndex{};
 		std::unordered_map<std::string, size_t> m_mapVulkanSetLayoutNamesToIndex{};
