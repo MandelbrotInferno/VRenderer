@@ -12,12 +12,13 @@ namespace VRenderer
 	{
 	public:
 
-		void CleanUp(VmaAllocator l_allocator) noexcept;
+		void CleanUp(VkDevice l_device, VmaAllocator l_allocator) noexcept;
 
 	public:
 		std::array<VkImageLayout, 6> m_mipMapImageLayouts{};
 		std::array<VkImageLayout, 6> m_layerImageLayouts{};
 		VkImage m_image{};
+		VkSampler m_sampler{};
 		VmaAllocation m_vmaAllocation{};
 		VkExtent3D m_extent{};
 		VkFormat m_format{};
