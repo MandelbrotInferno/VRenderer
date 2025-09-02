@@ -14,6 +14,8 @@
 #include <vma/vk_mem_alloc.h>
 #include <array>
 #include <memory>
+#include <utility>
+#include <string>
 
 
 struct SDL_Window;
@@ -63,7 +65,7 @@ namespace VRenderer
 		void ResizeWindow();
 		void ResetResourcesAfterWindowResize(SDL_Window* l_window);
 
-		void GenerateAllVulkanSetLayoutsAndPipelineLayouts();
+		void GenerateAllVulkanSetLayoutsAndPipelineLayouts(const std::pair<std::string, uint32_t>& l_bindlessTextureArraySizePair);
 
 		void GenerateAllKTXVulkanTexturesOfScene(const Scene::SceneData& l_sceneData);
 
@@ -92,8 +94,6 @@ namespace VRenderer
 
 		bool m_physicalDeviceHasDedicatedCompute{ false };
 		bool m_resizeWindow{ false };
-
-		std::string m_shaderRootPath{"shaders"};
 
 	private:
 

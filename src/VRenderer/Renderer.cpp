@@ -75,8 +75,8 @@ namespace VRenderer
 		InitializeDescriptorSetPools();
 		InitializeIMGUI(l_window);
 
-		GenerateAllVulkanSetLayoutsAndPipelineLayouts();
 		GenerateAllKTXVulkanTexturesOfScene(l_sceneData);
+		GenerateAllVulkanSetLayoutsAndPipelineLayouts(std::make_pair<std::string, uint32_t>(std::string("Textures"), (uint32_t)l_sceneData.m_textureNames.size()));
 
 		VulkanBuffer lv_meshesVulkanBuffer = Utilities::AllocateAndPopulateVulkanBuffer<const Scene::Mesh>(m_device, m_graphicsQueue.m_queue, m_immediateCmdBuffer, m_immediateGPUCmdsFence, m_vmaAlloc, l_sceneData.m_meshes, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT);
 		VulkanBuffer lv_verticesVulkanBuffer = Utilities::AllocateAndPopulateVulkanBuffer<const Scene::Vertex>(m_device, m_graphicsQueue.m_queue, m_immediateCmdBuffer, m_immediateGPUCmdsFence, m_vmaAlloc, l_sceneData.m_verticesOfAllMeshesInScene, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT);
@@ -84,11 +84,68 @@ namespace VRenderer
 		VulkanBuffer lv_materialsVulkanBuffer = Utilities::AllocateAndPopulateVulkanBuffer<const Scene::Material>(m_device, m_graphicsQueue.m_queue, m_immediateCmdBuffer, m_immediateGPUCmdsFence, m_vmaAlloc, l_sceneData.m_materials, VK_BUFFER_USAGE_2_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT);
 		VulkanBuffer lv_modelTransformsVulkanBuffer = Utilities::AllocateAndPopulateVulkanBuffer<const glm::mat4>(m_device, m_graphicsQueue.m_queue, m_immediateCmdBuffer, m_immediateGPUCmdsFence, m_vmaAlloc, l_sceneData.m_modalTransformations, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_2_SHADER_DEVICE_ADDRESS_BIT, VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT);
 
-		m_vulkanResManager.AddVulkanBuffer("Mesh", std::move(lv_meshesVulkanBuffer));
+
+		m_vulkanResManager.AddVulkanBuffer("Meshes", std::move(lv_meshesVulkanBuffer));
 		m_vulkanResManager.AddVulkanBuffer("Vertices", std::move(lv_verticesVulkanBuffer));
 		m_vulkanResManager.AddVulkanBuffer("Indices", std::move(lv_indicesVulkanBuffer));
 		m_vulkanResManager.AddVulkanBuffer("Materials", std::move(lv_materialsVulkanBuffer));
 		m_vulkanResManager.AddVulkanBuffer("ModelTransformations", std::move(lv_modelTransformsVulkanBuffer));
+
+		std::array<VkDescriptorSetLayout, 1> lv_indirectSetLayouts{};
+		lv_indirectSetLayouts[0] = m_vulkanResManager.RetrieveVulkanDescriptorSetLayout("IndirectRenderPass0");
+		std::array<VulkanDescriptorSet, 2> lv_indirectDescSets{};
+		lv_indirectDescSets[0] = m_mainDescriptorSetAlloc.Allocate(m_device, lv_indirectSetLayouts[0]);
+		lv_indirectDescSets[1] = m_mainDescriptorSetAlloc.Allocate(m_device, lv_indirectSetLayouts[0]);
+
+		VulkanDescriptorSetUpdater lv_vulkanDescSetUpdater{};
+		const auto& lv_ktxTextures = m_vulkanResManager.GetAllKTXVulkanTextures();
+		for (uint32_t i = 0U; i < (uint32_t)l_sceneData.m_textureNames.size(); ++i) {
+			const auto& lv_currentTexture = lv_ktxTextures[i];
+			lv_vulkanDescSetUpdater.AddWriteImage(1U + i, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, lv_currentTexture.second, m_vulkanResManager.RetrieveVulkanImageView(l_sceneData.m_textureNames[i]), lv_currentTexture.first.imageLayout);
+		}
+		lv_vulkanDescSetUpdater.UpdateSet(m_device, lv_indirectDescSets[0].m_set);
+		lv_vulkanDescSetUpdater.UpdateSet(m_device, lv_indirectDescSets[1].m_set);
+
+		auto lv_indirectPipelineLayout = m_vulkanResManager.RetrieveVulkanPipelineLayout("IndirectRenderPass");
+
+		auto lv_indirectRenderPassVertModule = Utilities::GenerateVkShaderModule("shaders/IndirectRenderPass/SPV/IndirectRenderPassVert.spv", m_device);
+		auto lv_indirectRenderPassFragModule = Utilities::GenerateVkShaderModule("shaders/IndirectRenderPass/SPV/IndirectRenderPassFrag.spv", m_device);
+
+		std::vector<VkPipelineShaderStageCreateInfo> lv_shaderStageCreateInfo{};
+		lv_shaderStageCreateInfo.resize(2);
+		lv_shaderStageCreateInfo[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		lv_shaderStageCreateInfo[0].module = lv_indirectRenderPassVertModule;
+		lv_shaderStageCreateInfo[0].pName = "main";
+		lv_shaderStageCreateInfo[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
+
+		lv_shaderStageCreateInfo[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		lv_shaderStageCreateInfo[1].module = lv_indirectRenderPassFragModule;
+		lv_shaderStageCreateInfo[1].pName = "main";
+		lv_shaderStageCreateInfo[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+		std::array<Utilities::VulkanGraphicsCreateInfo, 1> lv_graphicsCreateInfoHelper{};
+		lv_graphicsCreateInfoHelper[0].m_topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+		lv_graphicsCreateInfoHelper[0].m_sampleShadingEnabled = VK_FALSE;
+		lv_graphicsCreateInfoHelper[0].m_rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+		lv_graphicsCreateInfoHelper[0].m_polygonMode = VK_POLYGON_MODE_FILL;
+		lv_graphicsCreateInfoHelper[0].m_pipelineLayout = lv_indirectPipelineLayout;
+		lv_graphicsCreateInfoHelper[0].m_minSampleShading = 1.f;
+		lv_graphicsCreateInfoHelper[0].m_lineWidth = 1.f;
+		lv_graphicsCreateInfoHelper[0].m_frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+		lv_graphicsCreateInfoHelper[0].m_depthWriteEnabled = VK_TRUE;
+		lv_graphicsCreateInfoHelper[0].m_depthTestEnabled = VK_TRUE;
+		lv_graphicsCreateInfoHelper[0].m_depthCompareOp = VK_COMPARE_OP_LESS;
+		lv_graphicsCreateInfoHelper[0].m_cullMode = VK_CULL_MODE_BACK_BIT;
+		lv_graphicsCreateInfoHelper[0].m_colorBlendCreateInfoLogicOpEnabled = VK_FALSE;
+		lv_graphicsCreateInfoHelper[0].m_shaderStageCreateInfos = std::move(lv_shaderStageCreateInfo);
+		lv_graphicsCreateInfoHelper[0].m_dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+
+		std::vector<VkPipeline> lv_graphicsPipelines = Utilities::GenerateGraphicsPipelines(m_device, lv_graphicsCreateInfoHelper);
+
+		m_vulkanResManager.AddVulkanPipeline("IndirectRenderPass", lv_graphicsPipelines[0]);
+
+		vkDestroyShaderModule(m_device, lv_indirectRenderPassVertModule, nullptr);
+		vkDestroyShaderModule(m_device, lv_indirectRenderPassFragModule, nullptr);
 	}
 	void Renderer::InitCleanUp()
 	{
@@ -311,11 +368,11 @@ namespace VRenderer
 		++m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex;
 	}
 
-	void Renderer::GenerateAllVulkanSetLayoutsAndPipelineLayouts()
+	void Renderer::GenerateAllVulkanSetLayoutsAndPipelineLayouts(const std::pair<std::string, uint32_t>& l_bindlessTextureArraySizePair)
 	{
 		std::vector<std::string> lv_allSpvFilePaths{};
 		lv_allSpvFilePaths.reserve(64U);
-		const std::filesystem::path lv_shaderRootFolder{ m_shaderRootPath };
+		const std::filesystem::path lv_shaderRootFolder{ "shaders" };
 
 		for (const auto& l_entry : std::filesystem::directory_iterator(lv_shaderRootFolder)) {
 			if (true == l_entry.is_directory()) {
@@ -327,7 +384,7 @@ namespace VRenderer
 
 		VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV lv_generator{};
 		for (const auto& l_spvFilePath : lv_allSpvFilePaths) {
-			lv_generator.GenerateVulkanPipelineLayoutAndSetLayouts(m_device, m_vulkanResManager, l_spvFilePath);
+			lv_generator.GenerateVulkanPipelineLayoutAndSetLayouts(m_device, m_vulkanResManager, l_spvFilePath, l_bindlessTextureArraySizePair);
 		}
 	}
 
@@ -457,6 +514,14 @@ namespace VRenderer
 
 		SDL_Vulkan_CreateSurface(l_window, m_vulkanFoundational.m_instance, nullptr, &m_vulkanFoundational.m_surface);
 
+		VkPhysicalDeviceFeatures lv_physicalDeviceFeatures{};
+		lv_physicalDeviceFeatures.shaderInt64 = true;
+		lv_physicalDeviceFeatures.shaderInt16 = true;
+
+		VkPhysicalDeviceVulkan11Features lv_features11{ .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES };
+		lv_features11.shaderDrawParameters = true;
+		lv_features11.storageBuffer16BitAccess = true;
+
 		VkPhysicalDeviceVulkan13Features lv_features13{ .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES };
 		lv_features13.dynamicRendering = true;
 		lv_features13.synchronization2 = true;
@@ -465,13 +530,17 @@ namespace VRenderer
 		lv_features12.bufferDeviceAddress = true;
 		lv_features12.descriptorIndexing = true;
 		lv_features12.timelineSemaphore = true;
+		lv_features12.runtimeDescriptorArray = true;
+		lv_features12.shaderSampledImageArrayNonUniformIndexing = true;
 
 		vkb::PhysicalDeviceSelector lv_selector{ lv_vkbInstance };
 
 		auto lv_physicalDeviceSelector = lv_selector
 			.set_minimum_version(1, 3)
-			.set_required_features_13(lv_features13)
+			.set_required_features(lv_physicalDeviceFeatures)
+			.set_required_features_11(lv_features11)
 			.set_required_features_12(lv_features12)
+			.set_required_features_13(lv_features13)
 			.set_surface(m_vulkanFoundational.m_surface);
 
 		auto lv_physicalDeviceCandidNames = lv_physicalDeviceSelector.select_device_names().value();
@@ -725,8 +794,11 @@ namespace VRenderer
 			}
 			
 			ktxTexture_Destroy(ktxTexture(lv_ktxTexture));
-
-			m_vulkanResManager.AddKtxVulkanTexture(std::move(lv_ktxVulkanTexture));
+			VkSampler lv_ktxVulkanTextureSampler = Utilities::GenerateVkSampler(m_device);
+			VkImageView lv_ktxVulkanTextureView = Utilities::GenerateVkImageView(m_device, lv_ktxVulkanTexture.image, lv_ktxVulkanTexture.imageFormat, lv_ktxVulkanTexture.viewType);
+			std::string lv_ktxVulkanTextureName = l_textureName;
+			m_vulkanResManager.AddVulkanImageView(std::move(lv_ktxVulkanTextureName), lv_ktxVulkanTextureView);
+			m_vulkanResManager.AddKtxVulkanTexture(std::move(lv_ktxVulkanTexture), lv_ktxVulkanTextureSampler);
 		}
 
 		ktxVulkanDeviceInfo_Destruct(&lv_ktxVulkanDeviceInfo);
