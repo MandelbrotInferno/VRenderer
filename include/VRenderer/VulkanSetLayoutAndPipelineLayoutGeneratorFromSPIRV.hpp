@@ -8,6 +8,7 @@
 #include <vector>
 #include <string_view>
 #include <string>
+#include <utility>
 
 
 namespace VRenderer
@@ -28,11 +29,11 @@ namespace VRenderer
 
 	public:
 
-		void GenerateVulkanPipelineLayoutAndSetLayouts(VkDevice l_device, VulkanResourceManager& l_resManager, std::string_view l_renderpassSPIRVsFilePath);
+		void GenerateVulkanPipelineLayoutAndSetLayouts(VkDevice l_device, VulkanResourceManager& l_resManager, std::string_view l_renderpassSPIRVsFilePath, const std::pair<std::string, uint32_t>& l_bindlessTextureArraySizePair);
 
 	private:
 
-		std::vector<DescriptorSetLayout> ExtractDescriptorSetLayoutsFromSPIRV_Bytecode(const void* l_binary, const size_t l_sizeOfBinary);
+		std::vector<DescriptorSetLayout> ExtractDescriptorSetLayoutsFromSPIRV_Bytecode(const void* l_binary, const size_t l_sizeOfBinary, const std::pair<std::string, uint32_t>& l_bindlessTextureArraySizePair);
 		VkPushConstantRange ExtractPushConstBlockFromSPIRV_Bytecode(const void* l_binary, const size_t l_sizeOfBinary);
 
 	private:

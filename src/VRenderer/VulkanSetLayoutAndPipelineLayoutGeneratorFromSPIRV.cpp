@@ -17,7 +17,7 @@
 namespace VRenderer
 {
 
-    void VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV::GenerateVulkanPipelineLayoutAndSetLayouts(VkDevice l_device, VulkanResourceManager& l_resManager, std::string_view l_renderpassSPIRVsFilePath)
+    void VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV::GenerateVulkanPipelineLayoutAndSetLayouts(VkDevice l_device, VulkanResourceManager& l_resManager, std::string_view l_renderpassSPIRVsFilePath, const std::pair<std::string, uint32_t>& l_bindlessTextureArraySizePair)
     {
         const std::filesystem::path lv_spirvCompiledShadersPath{ l_renderpassSPIRVsFilePath };
         std::vector<VkPushConstantRange> lv_ranges{};
@@ -37,38 +37,43 @@ namespace VRenderer
             lv_spvFile.read(lv_bufferChar.data(), lv_fileSize);
             lv_spvFile.close();
 
-            auto lv_extractedSetLayout = ExtractDescriptorSetLayoutsFromSPIRV_Bytecode(lv_bufferChar.data(), lv_bufferChar.size());
+            auto lv_extractedSetLayout = ExtractDescriptorSetLayoutsFromSPIRV_Bytecode(lv_bufferChar.data(), lv_bufferChar.size(), l_bindlessTextureArraySizePair);
             auto lv_range = ExtractPushConstBlockFromSPIRV_Bytecode(lv_bufferChar.data(), lv_bufferChar.size());
             if (0U != lv_range.size) {
                 lv_ranges.push_back(lv_range);
             }
             if (false == lv_extractedSetLayout.empty()) {
-                m_extractedDescriptorSetLayouts.emplace_back(std::move(lv_extractedSetLayout));
-            }
-        }
+                for (auto& l_prevSomeStageExtractedSetLayouts : m_extractedDescriptorSetLayouts) {
+                    for (auto& l_prevExtractedSetLayout : l_prevSomeStageExtractedSetLayouts) {
+                        for (auto& l_currentExtractedSetLayout : lv_extractedSetLayout) {
+                            if (l_currentExtractedSetLayout.set_number == l_prevExtractedSetLayout.set_number) {
 
-        for (size_t i = 0; auto& l_extractedSetLayouts : m_extractedDescriptorSetLayouts) {
-            for (auto& l_setLayout : l_extractedSetLayouts) {
-                
-                VkShaderStageFlags lv_stageFlags{};
-                for (size_t j = i+1U; j < m_extractedDescriptorSetLayouts.size(); ++j) {
+                                for (const auto& lv_binding : l_currentExtractedSetLayout.bindings) {
+                                    l_prevExtractedSetLayout.bindings.push_back(lv_binding);
+                                }
 
-                    for (const auto& l_tempSetLayout : m_extractedDescriptorSetLayouts[j]) {
-                        if (l_setLayout.set_number == l_tempSetLayout.set_number) {
-                            lv_stageFlags |= l_tempSetLayout.bindings[0].stageFlags;
+                                l_prevExtractedSetLayout.create_info.pBindings = l_prevExtractedSetLayout.bindings.data();
+                                l_prevExtractedSetLayout.create_info.bindingCount = static_cast<uint32_t>(l_prevExtractedSetLayout.bindings.size());
+                                
+                                l_currentExtractedSetLayout.bindings.clear();
+                            }
                         }
                     }
-                   auto lv_totalErased = std::erase_if(m_extractedDescriptorSetLayouts[j], [&l_setLayout](DescriptorSetLayout& l_layout) {return l_layout.set_number == l_setLayout.set_number; });
+                }
 
-                   if (0U != lv_totalErased) {
-                       for (auto& l_binding : l_setLayout.bindings) {
-                           l_binding.stageFlags |= lv_stageFlags;
-                       }
-                   }
+                std::vector<VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV::DescriptorSetLayout> lv_newExtractedSetLayouts{};
+                lv_newExtractedSetLayouts.reserve(lv_extractedSetLayout.size());
+
+                for (size_t i = 0U; i < lv_extractedSetLayout.size(); ++i) {
+                    if (false == lv_extractedSetLayout[i].bindings.empty()) {
+                        lv_newExtractedSetLayouts.emplace_back(std::move(lv_extractedSetLayout[i]));
+                    }
+                }
+
+                if (false == lv_newExtractedSetLayouts.empty()) {
+                    m_extractedDescriptorSetLayouts.emplace_back(std::move(lv_newExtractedSetLayouts));
                 }
             }
-
-            ++i;
         }
 
         size_t lv_totalLayouts{};
@@ -84,8 +89,8 @@ namespace VRenderer
         auto lv_baseName = lv_spvFilePath.substr(lv_firstOccurence + 1U, lv_lastOccurence - lv_firstOccurence - 1U);
         auto lv_baseNameSetLayouts = lv_baseName + "{}";
 
-        for (const auto& l_extractedSetLayouts : m_extractedDescriptorSetLayouts) {
-            for (const auto& l_extractedSetLayout : l_extractedSetLayouts) {
+        for (const auto& l_extractedSetLayoutsOfSomeStage : m_extractedDescriptorSetLayouts) {
+            for (const auto& l_extractedSetLayout : l_extractedSetLayoutsOfSomeStage) {
                 for (const auto& l_binding : l_extractedSetLayout.bindings) {
                     lv_vkSetLayoutFactory.AddBinding(l_binding.binding, l_binding.descriptorType, l_binding.descriptorCount, l_binding.stageFlags);
                 }
@@ -103,7 +108,7 @@ namespace VRenderer
     }
 
 
-	std::vector<VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV::DescriptorSetLayout> VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV::ExtractDescriptorSetLayoutsFromSPIRV_Bytecode(const void* l_binary, const size_t l_sizeOfBinary)
+	std::vector<VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV::DescriptorSetLayout> VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV::ExtractDescriptorSetLayoutsFromSPIRV_Bytecode(const void* l_binary, const size_t l_sizeOfBinary, const std::pair<std::string, uint32_t>& l_bindlessTextureArraySizePair)
 	{
         SpvReflectShaderModule lv_module = {};
         SpvReflectResult lv_result = spvReflectCreateShaderModule(l_sizeOfBinary, l_binary, &lv_module);
@@ -122,7 +127,30 @@ namespace VRenderer
         for (size_t i_set = 0; i_set < lv_sets.size(); ++i_set) {
             const SpvReflectDescriptorSet& lv_refl_set = *(lv_sets[i_set]);
             DescriptorSetLayout& lv_layout = lv_set_layouts[i_set];
-            lv_layout.bindings.resize(lv_refl_set.binding_count);
+            
+            if (SpvOpTypeRuntimeArray != (*lv_refl_set.bindings)->type_description->op) {
+                lv_layout.bindings.resize(lv_refl_set.binding_count);
+            }
+            else {
+                if (l_bindlessTextureArraySizePair.first == std::string((*lv_refl_set.bindings)->name)) {
+                    lv_layout.bindings.resize(l_bindlessTextureArraySizePair.second);
+                    const SpvReflectDescriptorBinding& refl_binding = *(lv_refl_set.bindings[0]);
+
+                    for (uint32_t i_binding = 0; i_binding < l_bindlessTextureArraySizePair.second; ++i_binding) {
+                        VkDescriptorSetLayoutBinding& layout_binding = lv_layout.bindings[i_binding];
+                        layout_binding.binding = refl_binding.binding+i_binding;
+                        layout_binding.descriptorType = static_cast<VkDescriptorType>(refl_binding.descriptor_type);
+                        layout_binding.descriptorCount = 1;
+                        layout_binding.stageFlags = static_cast<VkShaderStageFlagBits>(lv_module.shader_stage);
+                    }
+                    lv_layout.set_number = lv_refl_set.set;
+                    lv_layout.create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+                    lv_layout.create_info.bindingCount = (uint32_t)l_bindlessTextureArraySizePair.second;
+                    lv_layout.create_info.pBindings = lv_layout.bindings.data();
+                }
+
+                continue;
+            }
             for (uint32_t i_binding = 0; i_binding < lv_refl_set.binding_count; ++i_binding) {
                 const SpvReflectDescriptorBinding& refl_binding = *(lv_refl_set.bindings[i_binding]);
                 VkDescriptorSetLayoutBinding& layout_binding = lv_layout.bindings[i_binding];
