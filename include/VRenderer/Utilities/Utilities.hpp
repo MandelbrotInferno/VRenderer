@@ -38,7 +38,11 @@ namespace VRenderer
 
 		VkSemaphoreSubmitInfo GenerateVkSemaphoreSubmitInfo(VkSemaphore l_semaphore, VkPipelineStageFlags2 l_stage, const uint64_t l_value = 0U);
 
-		VulkanTexture GenerateVulkanTexture(VmaAllocator l_allocator, const VkFormat l_format, const VkExtent3D l_extent, const VkImageUsageFlags l_usageFlags, const VkImageType l_type = VK_IMAGE_TYPE_2D,const uint32_t l_mipLevels = 1U, const uint32_t l_layerCount = 1U);
+		VkSampler GenerateVkSampler(VkDevice l_device, const float l_minLod = 0.f, const float l_maxLod = 6.f, const VkFilter l_minFilter = VK_FILTER_LINEAR, const VkFilter l_magFilter = VK_FILTER_LINEAR, const VkSamplerMipmapMode l_mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR, const VkSamplerAddressMode l_addressU = VK_SAMPLER_ADDRESS_MODE_REPEAT, const VkSamplerAddressMode l_addressV = VK_SAMPLER_ADDRESS_MODE_REPEAT, const VkSamplerAddressMode l_addressW = VK_SAMPLER_ADDRESS_MODE_REPEAT);
+
+		VulkanTexture GenerateVulkanTexture(VkDevice l_device, VmaAllocator l_allocator, const VkFormat l_format, const VkExtent3D l_extent, const VkImageUsageFlags l_usageFlags, const float l_minLod = 0.f, const float l_maxLod = 6.f, const VkFilter l_minFilter = VK_FILTER_LINEAR, const VkFilter l_magFilter = VK_FILTER_LINEAR, const VkSamplerMipmapMode l_mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR, const VkSamplerAddressMode l_addressU = VK_SAMPLER_ADDRESS_MODE_REPEAT, const VkSamplerAddressMode l_addressV = VK_SAMPLER_ADDRESS_MODE_REPEAT, const VkSamplerAddressMode l_addressW = VK_SAMPLER_ADDRESS_MODE_REPEAT, const VkImageType l_type = VK_IMAGE_TYPE_2D,const uint32_t l_mipLevels = 1U, const uint32_t l_layerCount = 1U);
+
+		VkImageView GenerateVkImageView(VkDevice l_device, VkImage l_image, VkFormat l_format, VkImageViewType l_viewType, const VkImageAspectFlags l_aspect = VK_IMAGE_ASPECT_COLOR_BIT, const uint32_t l_baseMipLevel = 0U, const uint32_t l_baseArrayLayer = 0U, const uint32_t l_layerCount = 1U, const uint32_t l_levelCount = 1U);
 
 		VkImageView GenerateVkImageView(VkDevice l_device, VulkanTexture& l_vulkanTexture, const VkImageAspectFlags l_aspect = VK_IMAGE_ASPECT_COLOR_BIT,const uint32_t l_baseMipLevel = 0U, const uint32_t l_baseArrayLayer = 0U, const uint32_t l_layerCount = 1U, const uint32_t l_levelCount = 1U);
 

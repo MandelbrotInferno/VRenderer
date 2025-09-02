@@ -83,8 +83,26 @@ namespace VRenderer
 
 			return lv_submitInfo;
 		}
+		VkSampler GenerateVkSampler(VkDevice l_device, const float l_minLod, const float l_maxLod, const VkFilter l_minFilter, const VkFilter l_magFilter, const VkSamplerMipmapMode l_mipmapMode, const VkSamplerAddressMode l_addressU, const VkSamplerAddressMode l_addressV, const VkSamplerAddressMode l_addressW)
+		{
+			VkSamplerCreateInfo lv_samplerCreateInfo{};
+			lv_samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+			lv_samplerCreateInfo.addressModeU = l_addressU;
+			lv_samplerCreateInfo.addressModeV = l_addressV;
+			lv_samplerCreateInfo.addressModeW = l_addressW;
+			lv_samplerCreateInfo.anisotropyEnable = VK_FALSE;
+			lv_samplerCreateInfo.compareEnable = VK_FALSE;
+			lv_samplerCreateInfo.magFilter = l_magFilter;
+			lv_samplerCreateInfo.minFilter = l_minFilter;
+			lv_samplerCreateInfo.maxLod = l_maxLod;
+			lv_samplerCreateInfo.minLod = l_minLod;
+			lv_samplerCreateInfo.mipmapMode = l_mipmapMode;
 
-		VulkanTexture GenerateVulkanTexture(VmaAllocator l_allocator, const VkFormat l_format, const VkExtent3D l_extent, const VkImageUsageFlags l_usageFlags, const VkImageType l_type, const uint32_t l_mipLevels, const uint32_t l_layerCount)
+			VkSampler lv_sampler{};
+			VULKAN_CHECK(vkCreateSampler(l_device, &lv_samplerCreateInfo, nullptr, &lv_sampler));
+			return lv_sampler;
+		}
+		VulkanTexture GenerateVulkanTexture(VkDevice l_device, VmaAllocator l_allocator, const VkFormat l_format, const VkExtent3D l_extent, const VkImageUsageFlags l_usageFlags, const float l_minLod, const float l_maxLod, const VkFilter l_minFilter, const VkFilter l_magFilter, const VkSamplerMipmapMode l_mipmapMode, const VkSamplerAddressMode l_addressU, const VkSamplerAddressMode l_addressV, const VkSamplerAddressMode l_addressW, const VkImageType l_type, const uint32_t l_mipLevels, const uint32_t l_layerCount)
 		{
 			VkImageCreateInfo lv_imageCreateInfo{};
 			lv_imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -111,6 +129,7 @@ namespace VRenderer
 			lv_texture.m_layerCount = l_layerCount;
 			lv_texture.m_mipLevels = l_mipLevels;
 			lv_texture.m_type = l_type;
+			lv_texture.m_sampler = GenerateVkSampler(l_device, l_minLod, l_maxLod, l_minFilter, l_magFilter, l_mipmapMode, l_addressU, l_addressV, l_addressW);
 
 			for (auto& l_mipImageLayout : lv_texture.m_mipMapImageLayouts) {
 				l_mipImageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -121,6 +140,30 @@ namespace VRenderer
 
 			return lv_texture;
 		}
+
+		VkImageView GenerateVkImageView(VkDevice l_device, VkImage l_image, VkFormat l_format, VkImageViewType l_viewType, const VkImageAspectFlags l_aspect, const uint32_t l_baseMipLevel, const uint32_t l_baseArrayLayer, const uint32_t l_layerCount, const uint32_t l_levelCount)
+		{
+			VkImageViewCreateInfo lv_viewCreateInfo{};
+			lv_viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+			lv_viewCreateInfo.format = l_format;
+			lv_viewCreateInfo.image = l_image;
+			lv_viewCreateInfo.viewType = l_viewType;
+			lv_viewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+			lv_viewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+			lv_viewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+			lv_viewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+			lv_viewCreateInfo.subresourceRange.aspectMask = l_aspect;
+			lv_viewCreateInfo.subresourceRange.baseArrayLayer = l_baseArrayLayer;
+			lv_viewCreateInfo.subresourceRange.baseMipLevel = l_baseMipLevel;
+			lv_viewCreateInfo.subresourceRange.layerCount = l_layerCount;
+			lv_viewCreateInfo.subresourceRange.levelCount = l_levelCount;
+
+			VkImageView lv_view{};
+			VULKAN_CHECK(vkCreateImageView(l_device, &lv_viewCreateInfo, nullptr, &lv_view));
+
+			return lv_view;
+		}
+
 
 		VkImageView GenerateVkImageView(VkDevice l_device, VulkanTexture& l_vulkanTexture, const VkImageAspectFlags l_aspect, const uint32_t l_baseMipLevel, const uint32_t l_baseArrayLayer, const uint32_t l_layerCount, const uint32_t l_levelCount)
 		{
@@ -335,6 +378,8 @@ namespace VRenderer
 			return lv_colorBlendAttachmentState;
 		}
 
+
+		
 
 		void SubmitCommandsToQueue(VulkanQueue& l_queue, const VulkanSubmissionSync l_sync, const VkPipelineStageFlagBits2 l_semaphoreStage, VkCommandBuffer l_cmdBuffer, VulkanSwapchainAndPresentSync& l_swapchainPresentSyncPrimitives, VulkanTimelineSemaphore& l_timelineSemaphore)
 		{
