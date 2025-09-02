@@ -18,7 +18,7 @@ namespace VRenderer
 
 		void InitPool(VkDevice l_device, const std::span<VkDescriptorPoolSize> l_poolSizes);
 
-		VulkanDescriptorSet Allocate(VkDevice l_device, const std::span<VkDescriptorSetLayout> l_setLayouts);
+		VulkanDescriptorSet Allocate(VkDevice l_device, VkDescriptorSetLayout l_setLayout);
 
 		void Deallocate(VkDevice l_device, VulkanDescriptorSet l_setToDeallocate);
 

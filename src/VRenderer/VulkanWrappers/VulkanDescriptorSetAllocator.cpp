@@ -20,13 +20,13 @@ namespace VRenderer
 		m_pools.push_back(lv_pool);
 	}
 
-	VulkanDescriptorSet VulkanDescriptorSetAllocator::Allocate(VkDevice l_device, const std::span<VkDescriptorSetLayout> l_setLayouts)
+	VulkanDescriptorSet VulkanDescriptorSetAllocator::Allocate(VkDevice l_device, VkDescriptorSetLayout l_setLayout)
 	{
 		if (true == m_pools.empty()) {
 			throw "Tried to allocate descriptor set without initializing the pool.\n";
 		}
 
-		if (((uint32_t)l_setLayouts.size() + m_totalNumSetAllocFromCurrentPool) > m_maxNumSetsAllowedPerPool) {
+		if ((1U + m_totalNumSetAllocFromCurrentPool) > m_maxNumSetsAllowedPerPool) {
 			auto lv_pool = Utilities::GenerateVkDescriptorPool(l_device, m_descriptorPollSizes, m_maxNumSetsAllowedPerPool);
 			m_pools.push_back(lv_pool);
 			++m_currentPoolIndex;
@@ -35,8 +35,8 @@ namespace VRenderer
 
 		VkDescriptorSetAllocateInfo lv_allocateInfo{};
 		lv_allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		lv_allocateInfo.pSetLayouts = l_setLayouts.data();
-		lv_allocateInfo.descriptorSetCount = static_cast<uint32_t>(l_setLayouts.size());
+		lv_allocateInfo.pSetLayouts = &l_setLayout;
+		lv_allocateInfo.descriptorSetCount = 1U;
 		lv_allocateInfo.descriptorPool = m_pools[m_currentPoolIndex];
 
 		VkDescriptorSet lv_set{};
@@ -64,7 +64,7 @@ namespace VRenderer
 			VULKAN_CHECK(lv_result);
 		}
 
-		m_totalNumSetAllocFromCurrentPool += (uint32_t)l_setLayouts.size();
+		m_totalNumSetAllocFromCurrentPool += 1U;
 
 		VulkanDescriptorSet lv_vulkanDesSet{};
 		lv_vulkanDesSet.m_indexOfPool = m_currentPoolIndex;
