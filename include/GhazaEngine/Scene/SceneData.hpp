@@ -1,10 +1,10 @@
 #pragma once
 
 
-#include "GhazaEngine/SceneDataGenerator/GeometryData/Vertex.hpp"
-#include "GhazaEngine/SceneDataGenerator/GeometryData/Mesh.hpp"
-#include "GhazaEngine/SceneDataGenerator/Node.hpp"
-#include "GhazaEngine/SceneDataGenerator/Material.hpp"
+#include "GhazaEngine/Scene/GeometryData/Vertex.hpp"
+#include "GhazaEngine/Scene/GeometryData/Mesh.hpp"
+#include "GhazaEngine/Scene/Node.hpp"
+#include "GhazaEngine/Scene/Material.hpp"
 #include <vector>
 #include <glm/glm.hpp>
 #include <unordered_map>

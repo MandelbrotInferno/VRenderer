@@ -22,14 +22,8 @@
     <Filter Include="include\GhazaEngine\VRenderer">
       <UniqueIdentifier>{9792a9bf-0682-4161-9691-4ae72003db59}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\GhazaEngine\SceneDataGenerator">
-      <UniqueIdentifier>{d7fde996-2b14-47f3-bd91-9135b11697f4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\GhazaEngine\VRenderer">
       <UniqueIdentifier>{7546ed83-b4e0-4a8f-801e-c10f3770ee3d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\GhazaEngine\SceneDataGenerator">
-      <UniqueIdentifier>{7914f259-3430-40fe-bdb8-ae4c674bbc04}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\GhazaEngine\VRenderer\VulkanWrappers">
       <UniqueIdentifier>{064e20a2-3bab-42b8-ad69-5f028941e4b9}</UniqueIdentifier>
@@ -43,17 +37,20 @@
     <Filter Include="src\GhazaEngine\VRenderer\VulkanWrappers">
       <UniqueIdentifier>{710300fe-514b-46b3-a0f7-971cb8bbd0fe}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\GhazaEngine\SceneDataGenerator\GeometryData">
-      <UniqueIdentifier>{8b67e823-0aee-44c8-9a38-b20f3902bb60}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\GhazaEngine\SceneDataGenerator\GeometryData">
-      <UniqueIdentifier>{5e541b51-4800-4896-ace8-1d4eeade44fe}</UniqueIdentifier>
-    </Filter>
     <Filter Include="include\GhazaEngine\Logger">
       <UniqueIdentifier>{b580a1ea-b22b-450f-bd2e-d0b70c92be0d}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\GhazaEngine\Logger">
       <UniqueIdentifier>{e4561b7b-0afc-458a-9a08-d6d284dde11c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\GhazaEngine\Scene">
+      <UniqueIdentifier>{6d38dfd8-a152-4d4d-938e-652680d57e0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\GhazaEngine\Scene">
+      <UniqueIdentifier>{641c8d63-16ca-4d38-a7ca-0ea314cbe3b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\GhazaEngine\Scene\GeometryData">
+      <UniqueIdentifier>{f524ff1b-862e-4287-ad92-f5012091a86c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -79,12 +76,6 @@
       <Filter>manual-dependencies\backends</Filter>
     </ClCompile>
     <ClCompile Include="manual-dependencies\SPIRV-Reflect\spirv_reflect.c" />
-    <ClCompile Include="src\GhazaEngine\SceneDataGenerator\SceneData.cpp">
-      <Filter>src\GhazaEngine\SceneDataGenerator</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GhazaEngine\SceneDataGenerator\SceneDataGenerator.cpp">
-      <Filter>src\GhazaEngine\SceneDataGenerator</Filter>
-    </ClCompile>
     <ClCompile Include="src\GhazaEngine\VRenderer\Renderer.cpp">
       <Filter>src\GhazaEngine\VRenderer</Filter>
     </ClCompile>
@@ -139,6 +130,12 @@
     <ClCompile Include="src\GhazaEngine\Logger\Logger.cpp">
       <Filter>src\GhazaEngine\Logger</Filter>
     </ClCompile>
+    <ClCompile Include="src\GhazaEngine\Scene\SceneData.cpp">
+      <Filter>src\GhazaEngine\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\Scene\SceneDataGenerator.cpp">
+      <Filter>src\GhazaEngine\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="manual-dependencies\imconfig.h">
@@ -167,24 +164,6 @@
     </ClInclude>
     <ClInclude Include="manual-dependencies\SPIRV-Reflect\spirv.h" />
     <ClInclude Include="manual-dependencies\SPIRV-Reflect\spirv_reflect.h" />
-    <ClInclude Include="include\GhazaEngine\SceneDataGenerator\Material.hpp">
-      <Filter>include\GhazaEngine\SceneDataGenerator</Filter>
-    </ClInclude>
-    <ClInclude Include="include\GhazaEngine\SceneDataGenerator\Node.hpp">
-      <Filter>include\GhazaEngine\SceneDataGenerator</Filter>
-    </ClInclude>
-    <ClInclude Include="include\GhazaEngine\SceneDataGenerator\SceneData.hpp">
-      <Filter>include\GhazaEngine\SceneDataGenerator</Filter>
-    </ClInclude>
-    <ClInclude Include="include\GhazaEngine\SceneDataGenerator\SceneDataGenerator.hpp">
-      <Filter>include\GhazaEngine\SceneDataGenerator</Filter>
-    </ClInclude>
-    <ClInclude Include="include\GhazaEngine\SceneDataGenerator\GeometryData\Mesh.hpp">
-      <Filter>include\GhazaEngine\SceneDataGenerator\GeometryData</Filter>
-    </ClInclude>
-    <ClInclude Include="include\GhazaEngine\SceneDataGenerator\GeometryData\Vertex.hpp">
-      <Filter>include\GhazaEngine\SceneDataGenerator\GeometryData</Filter>
-    </ClInclude>
     <ClInclude Include="include\GhazaEngine\VRenderer\Utilities\Utilities.hpp">
       <Filter>include\GhazaEngine\VRenderer\Utilities</Filter>
     </ClInclude>
@@ -262,6 +241,24 @@
     </ClInclude>
     <ClInclude Include="include\GhazaEngine\Logger\Logger.hpp">
       <Filter>include\GhazaEngine\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\Scene\Material.hpp">
+      <Filter>include\GhazaEngine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\Scene\Node.hpp">
+      <Filter>include\GhazaEngine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\Scene\SceneData.hpp">
+      <Filter>include\GhazaEngine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\Scene\SceneDataGenerator.hpp">
+      <Filter>include\GhazaEngine\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\Scene\GeometryData\Mesh.hpp">
+      <Filter>include\GhazaEngine\Scene\GeometryData</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\Scene\GeometryData\Vertex.hpp">
+      <Filter>include\GhazaEngine\Scene\GeometryData</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

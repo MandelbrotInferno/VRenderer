@@ -1,7 +1,7 @@
 
 
 
-#include "GhazaEngine/SceneDataGenerator/SceneDataGenerator.hpp"
+#include "GhazaEngine/Scene/SceneDataGenerator.hpp"
 #include "GhazaEngine/Logger/Logger.hpp"
 #include <filesystem>
 #include <string>

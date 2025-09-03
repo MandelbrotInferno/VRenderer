@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "GhazaEngine/SceneDataGenerator/SceneData.hpp"
+#include "GhazaEngine/Scene/SceneData.hpp"
 #include <string_view>
 #include <assimp/matrix4x4.h>
 

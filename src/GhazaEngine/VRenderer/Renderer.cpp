@@ -4,11 +4,11 @@
 #include "GhazaEngine/VRenderer/Utilities/Utilities.hpp"
 #include "GhazaEngine/VRenderer/VulkanWrappers/VulkanDescriptorSetLayoutFactory.hpp"
 #include "GhazaEngine/VRenderer/Utilities/VulkanGraphicsCreateInfo.hpp"
-#include "GhazaEngine/SceneDataGenerator/GeometryData/Vertex.hpp"
+#include "GhazaEngine/Scene/GeometryData/Vertex.hpp"
 #include "GhazaEngine/Logger/Logger.hpp"
 #include "GhazaEngine/VRenderer/VulkanWrappers/VulkanDescriptorSetUpdater.hpp"
 #include "GhazaEngine/VRenderer/VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV.hpp"
-#include "GhazaEngine/SceneDataGenerator/SceneData.hpp"
+#include "GhazaEngine/Scene/SceneData.hpp"
 
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 0

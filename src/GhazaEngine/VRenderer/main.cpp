@@ -4,7 +4,7 @@
 #include "GhazaEngine/VRenderer/Renderer.hpp"
 #include "GhazaEngine/VRenderer/SDL_WindowWrapper.hpp"
 #include "GhazaEngine/Logger/Logger.hpp"
-#include "GhazaEngine/SceneDataGenerator/SceneDataGenerator.hpp"
+#include "GhazaEngine/Scene/SceneDataGenerator.hpp"
 
 #include <tracy/Tracy.hpp>
 #include <SDL3/SDL.h>
