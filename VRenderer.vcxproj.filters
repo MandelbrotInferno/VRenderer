@@ -13,38 +13,47 @@
     <Filter Include="manual-dependencies\backends">
       <UniqueIdentifier>{9642e32b-a2ce-4e8a-9f59-7ba898dc61e0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\VRenderer">
-      <UniqueIdentifier>{9f7f8946-b15f-4232-a88d-d675f5a6074b}</UniqueIdentifier>
+    <Filter Include="include\GhazaEngine">
+      <UniqueIdentifier>{e73cb107-98a8-4105-920d-17e99d78a6f5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\VRenderer">
-      <UniqueIdentifier>{42f88326-a311-421e-a06e-7666d6c10342}</UniqueIdentifier>
+    <Filter Include="src\GhazaEngine">
+      <UniqueIdentifier>{808138c9-1a8f-4ac5-9c72-4520aace4a50}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\VRenderer\VulkanWrappers">
-      <UniqueIdentifier>{dd68b035-c071-459a-83dc-3808099957bb}</UniqueIdentifier>
+    <Filter Include="include\GhazaEngine\VRenderer">
+      <UniqueIdentifier>{9792a9bf-0682-4161-9691-4ae72003db59}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\VRenderer\VulkanWrappers">
-      <UniqueIdentifier>{8d917480-6d8d-4d0d-9fac-c2e5a2070a61}</UniqueIdentifier>
+    <Filter Include="include\GhazaEngine\SceneDataGenerator">
+      <UniqueIdentifier>{d7fde996-2b14-47f3-bd91-9135b11697f4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\VRenderer\Passes">
-      <UniqueIdentifier>{5ab1935a-08b1-4406-8c45-96c9862091ab}</UniqueIdentifier>
+    <Filter Include="src\GhazaEngine\VRenderer">
+      <UniqueIdentifier>{7546ed83-b4e0-4a8f-801e-c10f3770ee3d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\VRenderer\Passes\ComputePasses">
-      <UniqueIdentifier>{d73a67a4-dfb7-4cd8-8c77-f87daed491f7}</UniqueIdentifier>
+    <Filter Include="src\GhazaEngine\SceneDataGenerator">
+      <UniqueIdentifier>{7914f259-3430-40fe-bdb8-ae4c674bbc04}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\VRenderer\Utilities">
-      <UniqueIdentifier>{46325164-a5e0-45d4-bfb0-b25669a1990a}</UniqueIdentifier>
+    <Filter Include="include\GhazaEngine\VRenderer\VulkanWrappers">
+      <UniqueIdentifier>{064e20a2-3bab-42b8-ad69-5f028941e4b9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\VRenderer\Utilities">
-      <UniqueIdentifier>{c70badd6-1c35-4c1f-a7d6-26d2d61636c0}</UniqueIdentifier>
+    <Filter Include="include\GhazaEngine\VRenderer\Logger">
+      <UniqueIdentifier>{93801105-9992-45fc-93b8-418a6c13d91f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\SceneDataGenerator">
-      <UniqueIdentifier>{4031113a-ad04-47a8-b908-8ab4d3920cce}</UniqueIdentifier>
+    <Filter Include="include\GhazaEngine\VRenderer\Utilities">
+      <UniqueIdentifier>{1d8cba98-bc5c-445f-90b9-0ac5950a4589}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\SceneDataGenerator\GeometryData">
-      <UniqueIdentifier>{d36a0b78-091e-469f-b07e-114cbd3710c9}</UniqueIdentifier>
+    <Filter Include="src\GhazaEngine\VRenderer\Logger">
+      <UniqueIdentifier>{c6a1c557-24e7-4033-a91e-5533df1f3149}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\SceneDataGenerator">
-      <UniqueIdentifier>{7fe203ff-89cb-41b1-b6de-2181cc50d2d0}</UniqueIdentifier>
+    <Filter Include="src\GhazaEngine\VRenderer\Utilities">
+      <UniqueIdentifier>{733c4250-4687-42dd-ae94-3de98daaddc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\GhazaEngine\VRenderer\VulkanWrappers">
+      <UniqueIdentifier>{710300fe-514b-46b3-a0f7-971cb8bbd0fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\GhazaEngine\SceneDataGenerator\GeometryData">
+      <UniqueIdentifier>{8b67e823-0aee-44c8-9a38-b20f3902bb60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\GhazaEngine\SceneDataGenerator\GeometryData">
+      <UniqueIdentifier>{5e541b51-4800-4896-ace8-1d4eeade44fe}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -69,54 +78,66 @@
     <ClCompile Include="manual-dependencies\backends\imgui_impl_vulkan.cpp">
       <Filter>manual-dependencies\backends</Filter>
     </ClCompile>
-    <ClCompile Include="src\VRenderer\main.cpp">
-      <Filter>src\VRenderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VRenderer\Renderer.cpp">
-      <Filter>src\VRenderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VRenderer\SDL_WindowWrapper.cpp">
-      <Filter>src\VRenderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanCommandbufferReset.cpp">
-      <Filter>src\VRenderer\VulkanWrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanDescriptorSetAllocator.cpp">
-      <Filter>src\VRenderer\VulkanWrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanDescriptorSetLayoutFactory.cpp">
-      <Filter>src\VRenderer\VulkanWrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanError.cpp">
-      <Filter>src\VRenderer\VulkanWrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanFoundationalElements.cpp">
-      <Filter>src\VRenderer\VulkanWrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanSwapchain.cpp">
-      <Filter>src\VRenderer\VulkanWrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanSwapchainAndPresentSync.cpp">
-      <Filter>src\VRenderer\VulkanWrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanTexture.cpp">
-      <Filter>src\VRenderer\VulkanWrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanTimelineSemaphore.cpp">
-      <Filter>src\VRenderer\VulkanWrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\VRenderer\Utilities\Utilities.cpp" />
-    <ClCompile Include="src\VRenderer\VulkanResourceManager.cpp" />
-    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanBuffer.cpp" />
-    <ClCompile Include="src\VRenderer\Logger\Logger.cpp" />
-    <ClCompile Include="src\VRenderer\VulkanWrappers\VulkanDescriptorSetUpdater.cpp" />
     <ClCompile Include="manual-dependencies\SPIRV-Reflect\spirv_reflect.c" />
-    <ClCompile Include="src\VRenderer\VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV.cpp" />
-    <ClCompile Include="src\SceneDataGenerator\SceneDataGenerator.cpp">
-      <Filter>src\SceneDataGenerator</Filter>
+    <ClCompile Include="src\GhazaEngine\SceneDataGenerator\SceneData.cpp">
+      <Filter>src\GhazaEngine\SceneDataGenerator</Filter>
     </ClCompile>
-    <ClCompile Include="src\SceneDataGenerator\SceneData.cpp">
-      <Filter>src\SceneDataGenerator</Filter>
+    <ClCompile Include="src\GhazaEngine\SceneDataGenerator\SceneDataGenerator.cpp">
+      <Filter>src\GhazaEngine\SceneDataGenerator</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\Renderer.cpp">
+      <Filter>src\GhazaEngine\VRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\SDL_WindowWrapper.cpp">
+      <Filter>src\GhazaEngine\VRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\VulkanResourceManager.cpp">
+      <Filter>src\GhazaEngine\VRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV.cpp">
+      <Filter>src\GhazaEngine\VRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\main.cpp">
+      <Filter>src\GhazaEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\Logger\Logger.cpp">
+      <Filter>src\GhazaEngine\VRenderer\Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\VulkanWrappers\VulkanBuffer.cpp">
+      <Filter>src\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\VulkanWrappers\VulkanCommandbufferReset.cpp">
+      <Filter>src\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\VulkanWrappers\VulkanDescriptorSetAllocator.cpp">
+      <Filter>src\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\VulkanWrappers\VulkanDescriptorSetLayoutFactory.cpp">
+      <Filter>src\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\VulkanWrappers\VulkanDescriptorSetUpdater.cpp">
+      <Filter>src\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\VulkanWrappers\VulkanError.cpp">
+      <Filter>src\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\VulkanWrappers\VulkanFoundationalElements.cpp">
+      <Filter>src\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\VulkanWrappers\VulkanSwapchain.cpp">
+      <Filter>src\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\VulkanWrappers\VulkanSwapchainAndPresentSync.cpp">
+      <Filter>src\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\VulkanWrappers\VulkanTexture.cpp">
+      <Filter>src\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\VulkanWrappers\VulkanTimelineSemaphore.cpp">
+      <Filter>src\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\Utilities\Utilities.cpp">
+      <Filter>src\GhazaEngine\VRenderer\Utilities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -144,99 +165,103 @@
     <ClInclude Include="manual-dependencies\backends\imgui_impl_vulkan.h">
       <Filter>manual-dependencies\backends</Filter>
     </ClInclude>
-    <ClInclude Include="include\VRenderer\Renderer.hpp">
-      <Filter>include\VRenderer</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\SDL_WindowWrapper.hpp">
-      <Filter>include\VRenderer</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\VulkanResourceManager.hpp">
-      <Filter>include\VRenderer</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanCommandbufferReset.hpp">
-      <Filter>include\VRenderer\VulkanWrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSetAllocator.hpp">
-      <Filter>include\VRenderer\VulkanWrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSetLayoutFactory.hpp">
-      <Filter>include\VRenderer\VulkanWrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanError.hpp">
-      <Filter>include\VRenderer\VulkanWrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanFoundationalElements.hpp">
-      <Filter>include\VRenderer\VulkanWrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanQueue.hpp">
-      <Filter>include\VRenderer\VulkanWrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanQueueFamilyIndex.hpp">
-      <Filter>include\VRenderer\VulkanWrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanSubmissionSync.hpp">
-      <Filter>include\VRenderer\VulkanWrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanSwapchain.hpp">
-      <Filter>include\VRenderer\VulkanWrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanSwapchainAndPresentSync.hpp">
-      <Filter>include\VRenderer\VulkanWrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanTexture.hpp">
-      <Filter>include\VRenderer\VulkanWrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanTimelineSemaphore.hpp">
-      <Filter>include\VRenderer\VulkanWrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\Passes\ComputePasses\ComputePass.hpp">
-      <Filter>include\VRenderer\Passes\ComputePasses</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\Passes\ComputePasses\ComputePassPushConstant.hpp">
-      <Filter>include\VRenderer\Passes\ComputePasses</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\Passes\GraphicsPasses\GraphicsPassPushConstant.hpp" />
-    <ClInclude Include="include\VRenderer\Utilities\Utilities.hpp" />
-    <ClInclude Include="include\VRenderer\Utilities\VulkanGraphicsCreateInfo.hpp" />
-    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanBuffer.hpp" />
-    <ClInclude Include="include\VRenderer\Utilities\GPUSceneBuffers.hpp">
-      <Filter>include\VRenderer\Utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\AppState.hpp">
-      <Filter>include\VRenderer</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\Logger\Category.hpp" />
-    <ClInclude Include="include\VRenderer\Logger\Level.hpp" />
-    <ClInclude Include="include\VRenderer\Logger\Logger.hpp" />
-    <ClInclude Include="include\VRenderer\Logger\LevelModeCompareOp.hpp" />
-    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSet.hpp" />
-    <ClInclude Include="include\VRenderer\VulkanWrappers\VulkanDescriptorSetUpdater.hpp" />
-    <ClInclude Include="include\VRenderer\SynchronizationRequest.hpp">
-      <Filter>include\VRenderer</Filter>
-    </ClInclude>
-    <ClInclude Include="include\VRenderer\VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV.hpp" />
     <ClInclude Include="manual-dependencies\SPIRV-Reflect\spirv.h" />
     <ClInclude Include="manual-dependencies\SPIRV-Reflect\spirv_reflect.h" />
-    <ClInclude Include="include\VRenderer\Utilities\GPUUniformBufferData.hpp">
-      <Filter>include\VRenderer\Utilities</Filter>
+    <ClInclude Include="include\GhazaEngine\SceneDataGenerator\Material.hpp">
+      <Filter>include\GhazaEngine\SceneDataGenerator</Filter>
     </ClInclude>
-    <ClInclude Include="include\SceneDataGenerator\SceneDataGenerator.hpp">
-      <Filter>include\SceneDataGenerator</Filter>
+    <ClInclude Include="include\GhazaEngine\SceneDataGenerator\Node.hpp">
+      <Filter>include\GhazaEngine\SceneDataGenerator</Filter>
     </ClInclude>
-    <ClInclude Include="include\SceneDataGenerator\SceneData.hpp">
-      <Filter>include\SceneDataGenerator</Filter>
+    <ClInclude Include="include\GhazaEngine\SceneDataGenerator\SceneData.hpp">
+      <Filter>include\GhazaEngine\SceneDataGenerator</Filter>
     </ClInclude>
-    <ClInclude Include="include\SceneDataGenerator\GeometryData\Mesh.hpp">
-      <Filter>include\SceneDataGenerator\GeometryData</Filter>
+    <ClInclude Include="include\GhazaEngine\SceneDataGenerator\SceneDataGenerator.hpp">
+      <Filter>include\GhazaEngine\SceneDataGenerator</Filter>
     </ClInclude>
-    <ClInclude Include="include\SceneDataGenerator\GeometryData\Vertex.hpp">
-      <Filter>include\SceneDataGenerator\GeometryData</Filter>
+    <ClInclude Include="include\GhazaEngine\SceneDataGenerator\GeometryData\Mesh.hpp">
+      <Filter>include\GhazaEngine\SceneDataGenerator\GeometryData</Filter>
     </ClInclude>
-    <ClInclude Include="include\SceneDataGenerator\Node.hpp">
-      <Filter>include\SceneDataGenerator</Filter>
+    <ClInclude Include="include\GhazaEngine\SceneDataGenerator\GeometryData\Vertex.hpp">
+      <Filter>include\GhazaEngine\SceneDataGenerator\GeometryData</Filter>
     </ClInclude>
-    <ClInclude Include="include\SceneDataGenerator\Material.hpp">
-      <Filter>include\SceneDataGenerator</Filter>
+    <ClInclude Include="include\GhazaEngine\VRenderer\Logger\Category.hpp">
+      <Filter>include\GhazaEngine\VRenderer\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\Logger\Level.hpp">
+      <Filter>include\GhazaEngine\VRenderer\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\Logger\LevelModeCompareOp.hpp">
+      <Filter>include\GhazaEngine\VRenderer\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\Logger\Logger.hpp">
+      <Filter>include\GhazaEngine\VRenderer\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\Utilities\Utilities.hpp">
+      <Filter>include\GhazaEngine\VRenderer\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\Utilities\VulkanGraphicsCreateInfo.hpp">
+      <Filter>include\GhazaEngine\VRenderer\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\VulkanWrappers\VulkanBuffer.hpp">
+      <Filter>include\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\VulkanWrappers\VulkanCommandbufferReset.hpp">
+      <Filter>include\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\VulkanWrappers\VulkanDescriptorSet.hpp">
+      <Filter>include\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\VulkanWrappers\VulkanDescriptorSetAllocator.hpp">
+      <Filter>include\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\VulkanWrappers\VulkanDescriptorSetLayoutFactory.hpp">
+      <Filter>include\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\VulkanWrappers\VulkanDescriptorSetUpdater.hpp">
+      <Filter>include\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\VulkanWrappers\VulkanError.hpp">
+      <Filter>include\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\VulkanWrappers\VulkanFoundationalElements.hpp">
+      <Filter>include\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\VulkanWrappers\VulkanQueue.hpp">
+      <Filter>include\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\VulkanWrappers\VulkanQueueFamilyIndex.hpp">
+      <Filter>include\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\VulkanWrappers\VulkanSubmissionSync.hpp">
+      <Filter>include\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\VulkanWrappers\VulkanSwapchain.hpp">
+      <Filter>include\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\VulkanWrappers\VulkanSwapchainAndPresentSync.hpp">
+      <Filter>include\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\VulkanWrappers\VulkanTexture.hpp">
+      <Filter>include\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\VulkanWrappers\VulkanTimelineSemaphore.hpp">
+      <Filter>include\GhazaEngine\VRenderer\VulkanWrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\Renderer.hpp">
+      <Filter>include\GhazaEngine\VRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\SDL_WindowWrapper.hpp">
+      <Filter>include\GhazaEngine\VRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\SynchronizationRequest.hpp">
+      <Filter>include\GhazaEngine\VRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\VulkanResourceManager.hpp">
+      <Filter>include\GhazaEngine\VRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV.hpp">
+      <Filter>include\GhazaEngine\VRenderer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

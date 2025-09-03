@@ -1,0 +1,25 @@
+#pragma once
+
+
+
+#include <volk.h>
+
+
+namespace GhazaEngine
+{
+	namespace VRenderer
+	{
+		struct VulkanFoundationalElements final
+		{
+		public:
+
+			void CleanUp() noexcept;
+
+		public:
+			VkInstance m_instance{};
+			VkPhysicalDevice m_physicalDevice{};
+			VkSurfaceKHR m_surface{};
+			VkDebugUtilsMessengerEXT m_debugMsger{};
+		};
+	}
+}
