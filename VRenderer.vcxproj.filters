@@ -34,14 +34,8 @@
     <Filter Include="include\GhazaEngine\VRenderer\VulkanWrappers">
       <UniqueIdentifier>{064e20a2-3bab-42b8-ad69-5f028941e4b9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\GhazaEngine\VRenderer\Logger">
-      <UniqueIdentifier>{93801105-9992-45fc-93b8-418a6c13d91f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="include\GhazaEngine\VRenderer\Utilities">
       <UniqueIdentifier>{1d8cba98-bc5c-445f-90b9-0ac5950a4589}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\GhazaEngine\VRenderer\Logger">
-      <UniqueIdentifier>{c6a1c557-24e7-4033-a91e-5533df1f3149}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\GhazaEngine\VRenderer\Utilities">
       <UniqueIdentifier>{733c4250-4687-42dd-ae94-3de98daaddc9}</UniqueIdentifier>
@@ -54,6 +48,12 @@
     </Filter>
     <Filter Include="src\GhazaEngine\SceneDataGenerator\GeometryData">
       <UniqueIdentifier>{5e541b51-4800-4896-ace8-1d4eeade44fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\GhazaEngine\Logger">
+      <UniqueIdentifier>{b580a1ea-b22b-450f-bd2e-d0b70c92be0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\GhazaEngine\Logger">
+      <UniqueIdentifier>{e4561b7b-0afc-458a-9a08-d6d284dde11c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -100,9 +100,6 @@
     <ClCompile Include="src\GhazaEngine\VRenderer\main.cpp">
       <Filter>src\GhazaEngine</Filter>
     </ClCompile>
-    <ClCompile Include="src\GhazaEngine\VRenderer\Logger\Logger.cpp">
-      <Filter>src\GhazaEngine\VRenderer\Logger</Filter>
-    </ClCompile>
     <ClCompile Include="src\GhazaEngine\VRenderer\VulkanWrappers\VulkanBuffer.cpp">
       <Filter>src\GhazaEngine\VRenderer\VulkanWrappers</Filter>
     </ClCompile>
@@ -138,6 +135,9 @@
     </ClCompile>
     <ClCompile Include="src\GhazaEngine\VRenderer\Utilities\Utilities.cpp">
       <Filter>src\GhazaEngine\VRenderer\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\Logger\Logger.cpp">
+      <Filter>src\GhazaEngine\Logger</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -184,18 +184,6 @@
     </ClInclude>
     <ClInclude Include="include\GhazaEngine\SceneDataGenerator\GeometryData\Vertex.hpp">
       <Filter>include\GhazaEngine\SceneDataGenerator\GeometryData</Filter>
-    </ClInclude>
-    <ClInclude Include="include\GhazaEngine\VRenderer\Logger\Category.hpp">
-      <Filter>include\GhazaEngine\VRenderer\Logger</Filter>
-    </ClInclude>
-    <ClInclude Include="include\GhazaEngine\VRenderer\Logger\Level.hpp">
-      <Filter>include\GhazaEngine\VRenderer\Logger</Filter>
-    </ClInclude>
-    <ClInclude Include="include\GhazaEngine\VRenderer\Logger\LevelModeCompareOp.hpp">
-      <Filter>include\GhazaEngine\VRenderer\Logger</Filter>
-    </ClInclude>
-    <ClInclude Include="include\GhazaEngine\VRenderer\Logger\Logger.hpp">
-      <Filter>include\GhazaEngine\VRenderer\Logger</Filter>
     </ClInclude>
     <ClInclude Include="include\GhazaEngine\VRenderer\Utilities\Utilities.hpp">
       <Filter>include\GhazaEngine\VRenderer\Utilities</Filter>
@@ -262,6 +250,18 @@
     </ClInclude>
     <ClInclude Include="include\GhazaEngine\VRenderer\VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV.hpp">
       <Filter>include\GhazaEngine\VRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\Logger\Category.hpp">
+      <Filter>include\GhazaEngine\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\Logger\Level.hpp">
+      <Filter>include\GhazaEngine\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\Logger\LevelModeCompareOp.hpp">
+      <Filter>include\GhazaEngine\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\Logger\Logger.hpp">
+      <Filter>include\GhazaEngine\Logger</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

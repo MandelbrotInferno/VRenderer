@@ -2,9 +2,9 @@
 
 
 
-#include "GhazaEngine/VRenderer/Logger/Category.hpp"
-#include "GhazaEngine/VRenderer/Logger/Level.hpp"
-#include "GhazaEngine/VRenderer/Logger/LevelModeCompareOp.hpp"
+#include "GhazaEngine/Logger/Category.hpp"
+#include "GhazaEngine/Logger/Level.hpp"
+#include "GhazaEngine/Logger/LevelModeCompareOp.hpp"
 
 #include <queue>
 #include <tracy/Tracy.hpp>
@@ -19,8 +19,6 @@
 
 namespace GhazaEngine
 {
-	namespace VRenderer
-	{
 		class Logger final
 		{
 		public:
@@ -124,30 +122,29 @@ namespace GhazaEngine
 
 			bool m_stopQueueProcessor{};
 		};
-	}
 }
 
 #define LOGGING
 #ifdef LOGGING
 
 #define START_LOGGING(){\
-auto& lv_logger = GhazaEngine::VRenderer::Logger::GetInstance();\
+auto& lv_logger = GhazaEngine::Logger::GetInstance();\
 lv_logger.SpawnQueueProcessor();\
 }
 
 #define LOG(l_level, l_category, l_unformattedMsg, ...) {\
-auto& lv_logger = GhazaEngine::VRenderer::Logger::GetInstance();\
+auto& lv_logger = GhazaEngine::Logger::GetInstance();\
 lv_logger.FormatMsgAndEnqueue(l_level, l_category, __LINE__, __FILE__, l_unformattedMsg, __VA_ARGS__);\
 }
 
 
 #define END_LOGGING(){\
-auto& lv_logger = GhazaEngine::VRenderer::Logger::GetInstance();\
+auto& lv_logger = GhazaEngine::Logger::GetInstance();\
 lv_logger.StopQueueProcessor();\
 }
 
 #define SET_LEVEL(l_level, l_compOp){\
-auto& lv_logger = GhazaEngine::VRenderer::Logger::GetInstance();\
+auto& lv_logger = GhazaEngine::Logger::GetInstance();\
 lv_logger.SetCurrentLevel(l_level, l_compOp);\
 }
 

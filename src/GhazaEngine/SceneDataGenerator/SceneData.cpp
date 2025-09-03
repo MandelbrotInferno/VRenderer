@@ -2,7 +2,7 @@
 
 
 #include "GhazaEngine/SceneDataGenerator/SceneData.hpp"
-#include "GhazaEngine/VRenderer/Logger/Logger.hpp"
+#include "GhazaEngine/Logger/Logger.hpp"
 #include <fstream>
 
 namespace GhazaEngine
@@ -29,7 +29,7 @@ namespace GhazaEngine
 			std::ofstream lv_serializeFile{ l_filePathToSaveTo.data(), std::ios_base::out | std::ios_base::trunc | std::ios_base::binary };
 
 			if (false == lv_serializeFile.is_open()) {
-				LOG(VRenderer::Level::INFO, VRenderer::Category::GENERAL, "Import of the requested file : {} failed by assimp due to {}.", );
+				LOG(Level::INFO, Category::GENERAL, "Import of the requested file : {} failed by assimp due to {}.", );
 				throw "Failed to serialize generated scene data.\n";
 			}
 
@@ -191,7 +191,7 @@ namespace GhazaEngine
 			auto& lv_ostream = lv_serializeFile.write((const char*)lv_serializedBinaryData.data(), lv_serializedBinaryData.size());
 
 			if (true == lv_ostream.bad() || true == lv_ostream.fail()) {
-				LOG(VRenderer::Level::INFO, VRenderer::Category::GENERAL, "Failed to write serialized data to {}", l_filePathToSaveTo);
+				LOG(Level::INFO, Category::GENERAL, "Failed to write serialized data to {}", l_filePathToSaveTo);
 				throw "Failed to output serialized data.";
 			}
 			lv_serializeFile.flush();

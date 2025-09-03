@@ -3,7 +3,7 @@
 
 #include "GhazaEngine/VRenderer/Renderer.hpp"
 #include "GhazaEngine/VRenderer/SDL_WindowWrapper.hpp"
-#include "GhazaEngine/VRenderer/Logger/Logger.hpp"
+#include "GhazaEngine/Logger/Logger.hpp"
 #include "GhazaEngine/SceneDataGenerator/SceneDataGenerator.hpp"
 
 #include <tracy/Tracy.hpp>
@@ -52,7 +52,7 @@ int main()
 {
 	using namespace GhazaEngine::VRenderer;
 	START_LOGGING();
-	SET_LEVEL(Level::ERROR, LevelModeCompareOp::EQUAL);
+	SET_LEVEL(GhazaEngine::Level::ERROR, GhazaEngine::LevelModeCompareOp::EQUAL);
 	GhazaEngine::Scene::SceneDataGenerator lv_sceneDataGenerator{};
 	GhazaEngine::Scene::SceneData lv_sceneData{};
 

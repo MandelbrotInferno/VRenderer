@@ -1,14 +1,13 @@
 
 
 
-#include "GhazaEngine/VRenderer/Logger/Logger.hpp"
+#include "GhazaEngine/Logger/Logger.hpp"
 
 
 
 namespace GhazaEngine
 {
-	namespace VRenderer
-	{
+
 		Logger::Logger()
 		{
 			m_mainThreadID = std::this_thread::get_id();
@@ -115,5 +114,4 @@ namespace GhazaEngine
 				m_compareOp = l_compOp;
 			}
 		}
-	}
 }

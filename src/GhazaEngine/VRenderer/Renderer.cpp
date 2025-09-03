@@ -5,7 +5,7 @@
 #include "GhazaEngine/VRenderer/VulkanWrappers/VulkanDescriptorSetLayoutFactory.hpp"
 #include "GhazaEngine/VRenderer/Utilities/VulkanGraphicsCreateInfo.hpp"
 #include "GhazaEngine/SceneDataGenerator/GeometryData/Vertex.hpp"
-#include "GhazaEngine/VRenderer/Logger/Logger.hpp"
+#include "GhazaEngine/Logger/Logger.hpp"
 #include "GhazaEngine/VRenderer/VulkanWrappers/VulkanDescriptorSetUpdater.hpp"
 #include "GhazaEngine/VRenderer/VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV.hpp"
 #include "GhazaEngine/SceneDataGenerator/SceneData.hpp"

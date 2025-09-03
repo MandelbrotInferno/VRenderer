@@ -182,9 +182,9 @@
     <ClCompile Include="manual-dependencies\imgui_tables.cpp" />
     <ClCompile Include="manual-dependencies\imgui_widgets.cpp" />
     <ClCompile Include="manual-dependencies\SPIRV-Reflect\spirv_reflect.c" />
+    <ClCompile Include="src\GhazaEngine\Logger\Logger.cpp" />
     <ClCompile Include="src\GhazaEngine\SceneDataGenerator\SceneData.cpp" />
     <ClCompile Include="src\GhazaEngine\SceneDataGenerator\SceneDataGenerator.cpp" />
-    <ClCompile Include="src\GhazaEngine\VRenderer\Logger\Logger.cpp" />
     <ClCompile Include="src\GhazaEngine\VRenderer\main.cpp" />
     <ClCompile Include="src\GhazaEngine\VRenderer\Renderer.cpp" />
     <ClCompile Include="src\GhazaEngine\VRenderer\SDL_WindowWrapper.cpp" />
@@ -204,16 +204,16 @@
     <ClCompile Include="src\GhazaEngine\VRenderer\VulkanWrappers\VulkanTimelineSemaphore.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\GhazaEngine\Logger\Category.hpp" />
+    <ClInclude Include="include\GhazaEngine\Logger\Level.hpp" />
+    <ClInclude Include="include\GhazaEngine\Logger\LevelModeCompareOp.hpp" />
+    <ClInclude Include="include\GhazaEngine\Logger\Logger.hpp" />
     <ClInclude Include="include\GhazaEngine\SceneDataGenerator\GeometryData\Mesh.hpp" />
     <ClInclude Include="include\GhazaEngine\SceneDataGenerator\GeometryData\Vertex.hpp" />
     <ClInclude Include="include\GhazaEngine\SceneDataGenerator\Material.hpp" />
     <ClInclude Include="include\GhazaEngine\SceneDataGenerator\Node.hpp" />
     <ClInclude Include="include\GhazaEngine\SceneDataGenerator\SceneData.hpp" />
     <ClInclude Include="include\GhazaEngine\SceneDataGenerator\SceneDataGenerator.hpp" />
-    <ClInclude Include="include\GhazaEngine\VRenderer\Logger\Category.hpp" />
-    <ClInclude Include="include\GhazaEngine\VRenderer\Logger\Level.hpp" />
-    <ClInclude Include="include\GhazaEngine\VRenderer\Logger\LevelModeCompareOp.hpp" />
-    <ClInclude Include="include\GhazaEngine\VRenderer\Logger\Logger.hpp" />
     <ClInclude Include="include\GhazaEngine\VRenderer\Renderer.hpp" />
     <ClInclude Include="include\GhazaEngine\VRenderer\SDL_WindowWrapper.hpp" />
     <ClInclude Include="include\GhazaEngine\VRenderer\SynchronizationRequest.hpp" />

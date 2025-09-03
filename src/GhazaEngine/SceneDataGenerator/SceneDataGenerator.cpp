@@ -2,7 +2,7 @@
 
 
 #include "GhazaEngine/SceneDataGenerator/SceneDataGenerator.hpp"
-#include "GhazaEngine/VRenderer/Logger/Logger.hpp"
+#include "GhazaEngine/Logger/Logger.hpp"
 #include <filesystem>
 #include <string>
 #include <assimp/Importer.hpp>
@@ -52,7 +52,7 @@ namespace GhazaEngine
 					| aiProcess_ValidateDataStructure);
 
 				if (nullptr == lv_assimpSceneData) {
-					LOG(VRenderer::Level::INFO, VRenderer::Category::GENERAL, "Import of the requested file : {} failed by assimp due to {}.", l_sceneFilePath, lv_importer.GetErrorString());
+					LOG(Level::INFO, Category::GENERAL, "Import of the requested file : {} failed by assimp due to {}.", l_sceneFilePath, lv_importer.GetErrorString());
 					throw "Failed to import scene.\n";
 				}
 
@@ -80,7 +80,7 @@ namespace GhazaEngine
 
 					const auto& lv_currentMesh = lv_assimpSceneData->mMeshes[i];
 
-					LOG(VRenderer::Level::INFO, VRenderer::Category::GENERAL, "\nMesh {} is being processed...\n", lv_currentMesh->mName.C_Str());
+					LOG(Level::INFO, Category::GENERAL, "\nMesh {} is being processed...\n", lv_currentMesh->mName.C_Str());
 
 					m_currentSceneData.m_meshes[i].m_totalNumIndices = lv_assimpSceneData->mMeshes[i]->mNumFaces * 3U;
 					m_currentSceneData.m_meshes[i].m_firstVertexHandle = lv_verticesCurrentOffset;
@@ -450,7 +450,7 @@ namespace GhazaEngine
 			std::ifstream lv_serializedSceneDataFile{ l_filePathToLoadFrom.data(), std::ios_base::ate | std::ios_base::binary };
 
 			if (false == lv_serializedSceneDataFile.is_open()) {
-				LOG(VRenderer::Level::INFO, VRenderer::Category::GENERAL, "Failed to open serialized file {} for deserialization.", l_filePathToLoadFrom);
+				LOG(Level::INFO, Category::GENERAL, "Failed to open serialized file {} for deserialization.", l_filePathToLoadFrom);
 				throw "Deserialization failed.";
 			}
 
@@ -470,7 +470,7 @@ namespace GhazaEngine
 			}
 
 			if (0x123456789FFFFFFF != lv_magicNumberHeader) {
-				LOG(VRenderer::Level::INFO, VRenderer::Category::GENERAL, "The scene data binary file is corrupted due to header mismatch.");
+				LOG(Level::INFO, Category::GENERAL, "The scene data binary file is corrupted due to header mismatch.");
 				throw "Failed to deserialize.\n";
 			}
 
