@@ -1,13 +1,12 @@
 #pragma once
 
+#include < SDL3/SDL_video.h>
 
 struct SDL_Window;
 
 
 namespace GhazaEngine
 {
-	namespace VRenderer
-	{
 		struct SDL_WindowWrapper final
 		{
 		public:
@@ -16,6 +15,7 @@ namespace GhazaEngine
 
 		public:
 			SDL_Window* m_window{};
+			SDL_WindowFlags m_windowFlags{};
+			bool m_isWindowMinimized{ false };
 		};
-	}
 }

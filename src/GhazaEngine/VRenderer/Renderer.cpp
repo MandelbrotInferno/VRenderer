@@ -9,6 +9,8 @@
 #include "GhazaEngine/VRenderer/VulkanWrappers/VulkanDescriptorSetUpdater.hpp"
 #include "GhazaEngine/VRenderer/VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV.hpp"
 #include "GhazaEngine/Scene/SceneData.hpp"
+#include "GhazaEngine/VRenderer/RequiredRendererUpdateData.hpp"
+
 
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
@@ -445,6 +447,10 @@ namespace GhazaEngine
 			}
 		}
 
+		void Renderer::Update(RequiredRendererUpdateData&& l_updateData)
+		{
+
+		}
 
 		Renderer::~Renderer()
 		{

@@ -52,6 +52,18 @@
     <Filter Include="include\GhazaEngine\Scene\GeometryData">
       <UniqueIdentifier>{f524ff1b-862e-4287-ad92-f5012091a86c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\GhazaEngine\InputSystem">
+      <UniqueIdentifier>{d555e2c2-b67f-4b25-bb38-874fd4ff90cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\GhazaEngine\InputSystem">
+      <UniqueIdentifier>{055a36d6-c923-4514-8ade-08ba05f61a2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\GhazaEngine\Camera">
+      <UniqueIdentifier>{d47b5450-0ab3-4515-b97c-62eed12fd6a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\GhazaEngine\Camera">
+      <UniqueIdentifier>{263951d5-4403-4e9d-bed8-d6698c35a0b9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="manual-dependencies\imgui.cpp">
@@ -77,9 +89,6 @@
     </ClCompile>
     <ClCompile Include="manual-dependencies\SPIRV-Reflect\spirv_reflect.c" />
     <ClCompile Include="src\GhazaEngine\VRenderer\Renderer.cpp">
-      <Filter>src\GhazaEngine\VRenderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GhazaEngine\VRenderer\SDL_WindowWrapper.cpp">
       <Filter>src\GhazaEngine\VRenderer</Filter>
     </ClCompile>
     <ClCompile Include="src\GhazaEngine\VRenderer\VulkanResourceManager.cpp">
@@ -135,6 +144,18 @@
     </ClCompile>
     <ClCompile Include="src\GhazaEngine\Scene\SceneDataGenerator.cpp">
       <Filter>src\GhazaEngine\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\InputSystem\InputSystem.cpp">
+      <Filter>src\GhazaEngine\InputSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\Engine.cpp">
+      <Filter>src\GhazaEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\SDL_WindowWrapper.cpp">
+      <Filter>src\GhazaEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\Camera\Camera.cpp">
+      <Filter>src\GhazaEngine\Camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -218,9 +239,6 @@
     <ClInclude Include="include\GhazaEngine\VRenderer\Renderer.hpp">
       <Filter>include\GhazaEngine\VRenderer</Filter>
     </ClInclude>
-    <ClInclude Include="include\GhazaEngine\VRenderer\SDL_WindowWrapper.hpp">
-      <Filter>include\GhazaEngine\VRenderer</Filter>
-    </ClInclude>
     <ClInclude Include="include\GhazaEngine\VRenderer\SynchronizationRequest.hpp">
       <Filter>include\GhazaEngine\VRenderer</Filter>
     </ClInclude>
@@ -259,6 +277,27 @@
     </ClInclude>
     <ClInclude Include="include\GhazaEngine\Scene\GeometryData\Vertex.hpp">
       <Filter>include\GhazaEngine\Scene\GeometryData</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\InputSystem\InputSystem.hpp">
+      <Filter>include\GhazaEngine\InputSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\Engine.hpp">
+      <Filter>include\GhazaEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\EngineInitData.hpp">
+      <Filter>include\GhazaEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\SDL_WindowWrapper.hpp">
+      <Filter>include\GhazaEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\Time.hpp">
+      <Filter>include\GhazaEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\Camera\Camera.hpp">
+      <Filter>include\GhazaEngine\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\RequiredRendererUpdateData.hpp">
+      <Filter>include\GhazaEngine\VRenderer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

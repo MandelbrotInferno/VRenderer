@@ -173,6 +173,7 @@ namespace GhazaEngine
 			}
 			SceneData lv_returnSceneData = std::move(m_currentSceneData);
 			m_currentSceneData.Clear();
+			lv_returnSceneData.m_completelyInitialized = true;
 			return lv_returnSceneData;
 		}
 
@@ -192,7 +193,7 @@ namespace GhazaEngine
 
 			const size_t lv_totalNumMeshesInScene = m_currentSceneData.m_meshes.size();
 			for (size_t i = 0U; i < lv_totalNumMeshesInScene; ++i) {
-				const uint32_t lv_nodeHandleOfCurrentMesh = m_currentSceneData.m_meshHandlesToNodes[i];
+				const uint32_t lv_nodeHandleOfCurrentMesh = m_currentSceneData.m_meshHandlesToNodes[(uint32_t)i];
 				m_currentSceneData.m_meshes[i].m_modelTransformationHandle = lv_nodeHandleOfCurrentMesh;
 			}
 

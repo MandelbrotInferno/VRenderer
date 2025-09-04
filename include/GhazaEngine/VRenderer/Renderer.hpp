@@ -9,6 +9,7 @@
 #include "GhazaEngine/VRenderer/VulkanWrappers/VulkanDescriptorSetAllocator.hpp"
 #include "GhazaEngine/VRenderer/VulkanWrappers/VulkanTimelineSemaphore.hpp"
 
+
 #include <vma/vk_mem_alloc.h>
 #include <array>
 #include <memory>
@@ -31,25 +32,28 @@ namespace GhazaEngine
 {
 	namespace VRenderer
 	{
+		struct RequiredRendererUpdateData;
+
 		class Renderer final
 		{
 		public:
-
-			VulkanCommandbufferReset& GetCurrentFrameGraphicsCmdBuffer();
-			VulkanCommandbufferReset& GetCurrentFrameComputeCmdBuffer();
-			VulkanSwapchainAndPresentSync& GetCurrentFrameSwapchainPresentSyncPrimitives();
-			uint32_t GetCurrentFrameInflightIndex() const;
 
 			void Init(SDL_Window* l_window, const GhazaEngine::Scene::SceneData& l_sceneData);
 			void InitCleanUp();
 
 			void Draw(SDL_Window* l_window, const GhazaEngine::Scene::SceneData& l_sceneData);
 
+			void Update(RequiredRendererUpdateData&& l_updateData);
+
 			~Renderer();
 		private:
 
-			void CleanUp() noexcept;
+			VulkanCommandbufferReset& GetCurrentFrameGraphicsCmdBuffer();
+			VulkanCommandbufferReset& GetCurrentFrameComputeCmdBuffer();
+			VulkanSwapchainAndPresentSync& GetCurrentFrameSwapchainPresentSyncPrimitives();
+			uint32_t GetCurrentFrameInflightIndex() const;
 
+			void CleanUp() noexcept;
 
 			void InitializeVulkanFoundationalElementsAndGraphicsQueue(SDL_Window* l_window);
 			void InitializeVulkanSwapchain(SDL_Window* l_window);
