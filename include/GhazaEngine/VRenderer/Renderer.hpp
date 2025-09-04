@@ -77,7 +77,7 @@ namespace GhazaEngine
 
 			void GenerateAllKTXVulkanTexturesOfScene(const GhazaEngine::Scene::SceneData& l_sceneData);
 
-		public:
+		private:
 
 			VulkanFoundationalElements m_vulkanFoundational{};
 			VulkanSwapchain m_vulkanSwapchain{};
@@ -103,11 +103,7 @@ namespace GhazaEngine
 			bool m_physicalDeviceHasDedicatedCompute{ false };
 			bool m_resizeWindow{ false };
 
-		private:
-
 			static constexpr uint32_t m_maxCommandBuffers{ 2U };
-
-		private:
 
 			uint64_t m_currentGraphicsCmdBufferAndSwapchainPresentSyncIndex{};
 			std::array<VulkanCommandbufferReset, m_maxCommandBuffers> m_vulkanGraphicsCmdBuffers{};
