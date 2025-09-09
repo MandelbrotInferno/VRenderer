@@ -5,6 +5,7 @@
 #include "GhazaEngine/VRenderer/VulkanWrappers/VulkanTexture.hpp"
 #include "GhazaEngine/VRenderer/VulkanWrappers/VulkanBuffer.hpp"
 #include "GhazaEngine/VRenderer/SynchronizationRequest.hpp"
+#include "GhazaEngine/VRenderer/VulkanWrappers/VulkanDescriptorSet.hpp"
 #include <volk.h>
 #include <vector>
 #include <unordered_map>
@@ -58,6 +59,9 @@ namespace GhazaEngine
 			//Make sure every name you provide is unique
 			uint32_t AddVulkanBuffer(std::string&& l_name, VulkanBuffer&& l_vulkanBuffer);
 
+			//Make sure every name you provide is unique
+			uint32_t AddVulkanDescriptorSet(std::string&& l_name, VulkanDescriptorSet&& l_vulkanDescriptorSet);
+
 			void AddKtxVulkanTexture(ktxVulkanTexture&& l_ktxVkTexture, VkSampler l_sampler);
 
 			const std::vector<std::pair<ktxVulkanTexture, VkSampler>>& GetAllKTXVulkanTextures();
@@ -68,6 +72,7 @@ namespace GhazaEngine
 			VkPipeline RetrieveVulkanPipeline(std::string_view l_name);
 			VkPipelineLayout RetrieveVulkanPipelineLayout(std::string_view l_name);
 			VulkanBuffer& RetrieveVulkanBuffer(std::string_view l_name);
+			VulkanDescriptorSet& RetrieveVulkanDescriptorSet(std::string_view l_name);
 
 			VulkanTexture& RetrieveVulkanTexture(const uint32_t l_textureHandle);
 			VkImageView RetrieveVulkanImageView(const uint32_t l_imageViewHandle);
@@ -75,6 +80,7 @@ namespace GhazaEngine
 			VkPipeline RetrieveVulkanPipeline(const uint32_t l_pipelineHandle);
 			VkPipelineLayout RetrieveVulkanPipelineLayout(const uint32_t l_pipelineLayoutHandle);
 			VulkanBuffer& RetrieveVulkanBuffer(const uint32_t l_bufferHandle);
+			VulkanDescriptorSet& RetrieveVulkanDescriptorSet(const uint32_t l_descriptorSetHandle);
 
 			void SynchronizeResources(VkCommandBuffer l_cmdBuffer, std::span<std::string_view> l_resourcesNames, const std::span<SynchronizationRequest> l_synchRequests);
 
@@ -84,10 +90,14 @@ namespace GhazaEngine
 
 			std::vector<VulkanTexture> m_vulkanTextures{};
 			std::vector<VkImageView> m_vulkanImageViews{};
+
+			//To find set layout corresponding to set=N search for the renderpass name + N
 			std::vector<VkDescriptorSetLayout> m_vulkanSetLayouts{};
 			std::vector<VkPipeline> m_vulkanPipelines{};
 			std::vector<VkPipelineLayout> m_vulkanPipelineLayouts{};
 			std::vector<VulkanBuffer> m_vulkanBuffers{};
+			std::vector<VulkanDescriptorSet> m_vulkanDescriptorSets{};
+
 
 			//These ktx vulkan textures are only used to load compressed ktx format textures of meshes
 			std::vector<std::pair<ktxVulkanTexture, VkSampler>> m_ktxVulkanTextures{};
@@ -96,6 +106,7 @@ namespace GhazaEngine
 			std::unordered_map<std::string, size_t> m_mapVulkanSetLayoutNamesToIndex{};
 			std::unordered_map<std::string, size_t> m_mapVulkanPipelineLayoutNamesToIndex{};
 			std::unordered_map<std::string, size_t> m_mapVulkanPiplineNamesToIndex{};
+			std::unordered_map<std::string, size_t> m_mapVulkanDescriptorSetNamesToIndex{};
 
 			std::unordered_map<std::string, std::pair<size_t, ResourceSynchronizationState>> m_mapVulkanBufferNamesToIndexAndState{};
 			std::unordered_map<std::string, std::pair<size_t, std::array<ResourceSynchronizationState, 6U>>> m_mapVulkanTextureNamesToIndexAndState{};

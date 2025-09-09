@@ -81,6 +81,13 @@ namespace GhazaEngine
 			return static_cast<uint32_t>(lv_index);
 		}
 
+		uint32_t VulkanResourceManager::AddVulkanDescriptorSet(std::string&& l_name, VulkanDescriptorSet&& l_vulkanDescriptorSet)
+		{
+			m_vulkanDescriptorSets.push_back(l_vulkanDescriptorSet);
+			const size_t lv_index = m_vulkanDescriptorSets.size() - 1U;
+			m_mapVulkanDescriptorSetNamesToIndex.emplace(std::move(l_name), lv_index);
+			return static_cast<uint32_t>(lv_index);
+		}
 
 		void VulkanResourceManager::AddKtxVulkanTexture(ktxVulkanTexture&& l_ktxVkTexture, VkSampler l_sampler)
 		{
@@ -190,6 +197,26 @@ namespace GhazaEngine
 			assert(l_pipelineLayoutHandle < (uint32_t)m_vulkanPipelineLayouts.size());
 
 			return m_vulkanPipelineLayouts[l_pipelineLayoutHandle];
+		}
+
+		VulkanDescriptorSet& VulkanResourceManager::RetrieveVulkanDescriptorSet(std::string_view l_name)
+		{
+			const std::string lv_tempName{ l_name };
+			auto lv_iter = m_mapVulkanDescriptorSetNamesToIndex.find(lv_tempName);
+
+			if (m_mapVulkanDescriptorSetNamesToIndex.end() != lv_iter) {
+				return m_vulkanDescriptorSets[lv_iter->second];
+			}
+
+			throw "Requested VkDescriptorSetLayout was not found in the vulkan resource manager.\n";
+		}
+
+
+		VulkanDescriptorSet& VulkanResourceManager::RetrieveVulkanDescriptorSet(const uint32_t l_descriptorSetHandle)
+		{
+			assert(l_descriptorSetHandle < (uint32_t)m_vulkanDescriptorSets.size());
+
+			return m_vulkanDescriptorSets[l_descriptorSetHandle];
 		}
 
 
