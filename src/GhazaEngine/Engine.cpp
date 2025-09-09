@@ -37,8 +37,12 @@ namespace GhazaEngine
 			throw "Failed to initialize vulkan SDL window.\n";
 		}
 		
-		m_vkRenderer.Init(m_sdlWindowWrapper.m_window, m_currentSceneData);
+		if (false == SDL_GetWindowSize(m_sdlWindowWrapper.m_window, &m_sdlWindowWrapper.m_currentWindowSize.x, &m_sdlWindowWrapper.m_currentWindowSize.y)) {
+			LOG(Level::ERROR, Category::GENERAL, "Failed to get window size using SDL3: {}", SDL_GetError());
+			throw "Failed to get window size.\n";
+		}
 
+		m_vkRenderer.Init(m_sdlWindowWrapper.m_window, m_currentSceneData);
 	}
 
 	void Engine::MainLoop()
@@ -83,13 +87,13 @@ namespace GhazaEngine
 			const double lv_deltaTime = ((double)m_timeInMillisec.m_deltaTime) / 100.0;
 			m_firstPersonCamera.Update(lv_deltaTime, m_inputSystem);
 
-			int lv_windowWidth{}, lv_windowHeight{};
-			if (false == SDL_GetWindowSize(m_sdlWindowWrapper.m_window, &lv_windowWidth, &lv_windowHeight)) {
+			if (false == SDL_GetWindowSize(m_sdlWindowWrapper.m_window, &m_sdlWindowWrapper.m_currentWindowSize.x, &m_sdlWindowWrapper.m_currentWindowSize.y)) {
 				LOG(Level::ERROR, Category::GENERAL, "SDL3 failed to get window size: {}", SDL_GetError());
 				throw "Failed to fetch window size.\n";
 			}
+			
 
-			const float lv_ratio = (float)(lv_windowWidth)/(float)(lv_windowHeight);
+			const float lv_ratio = (float)(m_sdlWindowWrapper.m_currentWindowSize.x)/(float)(m_sdlWindowWrapper.m_currentWindowSize.y);
 			constexpr float lv_nearPlane = 0.1f;
 			constexpr float lv_farPlane = 1000.f;
 			VRenderer::RequiredRendererUpdateData lv_rendererUpdateData{};

@@ -191,6 +191,7 @@
     <ClCompile Include="src\GhazaEngine\SDL_WindowWrapper.cpp" />
     <ClCompile Include="src\GhazaEngine\VRenderer\main.cpp" />
     <ClCompile Include="src\GhazaEngine\VRenderer\Renderer.cpp" />
+    <ClCompile Include="src\GhazaEngine\VRenderer\RenderPasses\GraphicsPasses\IndirectPass.cpp" />
     <ClCompile Include="src\GhazaEngine\VRenderer\Utilities\Utilities.cpp" />
     <ClCompile Include="src\GhazaEngine\VRenderer\VulkanResourceManager.cpp" />
     <ClCompile Include="src\GhazaEngine\VRenderer\VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV.cpp" />
@@ -224,6 +225,7 @@
     <ClInclude Include="include\GhazaEngine\SDL_WindowWrapper.hpp" />
     <ClInclude Include="include\GhazaEngine\Time.hpp" />
     <ClInclude Include="include\GhazaEngine\VRenderer\Renderer.hpp" />
+    <ClInclude Include="include\GhazaEngine\VRenderer\RenderPasses\GraphicsPasses\IndirectPass.hpp" />
     <ClInclude Include="include\GhazaEngine\VRenderer\RequiredRendererUpdateData.hpp" />
     <ClInclude Include="include\GhazaEngine\VRenderer\SynchronizationRequest.hpp" />
     <ClInclude Include="include\GhazaEngine\VRenderer\Utilities\Utilities.hpp" />
