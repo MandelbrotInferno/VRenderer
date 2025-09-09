@@ -38,7 +38,7 @@ namespace GhazaEngine
 		{
 		public:
 
-			void Init(SDL_Window* l_window, const GhazaEngine::Scene::SceneData& l_sceneData);
+			void Init(SDL_Window* l_window ,const GhazaEngine::Scene::SceneData& l_sceneData);
 			void InitCleanUp();
 
 			void Draw(SDL_Window* l_window, const GhazaEngine::Scene::SceneData& l_sceneData);

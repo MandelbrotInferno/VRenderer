@@ -10,6 +10,7 @@
 #include "GhazaEngine/VRenderer/VulkanSetLayoutAndPipelineLayoutGeneratorFromSPIRV.hpp"
 #include "GhazaEngine/Scene/SceneData.hpp"
 #include "GhazaEngine/VRenderer/RequiredRendererUpdateData.hpp"
+#include "GhazaEngine/VRenderer/RenderPasses/GraphicsPasses/IndirectPass.hpp"
 
 
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
@@ -80,74 +81,20 @@ namespace GhazaEngine
 			GenerateAllKTXVulkanTexturesOfScene(l_sceneData);
 			GenerateAllVulkanSetLayoutsAndPipelineLayouts(std::make_pair<std::string, uint32_t>(std::string("Textures"), (uint32_t)l_sceneData.m_textureNames.size()));
 
-			VulkanBuffer lv_meshesVulkanBuffer = Utilities::AllocateAndPopulateVulkanBuffer<const Scene::Mesh>(m_device, m_graphicsQueue.m_queue, m_immediateCmdBuffer, m_immediateGPUCmdsFence, m_vmaAlloc, l_sceneData.m_meshes, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT);
-			VulkanBuffer lv_verticesVulkanBuffer = Utilities::AllocateAndPopulateVulkanBuffer<const Scene::Vertex>(m_device, m_graphicsQueue.m_queue, m_immediateCmdBuffer, m_immediateGPUCmdsFence, m_vmaAlloc, l_sceneData.m_verticesOfAllMeshesInScene, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT, VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT);
-			VulkanBuffer lv_indicesVulkanBuffer = Utilities::AllocateAndPopulateVulkanBuffer<const uint32_t>(m_device, m_graphicsQueue.m_queue, m_immediateCmdBuffer, m_immediateGPUCmdsFence, m_vmaAlloc, l_sceneData.m_indicesOfAllMeshesInScene, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT);
-			VulkanBuffer lv_materialsVulkanBuffer = Utilities::AllocateAndPopulateVulkanBuffer<const Scene::Material>(m_device, m_graphicsQueue.m_queue, m_immediateCmdBuffer, m_immediateGPUCmdsFence, m_vmaAlloc, l_sceneData.m_materials, VK_BUFFER_USAGE_2_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT);
-			VulkanBuffer lv_modelTransformsVulkanBuffer = Utilities::AllocateAndPopulateVulkanBuffer<const glm::mat4>(m_device, m_graphicsQueue.m_queue, m_immediateCmdBuffer, m_immediateGPUCmdsFence, m_vmaAlloc, l_sceneData.m_modalTransformations, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_2_SHADER_DEVICE_ADDRESS_BIT, VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT);
+			const glm::uvec2 lv_fullScreenDimensions = Utilities::GetFullResolutionDimensions();
 
+			auto lv_pingPongColorAttach00 = Utilities::GenerateVulkanTexture(m_device, m_vmaAlloc, VK_FORMAT_B8G8R8A8_UNORM, VkExtent3D{.width = lv_fullScreenDimensions.x, .height = lv_fullScreenDimensions.y, .depth = 1U}, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+			auto lv_pingPongColorAttach01 = Utilities::GenerateVulkanTexture(m_device, m_vmaAlloc, VK_FORMAT_B8G8R8A8_UNORM, VkExtent3D{ .width = lv_fullScreenDimensions.x, .height = lv_fullScreenDimensions.y, .depth = 1U }, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+			auto lv_pingPongColorAttach10 = Utilities::GenerateVulkanTexture(m_device, m_vmaAlloc, VK_FORMAT_B8G8R8A8_UNORM, VkExtent3D{ .width = lv_fullScreenDimensions.x, .height = lv_fullScreenDimensions.y, .depth = 1U }, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+			auto lv_pingPongColorAttach11 = Utilities::GenerateVulkanTexture(m_device, m_vmaAlloc, VK_FORMAT_B8G8R8A8_UNORM, VkExtent3D{ .width = lv_fullScreenDimensions.x, .height = lv_fullScreenDimensions.y, .depth = 1U }, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
-			m_vulkanResManager.AddVulkanBuffer("Meshes", std::move(lv_meshesVulkanBuffer));
-			m_vulkanResManager.AddVulkanBuffer("Vertices", std::move(lv_verticesVulkanBuffer));
-			m_vulkanResManager.AddVulkanBuffer("Indices", std::move(lv_indicesVulkanBuffer));
-			m_vulkanResManager.AddVulkanBuffer("Materials", std::move(lv_materialsVulkanBuffer));
-			m_vulkanResManager.AddVulkanBuffer("ModelTransformations", std::move(lv_modelTransformsVulkanBuffer));
+			m_vulkanResManager.AddVulkanTexture("PingPongColorAttach00", std::move(lv_pingPongColorAttach00));
+			m_vulkanResManager.AddVulkanTexture("PingPongColorAttach01", std::move(lv_pingPongColorAttach01));
+			m_vulkanResManager.AddVulkanTexture("PingPongColorAttach10", std::move(lv_pingPongColorAttach10));
+			m_vulkanResManager.AddVulkanTexture("PingPongColorAttach11", std::move(lv_pingPongColorAttach11));
 
-			std::array<VkDescriptorSetLayout, 1> lv_indirectSetLayouts{};
-			lv_indirectSetLayouts[0] = m_vulkanResManager.RetrieveVulkanDescriptorSetLayout("IndirectRenderPass0");
-			std::array<VulkanDescriptorSet, 2> lv_indirectDescSets{};
-			lv_indirectDescSets[0] = m_mainDescriptorSetAlloc.Allocate(m_device, lv_indirectSetLayouts[0]);
-			lv_indirectDescSets[1] = m_mainDescriptorSetAlloc.Allocate(m_device, lv_indirectSetLayouts[0]);
-
-			VulkanDescriptorSetUpdater lv_vulkanDescSetUpdater{};
-			const auto& lv_ktxTextures = m_vulkanResManager.GetAllKTXVulkanTextures();
-			for (uint32_t i = 0U; i < (uint32_t)l_sceneData.m_textureNames.size(); ++i) {
-				const auto& lv_currentTexture = lv_ktxTextures[i];
-				lv_vulkanDescSetUpdater.AddWriteImage(1U + i, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, lv_currentTexture.second, m_vulkanResManager.RetrieveVulkanImageView(l_sceneData.m_textureNames[i]), lv_currentTexture.first.imageLayout);
-			}
-			lv_vulkanDescSetUpdater.UpdateSet(m_device, lv_indirectDescSets[0].m_set);
-			lv_vulkanDescSetUpdater.UpdateSet(m_device, lv_indirectDescSets[1].m_set);
-
-			auto lv_indirectPipelineLayout = m_vulkanResManager.RetrieveVulkanPipelineLayout("IndirectRenderPass");
-
-			auto lv_indirectRenderPassVertModule = Utilities::GenerateVkShaderModule("shaders/IndirectRenderPass/SPV/IndirectRenderPassVert.spv", m_device);
-			auto lv_indirectRenderPassFragModule = Utilities::GenerateVkShaderModule("shaders/IndirectRenderPass/SPV/IndirectRenderPassFrag.spv", m_device);
-
-			std::vector<VkPipelineShaderStageCreateInfo> lv_shaderStageCreateInfo{};
-			lv_shaderStageCreateInfo.resize(2);
-			lv_shaderStageCreateInfo[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-			lv_shaderStageCreateInfo[0].module = lv_indirectRenderPassVertModule;
-			lv_shaderStageCreateInfo[0].pName = "main";
-			lv_shaderStageCreateInfo[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-
-			lv_shaderStageCreateInfo[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-			lv_shaderStageCreateInfo[1].module = lv_indirectRenderPassFragModule;
-			lv_shaderStageCreateInfo[1].pName = "main";
-			lv_shaderStageCreateInfo[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-			std::array<GhazaEngine::VRenderer::Utilities::VulkanGraphicsCreateInfo, 1> lv_graphicsCreateInfoHelper{};
-			lv_graphicsCreateInfoHelper[0].m_topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-			lv_graphicsCreateInfoHelper[0].m_sampleShadingEnabled = VK_FALSE;
-			lv_graphicsCreateInfoHelper[0].m_rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-			lv_graphicsCreateInfoHelper[0].m_polygonMode = VK_POLYGON_MODE_FILL;
-			lv_graphicsCreateInfoHelper[0].m_pipelineLayout = lv_indirectPipelineLayout;
-			lv_graphicsCreateInfoHelper[0].m_minSampleShading = 1.f;
-			lv_graphicsCreateInfoHelper[0].m_lineWidth = 1.f;
-			lv_graphicsCreateInfoHelper[0].m_frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-			lv_graphicsCreateInfoHelper[0].m_depthWriteEnabled = VK_TRUE;
-			lv_graphicsCreateInfoHelper[0].m_depthTestEnabled = VK_TRUE;
-			lv_graphicsCreateInfoHelper[0].m_depthCompareOp = VK_COMPARE_OP_LESS;
-			lv_graphicsCreateInfoHelper[0].m_cullMode = VK_CULL_MODE_BACK_BIT;
-			lv_graphicsCreateInfoHelper[0].m_colorBlendCreateInfoLogicOpEnabled = VK_FALSE;
-			lv_graphicsCreateInfoHelper[0].m_shaderStageCreateInfos = std::move(lv_shaderStageCreateInfo);
-			lv_graphicsCreateInfoHelper[0].m_dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
-
-			std::vector<VkPipeline> lv_graphicsPipelines = Utilities::GenerateGraphicsPipelines(m_device, lv_graphicsCreateInfoHelper);
-
-			m_vulkanResManager.AddVulkanPipeline("IndirectRenderPass", lv_graphicsPipelines[0]);
-
-			vkDestroyShaderModule(m_device, lv_indirectRenderPassVertModule, nullptr);
-			vkDestroyShaderModule(m_device, lv_indirectRenderPassFragModule, nullptr);
+			IndirectPass::InitData lv_indirectInitData(m_device, m_graphicsQueue.m_queue, m_immediateCmdBuffer, m_immediateGPUCmdsFence, m_vulkanResManager, m_vmaAlloc, l_sceneData, m_mainDescriptorSetAlloc);
+			IndirectPass::Init(lv_indirectInitData);
 		}
 		void Renderer::InitCleanUp()
 		{
@@ -449,7 +396,11 @@ namespace GhazaEngine
 
 		void Renderer::Update(RequiredRendererUpdateData&& l_updateData)
 		{
+			auto&& lv_updateData = std::move(l_updateData);
 
+			const IndirectPass::UniformBufferVertexStage lv_indirectUniformBuffVertex{.m_projMatrix = lv_updateData.m_projMatrix, .m_viewMatrix = lv_updateData.m_viewMatrix};
+			IndirectPass::UpdateData lv_indirectUpdateData(lv_indirectUniformBuffVertex, m_vulkanResManager, GetCurrentFrameInflightIndex());
+			IndirectPass::Update(lv_indirectUpdateData);
 		}
 
 		Renderer::~Renderer()
