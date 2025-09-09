@@ -58,6 +58,7 @@ namespace GhazaEngine
 				const auto* lv_infoBuffer = std::get_if<VkDescriptorBufferInfo>(&lv_infoVar);
 				l_write.pImageInfo = lv_infoImage;
 				l_write.pBufferInfo = lv_infoBuffer;
+				++i;
 
 			}
 
