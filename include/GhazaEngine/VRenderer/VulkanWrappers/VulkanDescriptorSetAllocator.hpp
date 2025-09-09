@@ -22,8 +22,6 @@ namespace GhazaEngine
 
 			VulkanDescriptorSet Allocate(VkDevice l_device, VkDescriptorSetLayout l_setLayout);
 
-			void Deallocate(VkDevice l_device, VulkanDescriptorSet l_setToDeallocate);
-
 			void ResetPool(VkDevice l_device);
 
 			void CleanUp(VkDevice l_device);

@@ -76,26 +76,6 @@ namespace GhazaEngine
 			return lv_vulkanDesSet;
 		}
 
-		void VulkanDescriptorSetAllocator::Deallocate(VkDevice l_device, VulkanDescriptorSet l_setToDeallocate)
-		{
-			if (((uint32_t)m_currentPoolIndex < l_setToDeallocate.m_indexOfPool) || (0U == m_currentPoolIndex && 0U == m_totalNumSetAllocFromCurrentPool) || (true == m_pools.empty())) {
-				throw "Tried to deallocate either an already deallocated descriptor set or an invalid descriptor set or tried deallocating from an uninitialized pool\n";
-			}
-			VULKAN_CHECK(vkFreeDescriptorSets(l_device, m_pools[l_setToDeallocate.m_indexOfPool], 1U, &l_setToDeallocate.m_set));
-			--m_totalNumSetAllocFromCurrentPool;
-
-			if (0U == m_totalNumSetAllocFromCurrentPool) {
-				if (0U == m_currentPoolIndex) {
-					return;
-				}
-				else {
-					--m_currentPoolIndex;
-					m_totalNumSetAllocFromCurrentPool = m_maxNumSetsAllowedPerPool;
-				}
-			}
-		}
-
-
 		void VulkanDescriptorSetAllocator::ResetPool(VkDevice l_device)
 		{
 			if (VK_NULL_HANDLE != l_device && false == m_pools.empty()) {
