@@ -4,7 +4,7 @@
 
 #include <volk.h>
 #include <vma/vk_mem_alloc.h>
-
+#include <optional>
 
 namespace GhazaEngine
 {
@@ -20,6 +20,7 @@ namespace GhazaEngine
 			VkBuffer m_buffer{};
 			VmaAllocation m_vmaAllocation{};
 			VmaAllocationInfo m_vmaAllocationInfo{};
+			std::optional<VkDeviceAddress> m_gpuAddress{};
 		};
 	}
 }
