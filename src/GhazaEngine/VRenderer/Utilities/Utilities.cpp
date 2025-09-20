@@ -512,7 +512,7 @@ namespace GhazaEngine
 					lv_renderingInfo.pColorAttachmentFormats = l_createInfoHelper.m_colorAttachmentFormats.data();
 					lv_renderingInfo.colorAttachmentCount = static_cast<uint32_t>(l_createInfoHelper.m_colorAttachmentFormats.size());
 					lv_renderingInfo.depthAttachmentFormat = l_createInfoHelper.m_depthAttachmentFormat;
-
+					
 
 					VkPipelineViewportStateCreateInfo lv_viewPortCreateInfo{};
 					lv_viewPortCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;

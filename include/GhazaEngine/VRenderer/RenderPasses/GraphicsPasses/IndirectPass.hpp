@@ -39,6 +39,12 @@ namespace GhazaEngine
 				VulkanDescriptorSetAllocator& m_mainDescSetAllocator;
 			};
 
+			struct PushConstantVertex final
+			{
+				uint64_t m_meshBufferGpuPtr;
+				uint64_t m_vertexBufferGpuPtr;
+				uint64_t m_modelTransformsGpuPtr;
+			};
 
 			struct UniformBufferVertexStage final
 			{
@@ -61,7 +67,7 @@ namespace GhazaEngine
 
 			void Update(const UpdateData& l_updateData);
 
-			void IssueCommands(VkCommandBuffer l_cmdBuffer, VulkanResourceManager& l_vkResManager,const uint32_t l_swapchainIndex, const uint32_t l_currentFrameInFlightIndex);
+			void IssueCommands(VkCommandBuffer l_cmdBuffer, VulkanResourceManager& l_vkResManager, const uint32_t l_currentFrameInFlightIndex, const uint32_t l_drawCount);
 		}
 	}
 }

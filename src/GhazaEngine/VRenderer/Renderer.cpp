@@ -11,6 +11,8 @@
 #include "GhazaEngine/Scene/SceneData.hpp"
 #include "GhazaEngine/VRenderer/RequiredRendererUpdateData.hpp"
 #include "GhazaEngine/VRenderer/RenderPasses/GraphicsPasses/IndirectPass.hpp"
+#include "GhazaEngine/VRenderer/RenderPasses/GraphicsPasses/CopyToSwapchainPass.hpp"
+#include "GhazaEngine/VRenderer/RenderPasses/GraphicsPasses/ImguiPass.hpp"
 
 
 #define VMA_STATIC_VULKAN_FUNCTIONS 0
@@ -25,9 +27,9 @@
 #include <VkBootstrap.h>
 #include <SDL3/SDL_vulkan.h>
 #include <SDL3/SDL_log.h>
-#include <imgui.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_vulkan.h>
+#include <imgui.h>
 #include <filesystem>
 #include <ktxvulkan.h>
 
@@ -87,11 +89,75 @@ namespace GhazaEngine
 			auto lv_pingPongColorAttach01 = Utilities::GenerateVulkanTexture(m_device, m_vmaAlloc, VK_FORMAT_B8G8R8A8_UNORM, VkExtent3D{ .width = lv_fullScreenDimensions.x, .height = lv_fullScreenDimensions.y, .depth = 1U }, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 			auto lv_pingPongColorAttach10 = Utilities::GenerateVulkanTexture(m_device, m_vmaAlloc, VK_FORMAT_B8G8R8A8_UNORM, VkExtent3D{ .width = lv_fullScreenDimensions.x, .height = lv_fullScreenDimensions.y, .depth = 1U }, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 			auto lv_pingPongColorAttach11 = Utilities::GenerateVulkanTexture(m_device, m_vmaAlloc, VK_FORMAT_B8G8R8A8_UNORM, VkExtent3D{ .width = lv_fullScreenDimensions.x, .height = lv_fullScreenDimensions.y, .depth = 1U }, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+			auto lv_depthBuffer0 = Utilities::GenerateVulkanTexture(m_device, m_vmaAlloc, VK_FORMAT_D32_SFLOAT, VkExtent3D{ .width = lv_fullScreenDimensions.x, .height = lv_fullScreenDimensions.y, .depth = 1U }, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+			auto lv_depthBuffer1 = Utilities::GenerateVulkanTexture(m_device, m_vmaAlloc, VK_FORMAT_D32_SFLOAT, VkExtent3D{ .width = lv_fullScreenDimensions.x, .height = lv_fullScreenDimensions.y, .depth = 1U }, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
 
-			m_vulkanResManager.AddVulkanTexture("PingPongColorAttach00", std::move(lv_pingPongColorAttach00));
-			m_vulkanResManager.AddVulkanTexture("PingPongColorAttach01", std::move(lv_pingPongColorAttach01));
-			m_vulkanResManager.AddVulkanTexture("PingPongColorAttach10", std::move(lv_pingPongColorAttach10));
-			m_vulkanResManager.AddVulkanTexture("PingPongColorAttach11", std::move(lv_pingPongColorAttach11));
+			//Necessary image layout transitions
+			{
+				auto TransitionColorAndDepthAttachmentLayouts = [&](VkCommandBuffer l_cmdBuffer)
+					{
+						Utilities::ImageLayoutTransitionCmd(l_cmdBuffer,
+							VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED
+							, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, lv_pingPongColorAttach00.m_image
+							, VK_ACCESS_2_NONE, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT
+							, VK_PIPELINE_STAGE_2_NONE, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
+
+						Utilities::ImageLayoutTransitionCmd(l_cmdBuffer,
+							VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED
+							, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, lv_pingPongColorAttach01.m_image
+							, VK_ACCESS_2_NONE, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT
+							, VK_PIPELINE_STAGE_2_NONE, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
+
+						Utilities::ImageLayoutTransitionCmd(l_cmdBuffer,
+							VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED
+							, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, lv_pingPongColorAttach10.m_image
+							, VK_ACCESS_2_NONE, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT
+							, VK_PIPELINE_STAGE_2_NONE, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
+
+						Utilities::ImageLayoutTransitionCmd(l_cmdBuffer,
+							VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_LAYOUT_UNDEFINED
+							, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, lv_pingPongColorAttach11.m_image
+							, VK_ACCESS_2_NONE, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT
+							, VK_PIPELINE_STAGE_2_NONE, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
+
+						Utilities::ImageLayoutTransitionCmd(l_cmdBuffer
+							, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_LAYOUT_UNDEFINED
+							, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, lv_depthBuffer0.m_image
+							, VK_ACCESS_2_NONE, VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT
+							, VK_PIPELINE_STAGE_2_NONE, VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT);
+
+						Utilities::ImageLayoutTransitionCmd(l_cmdBuffer
+							, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_LAYOUT_UNDEFINED
+							, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, lv_depthBuffer1.m_image
+							, VK_ACCESS_2_NONE, VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT
+							, VK_PIPELINE_STAGE_2_NONE, VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT);
+					};
+
+				Utilities::ExecuteImmediateGPUCommands(m_device, m_graphicsQueue.m_queue, m_immediateCmdBuffer, m_immediateGPUCmdsFence, TransitionColorAndDepthAttachmentLayouts);
+
+				
+			}
+
+			VkImageView lv_pingPongColorAttach00View = Utilities::GenerateVkImageView(m_device, lv_pingPongColorAttach00);
+			VkImageView lv_pingPongColorAttach01View = Utilities::GenerateVkImageView(m_device, lv_pingPongColorAttach01);
+			VkImageView lv_pingPongColorAttach10View = Utilities::GenerateVkImageView(m_device, lv_pingPongColorAttach10);
+			VkImageView lv_pingPongColorAttach11View = Utilities::GenerateVkImageView(m_device, lv_pingPongColorAttach11);
+			VkImageView lv_depthBuffer0View = Utilities::GenerateVkImageView(m_device, lv_depthBuffer0, VK_IMAGE_ASPECT_DEPTH_BIT);
+			VkImageView lv_depthBuffer1View = Utilities::GenerateVkImageView(m_device, lv_depthBuffer1, VK_IMAGE_ASPECT_DEPTH_BIT);
+
+			m_vulkanResManager.AddVulkanTexture("PingPongColorAttach00", std::move(lv_pingPongColorAttach00), true);
+			m_vulkanResManager.AddVulkanTexture("PingPongColorAttach01", std::move(lv_pingPongColorAttach01), true);
+			m_vulkanResManager.AddVulkanTexture("PingPongColorAttach10", std::move(lv_pingPongColorAttach10), true);
+			m_vulkanResManager.AddVulkanTexture("PingPongColorAttach11", std::move(lv_pingPongColorAttach11), true);
+			m_vulkanResManager.AddVulkanTexture("DepthBuffer0", std::move(lv_depthBuffer0), false, true);
+			m_vulkanResManager.AddVulkanTexture("DepthBuffer1", std::move(lv_depthBuffer1), false, true);
+
+			m_vulkanResManager.AddVulkanImageView("PingPongColorAttach00", lv_pingPongColorAttach00View);
+			m_vulkanResManager.AddVulkanImageView("PingPongColorAttach01", lv_pingPongColorAttach01View);
+			m_vulkanResManager.AddVulkanImageView("PingPongColorAttach10", lv_pingPongColorAttach10View);
+			m_vulkanResManager.AddVulkanImageView("PingPongColorAttach11", lv_pingPongColorAttach11View);
+			m_vulkanResManager.AddVulkanImageView("DepthBuffer0", lv_depthBuffer0View);
+			m_vulkanResManager.AddVulkanImageView("DepthBuffer1", lv_depthBuffer1View);
 
 			IndirectPass::InitData lv_indirectInitData(m_device, m_graphicsQueue.m_queue, m_immediateCmdBuffer, m_immediateGPUCmdsFence, m_vulkanResManager, m_vmaAlloc, l_sceneData, m_mainDescriptorSetAlloc);
 			IndirectPass::Init(lv_indirectInitData);
@@ -146,153 +212,28 @@ namespace GhazaEngine
 
 			const uint32_t lv_currentFrameInflightIndex = GetCurrentFrameInflightIndex();
 
-
-			auto lv_computeCmds = [&, lv_currentFrameInflightIndex, lv_swapchainImageIndex](VkCommandBuffer l_cmdBuffer)->void {
-
-				using namespace Utilities;
-
-				auto lv_testTextureName = fmt::format("Test-Image{}", lv_currentFrameInflightIndex);
-				VulkanTexture& lv_testTexture = m_vulkanResManager.RetrieveVulkanTexture(lv_testTextureName);
-				VkPipeline lv_computePipeline{};
-				//auto& lv_pushData = m_computePasses[m_currentComputePassIndex].m_pushConstData;
-				VkPipelineLayout lv_computePipelineLayout = m_vulkanResManager.RetrieveVulkanPipelineLayout("TestComputePass");
-
-				std::array<std::string_view, 1> lv_testTextureNameView{ lv_testTextureName };
-				SynchronizationRequest lv_synchReq{};
-				lv_synchReq.m_accessFlagToBeUsed = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-				lv_synchReq.m_pipelineStageToBeUsedIn = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
-				lv_synchReq.m_imageLayout.emplace(VK_IMAGE_LAYOUT_GENERAL);
-				std::array<SynchronizationRequest, 1> lv_synchReqs{ lv_synchReq };
-				m_vulkanResManager.SynchronizeResources(l_cmdBuffer, lv_testTextureNameView, lv_synchReqs);
-
-				//vkCmdBindPipeline(l_cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, lv_computePipeline);
-				//vkCmdBindDescriptorSets(l_cmdBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, lv_computePipelineLayout, 0, 1, &m_testComputeSets[lv_currentFrameInflightIndex].m_set, 0U, nullptr);
-
-				//vkCmdPushConstants(l_cmdBuffer,lv_computePipelineLayout, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(lv_pushData),&lv_pushData);
-				vkCmdDispatch(l_cmdBuffer, (uint32_t)std::ceilf(lv_testTexture.m_extent.width / 16.f), (uint32_t)std::ceilf(lv_testTexture.m_extent.height / 16.f), 1U);
-
-				};
-			auto lv_graphicsCmds = [&, lv_swapchainImageIndex, lv_currentFrameInflightIndex](VkCommandBuffer l_cmdBuffer)->void
-				{
-					using namespace Utilities;
-					auto lv_testTextureName = fmt::format("Test-Image{}", lv_currentFrameInflightIndex);
-					VulkanTexture& lv_testTexture = m_vulkanResManager.RetrieveVulkanTexture(lv_testTextureName);
-					VkImageView lv_testTextureView = m_vulkanResManager.RetrieveVulkanImageView(fmt::format("ComputeImageView{}", lv_currentFrameInflightIndex));
-					VkPipeline lv_graphicsPipeline = m_vulkanResManager.RetrieveVulkanPipeline("GraphicsPipeline");
-					VkPipelineLayout lv_graphicsPipelineLayout = m_vulkanResManager.RetrieveVulkanPipelineLayout("ColoredRectangleRenderPass");
-					VulkanBuffer& lv_indexBuffer = m_vulkanResManager.RetrieveVulkanBuffer("IndicesBuffer");
-
-					std::array<std::string_view, 1> lv_testTextureNames{ lv_testTextureName };
-					std::array<SynchronizationRequest, 1> lv_synchReqsTest{};
-					lv_synchReqsTest[0].m_accessFlagToBeUsed = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
-					lv_synchReqsTest[0].m_pipelineStageToBeUsedIn = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
-					lv_synchReqsTest[0].m_imageLayout.emplace(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-					m_vulkanResManager.SynchronizeResources(l_cmdBuffer, lv_testTextureNames, lv_synchReqsTest);
-
-					auto lv_renderAttachmentInfo = GenerateRenderAttachmentInfo(lv_testTextureView);
-					std::array<VkRenderingAttachmentInfo, 1> lv_pRenderAttachmentInfo{ lv_renderAttachmentInfo };
-					auto lv_renderingInfo = GenerateRenderingInfo({ .offset = {.x = 0, .y = 0}, .extent = {.width = lv_testTexture.m_extent.width, .height = lv_testTexture.m_extent.height} }, lv_pRenderAttachmentInfo);
-
-					vkCmdBeginRendering(l_cmdBuffer, &lv_renderingInfo);
-
-					vkCmdBindPipeline(l_cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, lv_graphicsPipeline);
-
-					VkViewport lv_viewPort{};
-					lv_viewPort.x = 0.f;
-					lv_viewPort.y = 0.f;
-					lv_viewPort.width = static_cast<float>(lv_testTexture.m_extent.width);
-					lv_viewPort.height = static_cast<float>(lv_testTexture.m_extent.height);
-					lv_viewPort.minDepth = 0.f;
-					lv_viewPort.maxDepth = 1.f;
-
-					vkCmdSetViewport(l_cmdBuffer, 0U, 1U, &lv_viewPort);
-
-					VkRect2D lv_scissorArea{};
-					lv_scissorArea.offset = { .x = 0, .y = 0 };
-					lv_scissorArea.extent = { .width = lv_testTexture.m_extent.width, .height = lv_testTexture.m_extent.height };
-
-					vkCmdSetScissor(l_cmdBuffer, 0U, 1U, &lv_scissorArea);
-
-					vkCmdBindIndexBuffer(l_cmdBuffer, lv_indexBuffer.m_buffer, 0, VK_INDEX_TYPE_UINT32);
-					//vkCmdPushConstants(l_cmdBuffer, lv_graphicsPipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(GraphicsPassPushConstant), &m_graphicsPushConstant);
-
-					vkCmdDrawIndexed(l_cmdBuffer, 6, 1, 0U, 0U, 0U);
-
-					vkCmdEndRendering(l_cmdBuffer);
-
-					{
-						std::array<SynchronizationRequest, 1> lv_synchReqsTest{};
-						lv_synchReqsTest[0].m_accessFlagToBeUsed = VK_ACCESS_2_TRANSFER_READ_BIT;
-						lv_synchReqsTest[0].m_pipelineStageToBeUsedIn = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
-						lv_synchReqsTest[0].m_imageLayout.emplace(VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-						m_vulkanResManager.SynchronizeResources(l_cmdBuffer, lv_testTextureNames, lv_synchReqsTest);
-
-					}
-
-					ImageLayoutTransitionCmd(l_cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT
-						, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-						, m_vulkanSwapchain.m_images[lv_swapchainImageIndex], VK_ACCESS_2_MEMORY_READ_BIT
-						, VK_ACCESS_2_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT
-						, VK_PIPELINE_STAGE_2_TRANSFER_BIT);
-
-					auto& lv_swapchainExtent = m_vulkanSwapchain.m_extent;
-					std::array<VkOffset3D, 2> lv_srcRegion{ VkOffset3D{}, VkOffset3D{.x = (int)lv_testTexture.m_extent.width, .y = (int)lv_testTexture.m_extent.height, .z = 1} };
-					std::array<VkOffset3D, 2> lv_dstRegion{ VkOffset3D{}, VkOffset3D{.x = (int)lv_swapchainExtent.width, .y = (int)lv_swapchainExtent.height, .z = 1} };
-					BlitsCopySrcToDestImage(l_cmdBuffer, lv_testTexture.m_image, m_vulkanSwapchain.m_images[lv_swapchainImageIndex], VK_IMAGE_ASPECT_COLOR_BIT, lv_srcRegion, lv_dstRegion);
-
-
-					ImageLayoutTransitionCmd(l_cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT
-						, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-						, m_vulkanSwapchain.m_images[lv_swapchainImageIndex], VK_ACCESS_2_TRANSFER_WRITE_BIT
-						, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT, VK_PIPELINE_STAGE_2_TRANSFER_BIT
-						, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT);
-
-					auto lv_attachmentRenderInfo = GenerateRenderAttachmentInfo(m_vulkanSwapchain.m_imageViews[lv_swapchainImageIndex]);
-					std::array<VkRenderingAttachmentInfo, 1> lv_colorAttachments{ lv_attachmentRenderInfo };
-					lv_renderingInfo = GenerateRenderingInfo({ .offset = {} ,.extent = m_vulkanSwapchain.m_extent }, lv_colorAttachments);
-
-					vkCmdBeginRendering(l_cmdBuffer, &lv_renderingInfo);
-					ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), l_cmdBuffer);
-					vkCmdEndRendering(l_cmdBuffer);
-
-					ImageLayoutTransitionCmd(l_cmdBuffer, VK_IMAGE_ASPECT_COLOR_BIT
-						, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-						, m_vulkanSwapchain.m_images[lv_swapchainImageIndex], VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT
-						, VK_ACCESS_2_MEMORY_WRITE_BIT | VK_ACCESS_2_MEMORY_READ_BIT, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT
-						, VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT);
-				};
-
 			ImGui_ImplVulkan_NewFrame();
 			ImGui_ImplSDL3_NewFrame();
 
 			ImGui::NewFrame();
-
-
 			ImGui::Render();
 
-			if (true == m_physicalDeviceHasDedicatedCompute) {
+			//if (true == m_physicalDeviceHasDedicatedCompute) {
 
-				lv_computeCmdBuffer.BeginRecording();
-				lv_computeCmds(lv_computeCmdBuffer.m_buffer);
-				lv_computeCmdBuffer.EndRecording();
+				//SubmitCommandsToQueue(m_computeQueue, VulkanSubmissionSync::SIGNAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, lv_computeCmdBuffer.m_buffer, lv_syncPrimitives, m_timelineComputeGraphicsSemaphore);
+				//SubmitCommandsToQueue(m_graphicsQueue, VulkanSubmissionSync::WAIT_PREP_FOR_PRESENTATION, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, lv_graphicsCmdBuffer.m_buffer, lv_syncPrimitives, m_timelineComputeGraphicsSemaphore);
 
+
+			//}
+			//else {
 				lv_graphicsCmdBuffer.BeginRecording();
-				lv_graphicsCmds(lv_graphicsCmdBuffer.m_buffer);
-				lv_graphicsCmdBuffer.EndRecording();
-
-				SubmitCommandsToQueue(m_computeQueue, VulkanSubmissionSync::SIGNAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, lv_computeCmdBuffer.m_buffer, lv_syncPrimitives, m_timelineComputeGraphicsSemaphore);
-				SubmitCommandsToQueue(m_graphicsQueue, VulkanSubmissionSync::WAIT_PREP_FOR_PRESENTATION, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, lv_graphicsCmdBuffer.m_buffer, lv_syncPrimitives, m_timelineComputeGraphicsSemaphore);
-
-
-			}
-			else {
-				lv_graphicsCmdBuffer.BeginRecording();
-				lv_computeCmds(lv_graphicsCmdBuffer.m_buffer);
-				lv_graphicsCmds(lv_graphicsCmdBuffer.m_buffer);
+				IndirectPass::IssueCommands(lv_graphicsCmdBuffer.m_buffer, m_vulkanResManager, lv_currentFrameInflightIndex, (uint32_t)l_sceneData.m_meshes.size());
+				CopyToSwapchainPass::IssueCommands(lv_graphicsCmdBuffer.m_buffer, m_vulkanResManager, m_vulkanSwapchain, lv_currentFrameInflightIndex, lv_swapchainImageIndex, 1U);
+				ImguiPass::IssueCommands(lv_graphicsCmdBuffer.m_buffer, m_vulkanSwapchain, lv_swapchainImageIndex);
 				lv_graphicsCmdBuffer.EndRecording();
 
 				SubmitCommandsToQueue(m_graphicsQueue, VulkanSubmissionSync::PREP_FOR_PRESENTATION, 0, lv_graphicsCmdBuffer.m_buffer, lv_syncPrimitives, m_timelineComputeGraphicsSemaphore);
-			}
+			//}
 
 
 			VkPresentInfoKHR lv_presentInfo{};
@@ -474,6 +415,7 @@ namespace GhazaEngine
 			VkPhysicalDeviceFeatures lv_physicalDeviceFeatures{};
 			lv_physicalDeviceFeatures.shaderInt64 = true;
 			lv_physicalDeviceFeatures.shaderInt16 = true;
+			lv_physicalDeviceFeatures.multiDrawIndirect = true;
 
 			VkPhysicalDeviceVulkan11Features lv_features11{ .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES };
 			lv_features11.shaderDrawParameters = true;
@@ -520,6 +462,13 @@ namespace GhazaEngine
 			vkb::PhysicalDevice lv_physicalDevice = lv_physicalDeviceSelector.select_devices().value()[lv_physicalDeviceIndex];
 
 			m_vulkanFoundational.m_physicalDevice = lv_physicalDevice.physical_device;
+
+			VkPhysicalDeviceFeatures lv_testFeature{};
+			vkGetPhysicalDeviceFeatures(m_vulkanFoundational.m_physicalDevice, &lv_testFeature);
+
+			if (VK_FALSE == lv_testFeature.multiDrawIndirect) {
+				throw "MultiDrawIndirect is not supported by the current physical device.";
+			}
 
 			vkb::DeviceBuilder lv_deviceBuilder{ lv_physicalDevice };
 			vkb::Device lv_vkbDevice = lv_deviceBuilder.build().value();

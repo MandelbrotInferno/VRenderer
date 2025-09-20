@@ -31,6 +31,9 @@ namespace GhazaEngine
 			{
 			public:
 
+				ResourceSynchronizationState();
+				ResourceSynchronizationState(const VkPipelineStageFlags2 l_latestPipelineStageIn, const VkAccessFlagBits2 l_latestAccessFlagUsed);
+
 				bool ShouldGenerateBarrier(const bool l_isImage, const VkAccessFlagBits2 l_dstAccessState);
 
 			public:
@@ -42,7 +45,7 @@ namespace GhazaEngine
 		public:
 
 			//Make sure every name you provide is unique
-			uint32_t AddVulkanTexture(std::string&& l_name, VulkanTexture&& l_vulkanTexture);
+			uint32_t AddVulkanTexture(std::string&& l_name, VulkanTexture&& l_vulkanTexture, const bool l_isColorAttachment = false, const bool l_isDepthAttachment = false);
 
 			//Make sure every name you provide is unique
 			uint32_t AddVulkanImageView(std::string&& l_name, VkImageView l_vulkanImageView);

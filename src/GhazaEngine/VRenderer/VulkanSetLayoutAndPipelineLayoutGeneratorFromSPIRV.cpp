@@ -13,6 +13,7 @@
 #include <fstream>
 #include <iostream>
 #include <fmt/core.h>
+#include <algorithm>
 
 
 namespace GhazaEngine
@@ -103,6 +104,17 @@ namespace GhazaEngine
                 }
 
             }
+
+            auto Compare = [](const VkPushConstantRange& l_a, const VkPushConstantRange& l_b) ->bool
+                {
+                    if (l_a.stageFlags < l_b.stageFlags) {
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                };
+            std::sort(lv_ranges.begin(), lv_ranges.end(), Compare);
 
             auto lv_vulkanPipelineLayout = Utilities::GenerateVkPipelineLayout(l_device, lv_vkSetLayouts, lv_ranges);
             l_resManager.AddVulkanPipelineLayout(std::move(lv_baseName), lv_vulkanPipelineLayout);

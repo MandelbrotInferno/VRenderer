@@ -64,6 +64,18 @@
     <Filter Include="include\GhazaEngine\Camera">
       <UniqueIdentifier>{263951d5-4403-4e9d-bed8-d6698c35a0b9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\GhazaEngine\VRenderer\RenderPasses">
+      <UniqueIdentifier>{78c8a0d7-daae-4a74-9501-973b8b207bce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\GhazaEngine\VRenderer\RenderPasses\GraphicsPasses">
+      <UniqueIdentifier>{65f6c50f-8f24-4e07-a9c1-c74404d1af56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\GhazaEngine\VRenderer\RenderPasses">
+      <UniqueIdentifier>{37aa82ad-83c6-4e70-80b4-609a56caf8fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\GhazaEngine\VRenderer\RenderPasses\GraphicsPasses">
+      <UniqueIdentifier>{a30039c6-6f18-4660-a1a7-c55bfef80739}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="manual-dependencies\imgui.cpp">
@@ -156,6 +168,13 @@
     </ClCompile>
     <ClCompile Include="src\GhazaEngine\Camera\Camera.cpp">
       <Filter>src\GhazaEngine\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\RenderPasses\GraphicsPasses\IndirectPass.cpp" />
+    <ClCompile Include="src\GhazaEngine\VRenderer\RenderPasses\GraphicsPasses\CopyToSwapchainPass.cpp">
+      <Filter>src\GhazaEngine\VRenderer\RenderPasses\GraphicsPasses</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GhazaEngine\VRenderer\RenderPasses\GraphicsPasses\ImguiPass.cpp">
+      <Filter>src\GhazaEngine\VRenderer\RenderPasses\GraphicsPasses</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -298,6 +317,13 @@
     </ClInclude>
     <ClInclude Include="include\GhazaEngine\VRenderer\RequiredRendererUpdateData.hpp">
       <Filter>include\GhazaEngine\VRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\RenderPasses\GraphicsPasses\IndirectPass.hpp" />
+    <ClInclude Include="include\GhazaEngine\VRenderer\RenderPasses\GraphicsPasses\CopyToSwapchainPass.hpp">
+      <Filter>include\GhazaEngine\VRenderer\RenderPasses\GraphicsPasses</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GhazaEngine\VRenderer\RenderPasses\GraphicsPasses\ImguiPass.hpp">
+      <Filter>include\GhazaEngine\VRenderer\RenderPasses\GraphicsPasses</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

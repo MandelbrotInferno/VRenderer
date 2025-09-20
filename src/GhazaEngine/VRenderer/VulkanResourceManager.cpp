@@ -12,6 +12,18 @@ namespace GhazaEngine
 {
 	namespace VRenderer
 	{
+
+		VulkanResourceManager::ResourceSynchronizationState::ResourceSynchronizationState()
+		{
+
+		}
+		VulkanResourceManager::ResourceSynchronizationState::ResourceSynchronizationState(const VkPipelineStageFlags2 l_latestPipelineStageIn, const VkAccessFlagBits2 l_latestAccessFlagUsed)
+			:m_latestPipelineStageUsedIn(l_latestPipelineStageIn), m_latestAccessFlagUsed(l_latestAccessFlagUsed)
+		{
+
+		}
+
+
 		bool VulkanResourceManager::ResourceSynchronizationState::ShouldGenerateBarrier(const bool l_isImage, const VkAccessFlagBits2 l_dstAccessState)
 		{
 			if (false == l_isImage) {
@@ -40,11 +52,21 @@ namespace GhazaEngine
 			}
 		}
 
-		uint32_t VulkanResourceManager::AddVulkanTexture(std::string&& l_name, VulkanTexture&& l_vulkanTexture)
+		uint32_t VulkanResourceManager::AddVulkanTexture(std::string&& l_name, VulkanTexture&& l_vulkanTexture, const bool l_isColorAttachment, const bool l_isDepthAttachment)
 		{
 			m_vulkanTextures.emplace_back(std::move(l_vulkanTexture));
 			const size_t lv_index = m_vulkanTextures.size() - 1U;
-			m_mapVulkanTextureNamesToIndexAndState.emplace(std::move(l_name), std::make_pair(lv_index, std::array<ResourceSynchronizationState, 6U>{}));
+			if (false == l_isColorAttachment) {
+				if (false == l_isDepthAttachment) {
+					m_mapVulkanTextureNamesToIndexAndState.emplace(std::move(l_name), std::make_pair(lv_index, std::array<ResourceSynchronizationState, 6U>{}));
+				}
+				else {
+					m_mapVulkanTextureNamesToIndexAndState.emplace(std::move(l_name), std::make_pair(lv_index, std::array<ResourceSynchronizationState, 6U>{ResourceSynchronizationState(VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT, VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT)}));
+				}
+			}
+			else {
+				m_mapVulkanTextureNamesToIndexAndState.emplace(std::move(l_name), std::make_pair(lv_index, std::array<ResourceSynchronizationState, 6U>{ResourceSynchronizationState(VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT)}));
+			}
 			return static_cast<uint32_t>(lv_index);
 		}
 
